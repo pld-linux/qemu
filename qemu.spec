@@ -36,10 +36,9 @@ CPUs. QEMU has two operating modes:
   emulation) and DOSEMU (DOS emulation) are the main targets for QEMU.
 
 - Full system emulation. In this mode, QEMU emulates a full system,
-  including a processor and various peripherials. Currently, it is only
-  used to launch an x86 Linux kernel on an x86 Linux system. It enables
-  easier testing and debugging of system code. It can also be used to
-  provide virtual hosting of several virtual PC on a single server.
+  including a processor and various peripherials. 
+  It can also be used to provide virtual hosting of several 
+  virtual PC on a single server.
 
 %description -l pl
 QEMU to szybki(!) emulator procesora. Poprzez u¿ycie dynamicznego
@@ -54,11 +53,9 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
   cele QEMU.
 
 - Pe³na emulacja systemu. W tym trybie QEMU emuluje ca³y system,
-  w³±czaj±c w to procesor i ró¿ne urz±dzenia peryferyjne. Aktualnie
-  dzia³a to tylko przy uruchamianiu j±dra Linuksa x86 na systemie
-  linuksowym x86, pozwalaj±c na ³atwiejsze testowanie i odpluskwianie
-  kodu systemu. Mo¿e byæ tak¿e u¿ywane do wirtualnego hostowania kilku
-  wirtualnych pecetów na pojedynczym serwerze.
+  w³±czaj±c w to procesor i ró¿ne urz±dzenia peryferyjne.
+  Mo¿e byæ tak¿e u¿ywane do wirtualnego hostowania kilku wirtualnych 
+  pecetów na pojedynczym serwerze.
 
 %prep
 %setup -q
