@@ -1,7 +1,10 @@
 Summary:	QEMU CPU Emulator
+Summary(pl):	QEMU - emulator procesora
 Name:		qemu
 Version:	0.5.2
 Release:	0.1
+License:	GPL
+Group:		Applications/Emulators
 Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
 # Source0-md5:	81acda062219c82973e82585b0eb357a
 Patch0:		%{name}-nostatic.patch
@@ -14,9 +17,7 @@ Patch2:		%{name}-amd64.patch
 #Patch4:		qemu-0.5.0-lib64.patch.bz2
 #Patch5:		qemu-0.5.0-amd64.patch.bz2
 #Patch6:		qemu-0.5.0-vl-amd64.patch.bz2
-License:	GPL
 URL:		http://fabrice.bellard.free.fr/qemu/
-Group:		Applications/Emulators
 BuildRequires:	SDL-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -35,6 +36,25 @@ CPUs. QEMU has two operating modes:
   used to launch an x86 Linux kernel on an x86 Linux system. It enables
   easier testing and debugging of system code. It can also be used to
   provide virtual hosting of several virtual PC on a single server.
+
+%description -l pl
+QEMU to szybki(!) emulator procesora. Poprzez u¿ycie dynamicznego
+t³umaczenia osi±ga rozs±dn± szybko¶æ i jest ³atwy do przeportowania,
+aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
+
+- Emulacja trybu u¿ytkownika. W tym trybie QEMU mo¿e uruchamiaæ
+  procesy linuksowe skompilowane dla jednego procesora na innym
+  procesorze. Linuksowe wywo³ania systemowe s± t³umaczone ze wzglêdu
+  na niezgodno¶æ kolejno¶ci bajtów w s³owie i 32/64-bitowego rozmiaru
+  s³owa. Wine (emulacja Windows) i DOSEMU (emulacja DOS-a) to g³ówne
+  cele QEMU.
+
+- Pe³na emulacja systemu. W tym trybie QEMU emuluje ca³y system,
+  w³±czaj±c w to procesor i ró¿ne urz±dzenia peryferyjne. Aktualnie
+  dzia³a to tylko przy uruchamianiu j±dra Linuksa x86 na systemie
+  linuksowym x86, pozwalaj±c na ³atwiejsze testowanie i odpluskwianie
+  kodu systemu. Mo¿e byæ tak¿e u¿ywane do wirtualnego hostowania kilku
+  wirtualnych pecetów na pojedynczym serwerze.
 
 %prep
 %setup -q
@@ -60,6 +80,7 @@ CPUs. QEMU has two operating modes:
 
 %install
 rm -rf $RPM_BUILD_ROOT
+
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
