@@ -2,12 +2,11 @@ Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
 Version:	0.6.1
-Release:	1
+Release:	2
 License:	GPL
 Group:		Applications/Emulators
 Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
 # Source0-md5:	f1b5e103321832d2786dd4110f6c8ae4
-# Source0-size:	874397
 Patch0:		%{name}-nostatic.patch
 Patch1:		%{name}-DESTDIR.patch
 Patch2:		%{name}-amd64.patch
@@ -62,11 +61,11 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
 
 %prep
 %setup -q
-%patch0	-p1
-%patch1	-p1
-%patch2	-p1
-%patch3	-p1
-%patch4	-p1
+%patch0 -p1
+%patch1 -p1
+%patch2 -p1
+%patch3 -p1
+#%patch4 -p1
 
 #%patch0 -p1 -b .cvsupdates
 #%patch1 -p1 -b .glibc23-ldscripts
