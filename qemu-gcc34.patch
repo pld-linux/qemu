@@ -1,0 +1,19 @@
+--- qemu-0.6.0/softmmu_header.h.orig	2004-07-10 20:20:09.000000000 +0200
++++ qemu-0.6.0/softmmu_header.h	2004-10-16 14:48:12.804616248 +0200
+@@ -77,12 +77,15 @@
+ #define RES_TYPE int
+ #endif
+ 
++#if !((__GNUC__ == 3) && (__GNUC_MINOR__ == 3))
++#define ASM_SOFTMMU
++#endif
+ 
+ DATA_TYPE REGPARM(1) glue(glue(__ld, SUFFIX), MMUSUFFIX)(unsigned long addr,
+                                                          int is_user);
+ void REGPARM(2) glue(glue(__st, SUFFIX), MMUSUFFIX)(unsigned long addr, DATA_TYPE v, int is_user);
+ 
+-#if (DATA_SIZE <= 4) && defined(__i386__) && (ACCESS_TYPE <= 1) && defined(ASM_SOFTMMU)
++#if (DATA_SIZE <= 4) && defined(__i386__) && (ACCESS_TYPE <= 1) && !defined(ASM_SOFTMMU)
+ 
+ static inline RES_TYPE glue(glue(ld, USUFFIX), MEMSUFFIX)(void *ptr)
+ {
