@@ -6,6 +6,7 @@ Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
 # Source0-md5:	81acda062219c82973e82585b0eb357a
 Patch0:		%{name}-nostatic.patch
 Patch1:		%{name}-DESTDIR.patch
+Patch2:		%{name}-amd64.patch
 #Patch0:		qemu-0.5.0-cvsupdates.patch.bz2
 #Patch1:		qemu-0.1.6-glibc23-ldscripts.patch.bz2
 #Patch2:		qemu-0.5.0-sdl-static-libs.patch.bz2
@@ -39,6 +40,7 @@ CPUs. QEMU has two operating modes:
 %setup -q
 %patch0	-p1
 %patch1	-p1
+%patch2	-p1
 #%patch0 -p1 -b .cvsupdates
 #%patch1 -p1 -b .glibc23-ldscripts
 #%patch2 -p1 -b .sdl-static-libs
