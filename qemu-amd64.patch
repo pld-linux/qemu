@@ -1,3 +1,14 @@
+--- qemu-0.5.0/target-i386/cpu.h.amd64	2003-10-28 01:53:12.000000000 +0100
++++ qemu-0.5.0/target-i386/cpu.h	2003-11-07 09:33:23.000000000 +0100
+@@ -223,7 +223,7 @@ enum {
+     CC_OP_NB,
+ };
+ 
+-#ifdef __i386__
++#if defined(__i386__) || defined(__x86_64__)
+ #define USE_X86LDOUBLE
+ #endif
+ 
 --- qemu-0.5.0/target-i386/helper.c.amd64	2003-10-28 01:53:12.000000000 +0100
 +++ qemu-0.5.0/target-i386/helper.c	2003-11-07 09:33:23.000000000 +0100
 @@ -1231,14 +1231,14 @@ void helper_invlpg(unsigned int addr)

@@ -1,43 +1,32 @@
-diff -urN qemu-0.6.0-old/Makefile qemu-0.6.0/Makefile
---- qemu-0.6.0-old/Makefile	2004-07-14 17:17:57.259195608 +0000
-+++ qemu-0.6.0/Makefile	2004-07-14 17:27:48.597298552 +0000
-@@ -47,20 +47,20 @@
+--- qemu-0.5.2/Makefile~	2004-01-25 16:50:02.000000000 +0100
++++ qemu-0.5.2/Makefile	2004-02-05 02:55:07.000000000 +0100
+@@ -36,12 +36,12 @@
          done
  
  install: all 
--	mkdir -p "$(bindir)"
-+	mkdir -p "$(DESTDIR)$(bindir)"
- ifndef CONFIG_WIN32
- 	install -m 755 -s $(TOOLS) "$(bindir)"
- endif
--	mkdir -p "$(datadir)"
-+	mkdir -p "$(DESTDIR)$(datadir)"
- 	install -m 644 pc-bios/bios.bin pc-bios/vgabios.bin \
-                        pc-bios/vgabios-cirrus.bin \
-                        pc-bios/ppc_rom.bin \
--                       pc-bios/linux_boot.bin "$(datadir)"
--	mkdir -p "$(docdir)"
--	install -m 644 qemu-doc.html  qemu-tech.html "$(docdir)"
-+                       pc-bios/linux_boot.bin "$(DESTDIR)$(datadir)"
-+	mkdir -p "$(DESTDIR)$(docdir)"
-+	install -m 644 qemu-doc.html  qemu-tech.html "$(DESTDIR)$(docdir)"
- ifndef CONFIG_WIN32
--	mkdir -p "$(mandir)/man1"
--	install qemu.1 qemu-mkcow.1 "$(mandir)/man1"
-+	mkdir -p "$(DESTDIR)$(mandir)/man1"
-+	install qemu.1 qemu-mkcow.1 "$(DESTDIR)$(mandir)/man1"
- endif
+-	mkdir -p $(prefix)/bin
+-	install -m 755 -s $(TOOLS) $(prefix)/bin
+-	mkdir -p $(sharedir)
+-	install -m 644 pc-bios/bios.bin pc-bios/vgabios.bin $(sharedir)
+-	mkdir -p $(mandir)/man1
+-	install qemu.1 $(mandir)/man1
++	mkdir -p $(DESTDIR)$(prefix)/bin
++	install -m 755 -s $(TOOLS) $(DESTDIR)$(prefix)/bin
++	mkdir -p $(DESTDIR)$(sharedir)
++	install -m 644 pc-bios/bios.bin pc-bios/vgabios.bin $(DESTDIR)$(sharedir)
++	mkdir -p $(DESTDIR)$(mandir)/man1
++	install qemu.1 $(DESTDIR)$(mandir)/man1
  	for d in $(TARGET_DIRS); do \
- 	$(MAKE) -C $$d $@ || exit 1 ; \
-diff -urN qemu-0.6.0-old/Makefile.target qemu-0.6.0/Makefile.target
---- qemu-0.6.0-old/Makefile.target	2004-07-14 17:17:57.287191352 +0000
-+++ qemu-0.6.0/Makefile.target	2004-07-14 17:31:32.545253288 +0000
-@@ -340,7 +340,7 @@
+ 	make -C $$d $@ || exit 1 ; \
+         done
+--- qemu-0.5.2/Makefile.target~	2004-02-05 02:53:15.000000000 +0100
++++ qemu-0.5.2/Makefile.target	2004-02-05 02:55:26.000000000 +0100
+@@ -275,7 +275,7 @@
+ 	rm -f *.o  *.a *~ $(PROGS) gen-op.h opc.h op.h
  
  install: all 
- ifneq ($(PROGS),)
--	install -m 755 -s $(PROGS) "$(bindir)"
-+	install -m 755 -s $(PROGS) "$(DESTDIR)$(bindir)"
- endif
+-	install -m 755 -s $(PROGS) $(prefix)/bin
++	install -m 755 -s $(PROGS) $(DESTDIR)$(prefix)/bin
  
  ifneq ($(wildcard .depend),)
+ include .depend
