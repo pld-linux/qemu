@@ -3,6 +3,7 @@ Name:		qemu
 Version:	0.5.2
 Release:	0.1
 Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
+# Source0-md5:	81acda062219c82973e82585b0eb357a
 Patch0:		%{name}-nostatic.patch
 Patch1:		%{name}-DESTDIR.patch
 #Patch0:		qemu-0.5.0-cvsupdates.patch.bz2
