@@ -85,15 +85,6 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
 	--prefix=%{_prefix} \
 	--cc=%{__cc} \
 	--make=%{__make} \
-%ifarch %{ix86} amd64
-	--target-list="i386-user i386 i386-softmmu"
-%endif
-%ifarch ppc powerpc
-	--target-list="ppc-user ppc-softmmu"
-%endif
-%ifarch sparc
-	--target-list="sparc-user"
-%endif
 
 %{__make}
 
