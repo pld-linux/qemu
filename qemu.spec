@@ -9,7 +9,7 @@ Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
 # Source0-md5:	f1b5e103321832d2786dd4110f6c8ae4
 Patch0:		%{name}-nostatic.patch
 Patch1:		%{name}-DESTDIR.patch
-Patch2:		%{name}-amd64.patch
+#Patch2:		%{name}-amd64.patch
 Patch3:		%{name}-longjmp.patch
 Patch4:		%{name}-gcc34.patch
 #Patch0:		qemu-0.5.0-cvsupdates.patch.bz2
@@ -21,7 +21,8 @@ Patch4:		%{name}-gcc34.patch
 #Patch6:		qemu-0.5.0-vl-amd64.patch.bz2
 URL:		http://fabrice.bellard.free.fr/qemu/
 BuildRequires:	SDL-devel
-ExclusiveArch:	%{ix86} amd64 ppc sparc
+ExclusiveArch:	%{ix86} amd64 ppc
+# sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -63,7 +64,7 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
 %setup -q
 %patch0 -p1
 %patch1 -p1
-%patch2 -p1
+#%patch2 -p1
 %patch3 -p1
 #%patch4 -p1
 
