@@ -22,6 +22,7 @@ Patch4:		%{name}-gcc34.patch
 #Patch6:		qemu-0.5.0-vl-amd64.patch.bz2
 URL:		http://fabrice.bellard.free.fr/qemu/
 BuildRequires:	SDL-devel
+ExclusiveArch:	%{ix86} amd64 ppc sparc
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
