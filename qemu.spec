@@ -1,19 +1,18 @@
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
-Version:	0.6.0
-Release:	0.2
+Version:	0.6.1
+Release:	1
 License:	GPL
 Group:		Applications/Emulators
 Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
-# Source0-md5:	cdbc7258f122f381cba7ac1ca6ce0722
+# Source0-md5:	f1b5e103321832d2786dd4110f6c8ae4
 # Source0-size:	874397
 Patch0:		%{name}-nostatic.patch
 Patch1:		%{name}-DESTDIR.patch
 Patch2:		%{name}-amd64.patch
 Patch3:		%{name}-longjmp.patch
 Patch4:		%{name}-gcc34.patch
-Patch5:		%{name}-ppc.patch
 #Patch0:		qemu-0.5.0-cvsupdates.patch.bz2
 #Patch1:		qemu-0.1.6-glibc23-ldscripts.patch.bz2
 #Patch2:		qemu-0.5.0-sdl-static-libs.patch.bz2
@@ -68,7 +67,6 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
 %patch2	-p1
 %patch3	-p1
 %patch4	-p1
-%patch5	-p1
 
 #%patch0 -p1 -b .cvsupdates
 #%patch1 -p1 -b .glibc23-ldscripts
@@ -100,18 +98,6 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc README qemu-doc.html
-%ifarch %{ix86}
-%attr(755,root,root) %{_bindir}/qemu-fast
-%endif
-%ifarch %{ix86} ppc
-%{_bindir}/qemu
-%endif
-%{_bindir}/qemu-mkcow
-%{_bindir}/qemu-arm
-%{_bindir}/qemu-i386
-%{_bindir}/qemu-sparc
-%{_bindir}/qemu-ppc
+%attr(755,root,root) %{_bindir}/*
+%{_datadir}/qemu
 %{_mandir}/man1/qemu.1*
-%dir %{_datadir}/qemu
-%{_datadir}/qemu/bios.bin
-%{_datadir}/qemu/vgabios.bin
