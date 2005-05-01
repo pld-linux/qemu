@@ -1,29 +1,24 @@
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
-Version:	0.6.1
-Release:	2
+Version:	0.7.0
+Release:	1
 License:	GPL
 Group:		Applications/Emulators
+#Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
-# Source0-md5:	f1b5e103321832d2786dd4110f6c8ae4
+# Source0-md5:	234e9ace03b00259bb57dc5a9c633056
 Patch0:		%{name}-nostatic.patch
 Patch1:		%{name}-DESTDIR.patch
-#Patch2:		%{name}-amd64.patch
-Patch3:		%{name}-longjmp.patch
-Patch4:		%{name}-gcc34.patch
-#Patch0:		qemu-0.5.0-cvsupdates.patch.bz2
-#Patch1:		qemu-0.1.6-glibc23-ldscripts.patch.bz2
-#Patch2:		qemu-0.5.0-sdl-static-libs.patch.bz2
-#Patch3:		qemu-0.5.0-DESTDIR.patch.bz2
-#Patch4:		qemu-0.5.0-lib64.patch.bz2
-#Patch5:		qemu-0.5.0-amd64.patch.bz2
-#Patch6:		qemu-0.5.0-vl-amd64.patch.bz2
+Patch2:		%{name}-longjmp.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
-BuildRequires:	SDL-devel
+BuildRequires:	SDL-devel >= 1.2.1
 ExclusiveArch:	%{ix86} amd64 ppc
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+
+# some SPARC boot image in ELF format
+%define		_noautostrip	.*%{_datadir}/qemu/proll.elf
 
 %description
 QEMU is a FAST! processor emulator. By using dynamic translation it
@@ -61,25 +56,13 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
 %setup -q
 %patch0 -p1
 %patch1 -p1
-#%patch2 -p1
-%patch3 -p1
-#%patch4 -p1
-
-#%patch0 -p1 -b .cvsupdates
-#%patch1 -p1 -b .glibc23-ldscripts
-#%patch2 -p1 -b .sdl-static-libs
-#%patch3 -p1 -b .DESTDIR
-#%patch4 -p1 -b .lib64
-#%patch5 -p1 -b .amd64
-# needs to 64-bit clean softmmu code or MAP_32BIT physical_ram_base
-# but other problems remain.
-#%patch6 -p1 -b .vl-amd64
+%patch2 -p1
 
 %build
 ./configure \
 	--prefix=%{_prefix} \
-	--cc=%{__cc} \
-	--make=%{__make} \
+	--cc="%{__cc}" \
+	--make="%{__make}" \
 
 %{__make}
 
@@ -94,7 +77,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc README qemu-doc.html
+%doc README qemu-doc.html qemu-tech.html
 %attr(755,root,root) %{_bindir}/*
 %{_datadir}/qemu
 %{_mandir}/man1/qemu.1*
+%{_mandir}/man1/qemu-img.1*
