@@ -14,6 +14,7 @@ Patch2:		%{name}-longjmp.patch
 Patch3:		%{name}-dot.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 BuildRequires:	SDL-devel >= 1.2.1
+BuildRequires:	sed >= 4.0
 ExclusiveArch:	%{ix86} amd64 ppc
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -60,11 +61,16 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
 %patch2 -p1
 %patch3 -p1
 
+sed -i -e 's/sdl_static=yes/sdl_static=no/' configure
+# cannot use optflags on x86 - they cause "no register to spill" errors
+#sed -i -e 's/-Wall -O2 -g/-Wall %{rpmcflags}/' Makefile Makefile.target
+
 %build
+# --extra-cflags don't work (overridden by CFLAGS in Makefile*)
 ./configure \
 	--prefix=%{_prefix} \
 	--cc="%{__cc}" \
-	--make="%{__make}" \
+	--make="%{__make}"
 
 %{__make}
 
