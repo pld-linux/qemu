@@ -1,21 +1,19 @@
---- qemu-0.6.0/Makefile.orig	2004-07-10 20:20:09.000000000 +0200
-+++ qemu-0.6.0/Makefile	2004-10-16 12:44:46.537539984 +0200
-@@ -43,21 +43,21 @@
-         done
+--- qemu-0.7.0/Makefile.orig	2005-04-27 22:52:05.000000000 +0200
++++ qemu-0.7.0/Makefile	2005-05-01 13:13:53.934977792 +0200
+@@ -54,21 +54,21 @@
+ common  de-ch  es     fo  fr-ca  hu     ja  mk  nl-be      pt  sl     tr
  
  install: all 
 -	mkdir -p "$(bindir)"
-+	mkdir -p "$(DESTDIR)$(bindir)"
- ifndef CONFIG_WIN32
 -	install -m 755 -s $(TOOLS) "$(bindir)"
-+	install -m 755 -s $(TOOLS) "$(DESTDIR)$(bindir)"
- endif
 -	mkdir -p "$(datadir)"
++	mkdir -p "$(DESTDIR)$(bindir)"
++	install -m 755 $(TOOLS) "$(DESTDIR)$(bindir)"
 +	mkdir -p "$(DESTDIR)$(datadir)"
  	install -m 644 pc-bios/bios.bin pc-bios/vgabios.bin \
                         pc-bios/vgabios-cirrus.bin \
                         pc-bios/ppc_rom.bin \
-                        pc-bios/proll.bin \
+                        pc-bios/proll.elf \
 -                       pc-bios/linux_boot.bin "$(datadir)"
 -	mkdir -p "$(docdir)"
 -	install -m 644 qemu-doc.html  qemu-tech.html "$(docdir)"
@@ -24,9 +22,13 @@
 +	install -m 644 qemu-doc.html  qemu-tech.html "$(DESTDIR)$(docdir)"
  ifndef CONFIG_WIN32
 -	mkdir -p "$(mandir)/man1"
--	install qemu.1 qemu-mkcow.1 "$(mandir)/man1"
+-	install qemu.1 qemu-img.1 "$(mandir)/man1"
+-	mkdir -p "$(datadir)/keymaps"
+-	install -m 644 $(addprefix keymaps/,$(KEYMAPS)) "$(datadir)/keymaps"
 +	mkdir -p "$(DESTDIR)$(mandir)/man1"
-+	install qemu.1 qemu-mkcow.1 "$(DESTDIR)$(mandir)/man1"
++	install qemu.1 qemu-img.1 "$(DESTDIR)$(mandir)/man1"
++	mkdir -p "$(DESTDIR)$(datadir)/keymaps"
++	install -m 644 $(addprefix keymaps/,$(KEYMAPS)) "$(DESTDIR)$(datadir)/keymaps"
  endif
  	for d in $(TARGET_DIRS); do \
  	$(MAKE) -C $$d $@ || exit 1 ; \
@@ -37,7 +39,7 @@
  install: all 
  ifneq ($(PROGS),)
 -	install -m 755 -s $(PROGS) "$(bindir)"
-+	install -m 755 -s $(PROGS) "$(DESTDIR)$(bindir)"
++	install -m 755 $(PROGS) "$(DESTDIR)$(bindir)"
  endif
  
  ifneq ($(wildcard .depend),)
