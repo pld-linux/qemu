@@ -11,6 +11,7 @@ Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
 Patch0:		%{name}-nostatic.patch
 Patch1:		%{name}-DESTDIR.patch
 Patch2:		%{name}-longjmp.patch
+Patch3:		%{name}-dot.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 BuildRequires:	SDL-devel >= 1.2.1
 ExclusiveArch:	%{ix86} amd64 ppc
@@ -57,6 +58,7 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 
 %build
 ./configure \
