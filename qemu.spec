@@ -1,3 +1,7 @@
+#
+# Conditional build:
+%bcond_with	kqemu			# with QEMU accelerator module
+#
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
@@ -8,6 +12,11 @@ Group:		Applications/Emulators
 #Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
 # Source0-md5:	234e9ace03b00259bb57dc5a9c633056
+%if %{with kqemu}
+Source1:	http://fabrice.bellard.free.fr/qemu/kqemu-0.6.2-1.tar.gz
+# NoSource1-md5:	c6bb3b40fb3d526d731eb0f1f9dee7ee
+NoSource:	1
+%endif
 Patch0:		%{name}-nostatic.patch
 Patch1:		%{name}-DESTDIR.patch
 Patch2:		%{name}-longjmp.patch
@@ -55,7 +64,7 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
   pecetów na pojedynczym serwerze.
 
 %prep
-%setup -q
+%setup -q %{?with_kqemu:-a1}
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
@@ -64,6 +73,8 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
 sed -i -e 's/sdl_static=yes/sdl_static=no/' configure
 # cannot use optflags on x86 - they cause "no register to spill" errors
 #sed -i -e 's/-Wall -O2 -g/-Wall %{rpmcflags}/' Makefile Makefile.target
+
+%{?with_kqemu:echo -n > kqemu/install.sh}
 
 %build
 # --extra-cflags don't work (overridden by CFLAGS in Makefile*)
