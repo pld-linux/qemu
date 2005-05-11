@@ -24,7 +24,7 @@ Patch3:		%{name}-dot.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	sed >= 4.0
-ExclusiveArch:	%{ix86} amd64 ppc
+ExclusiveArch:	%{ix86} %{x8664} ppc
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
