@@ -6,7 +6,7 @@ Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
 Version:	0.7.0
-Release:	1
+Release:	1.1
 License:	GPL
 Group:		Applications/Emulators
 #Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
@@ -77,19 +77,34 @@ sed -i -e 's/sdl_static=yes/sdl_static=no/' configure
 %{?with_kqemu:echo -n > kqemu/install.sh}
 
 %build
+
+cp -rdp %{_kernelsrcdir}/ .
+rm linux/.config
+cp -f linux/config-smp linux/.config
+make -C linux modules_prepare
+
 # --extra-cflags don't work (overridden by CFLAGS in Makefile*)
 ./configure \
 	--prefix=%{_prefix} \
 	--cc="%{__cc}" \
-	--make="%{__make}"
+	--make="%{__make}" \
+	--enable-kqemu \
+	--kernel-path=`pwd`/linux
 
-%{__make}
+%{__make} 
+mv kqemu/kqemu.ko kqemu/kqemu.smp
+cp -f linux/config-up linux/.config
+make -C linux modules_prepare
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
+
+install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
+install kqemu/kqemu.smp $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/kqemu.ko
+install kqemu/kqemu.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -101,3 +116,4 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/qemu
 %{_mandir}/man1/qemu.1*
 %{_mandir}/man1/qemu-img.1*
+/lib/*
