@@ -6,7 +6,7 @@ Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
 Version:	0.7.0
-Release:	1.1
+Release:	1.2
 License:	GPL
 Group:		Applications/Emulators
 #Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
@@ -24,6 +24,9 @@ Patch3:		%{name}-dot.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	sed >= 4.0
+%if %{with kqemu}
+BuildRequires: kernel-source
+%endif
 ExclusiveArch:	%{ix86} %{x8664} ppc
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -78,23 +81,30 @@ sed -i -e 's/sdl_static=yes/sdl_static=no/' configure
 
 %build
 
+%if %{with kqemu}
 cp -rdp %{_kernelsrcdir}/ .
 rm linux/.config
 cp -f linux/config-smp linux/.config
 make -C linux modules_prepare
+%endif
 
 # --extra-cflags don't work (overridden by CFLAGS in Makefile*)
 ./configure \
 	--prefix=%{_prefix} \
 	--cc="%{__cc}" \
-	--make="%{__make}" \
-	--enable-kqemu \
-	--kernel-path=`pwd`/linux
+  %if %{with kqemu}
+	--enable-kqemu }\
+	--kernel-path=`pwd`/linux \
+  %endif
+	--make="%{__make}"
 
 %{__make} 
+
+%if %{with kqemu}
 mv kqemu/kqemu.ko kqemu/kqemu.smp
 cp -f linux/config-up linux/.config
 make -C linux modules_prepare
+%endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -102,12 +112,31 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
+%if %{with kqemu}
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
 install kqemu/kqemu.smp $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/kqemu.ko
 install kqemu/kqemu.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc
+%endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
+
+%post
+%if %{with kqemu}
+%depmod
+
+%banner %{name} -e << EOF
+To enable qemu accelerator (kqemu), You must manually create device for it:
+mknod /dev/kqemu c 250 0
+chmod 666 /dev/kqemu
+
+And before start qemu, the kqemu kernel module must be loaded:
+modprobe kqemu
+EOF
+%endif
+
+%postun
+%{?with_kqemu: %depmod}
 
 %files
 %defattr(644,root,root,755)
@@ -116,4 +145,4 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/qemu
 %{_mandir}/man1/qemu.1*
 %{_mandir}/man1/qemu-img.1*
-/lib/*
+%{?with_kqemu: /lib/*}
