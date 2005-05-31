@@ -21,6 +21,7 @@ Patch0:		%{name}-nostatic.patch
 Patch1:		%{name}-DESTDIR.patch
 Patch2:		%{name}-longjmp.patch
 Patch3:		%{name}-dot.patch
+Patch4:		%{name}-initrd_load_addr.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	sed >= 4.0
@@ -72,6 +73,7 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 sed -i -e 's/sdl_static=yes/sdl_static=no/' configure
 # cannot use optflags on x86 - they cause "no register to spill" errors
@@ -83,7 +85,7 @@ sed -i -e 's/sdl_static=yes/sdl_static=no/' configure
 
 %if %{with kqemu}
 cp -rdp %{_kernelsrcdir}/ .
-rm linux/.config
+rm -f linux/.config
 cp -f linux/config-smp linux/.config
 make -C linux modules_prepare
 %endif
