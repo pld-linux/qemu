@@ -1,6 +1,10 @@
 #
+# TODO:
+# - wait till the gcc bug http://gcc.gnu.org/PR16185 is fixed.
+#
 # Conditional build:
 %bcond_with	kqemu			# with QEMU accelerator module
+%bcond_with cflags_passing	# with passing rpmcflags to Makefiles
 #
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
@@ -22,6 +26,8 @@ Patch1:		%{name}-DESTDIR.patch
 Patch2:		%{name}-longjmp.patch
 Patch3:		%{name}-dot.patch
 Patch4:		%{name}-initrd_load_addr.patch
+Patch5:		%{name}-gcc4_x86.patch
+Patch6:		%{name}-gcc4_ppc.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	sed >= 4.0
@@ -74,10 +80,15 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
+%patch5 -p0
+%patch6 -p1
 
-sed -i -e 's/sdl_static=yes/sdl_static=no/' configure
+%{__sed} -i -e 's/sdl_static=yes/sdl_static=no/' configure
+
 # cannot use optflags on x86 - they cause "no register to spill" errors
-#sed -i -e 's/-Wall -O2 -g/-Wall %{rpmcflags}/' Makefile Makefile.target
+%if %{with cflags_passing}
+%{__sed} -i -e 's/-Wall -O2 -g/-Wall %{rpmcflags}/' Makefile Makefile.target
+%endif
 
 %{?with_kqemu:echo -n > kqemu/install.sh}
 
@@ -91,6 +102,7 @@ make -C linux modules_prepare
 %endif
 
 # --extra-cflags don't work (overridden by CFLAGS in Makefile*)
+# they can be passed if the cflags_passing bcond is used
 ./configure \
 	--prefix=%{_prefix} \
 	--cc="%{__cc}" \
