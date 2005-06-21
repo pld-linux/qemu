@@ -4,7 +4,7 @@
 #
 # Conditional build:
 %bcond_with	kqemu			# with QEMU accelerator module
-%bcond_with cflags_passing	# with passing rpmcflags to Makefiles
+%bcond_with	cflags_passing		# with passing rpmcflags to Makefiles
 #
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
