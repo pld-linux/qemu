@@ -5,6 +5,7 @@
 # Conditional build:
 %bcond_with	kqemu			# with QEMU accelerator module
 %bcond_with	cflags_passing		# with passing rpmcflags to Makefiles
+%bcond_with	nosdlgui		# do not use SDL gui (use X11 instead)
 #
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
@@ -29,7 +30,9 @@ Patch4:		%{name}-initrd_load_addr.patch
 Patch5:		%{name}-gcc4_x86.patch
 Patch6:		%{name}-gcc4_ppc.patch
 Patch7:		%{name}-parallel.patch
+Patch8:		%{name}-nosdlgui.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
+Requires:	SDL >= 1.2.1
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	sed >= 4.0
 %if %{with kqemu}
@@ -84,6 +87,7 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
 %patch5 -p0
 %patch6 -p1
 %patch7 -p1
+%{?with_nosdlgui:%patch8 -p1}
 
 %{__sed} -i -e 's/sdl_static=yes/sdl_static=no/' configure
 
