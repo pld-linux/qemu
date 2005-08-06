@@ -8,11 +8,11 @@
 -	install -m 755 -s $(TOOLS) "$(bindir)"
 -	mkdir -p "$(datadir)"
 +	mkdir -p "$(DESTDIR)$(bindir)"
-+	install -m 755 $(TOOLS) "$(DESTDIR)$(bindir)"
++	install -m 755 -s $(TOOLS) "$(DESTDIR)$(bindir)"
 +	mkdir -p "$(DESTDIR)$(datadir)"
  	install -m 644 pc-bios/bios.bin pc-bios/vgabios.bin \
                         pc-bios/vgabios-cirrus.bin \
-                        pc-bios/ppc_rom.bin \
+                        pc-bios/ppc_rom.bin pc-bios/video.x \
                         pc-bios/proll.elf \
 -                       pc-bios/linux_boot.bin "$(datadir)"
 -	mkdir -p "$(docdir)"
