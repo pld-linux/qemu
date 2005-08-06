@@ -10,13 +10,13 @@
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
-Version:	0.7.0
-Release:	1.3
+Version:	0.7.1
+Release:	1
 License:	GPL
 Group:		Applications/Emulators
 #Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
-# Source0-md5:	234e9ace03b00259bb57dc5a9c633056
+# Source0-md5:	b0c80d2c082049a5b8ccbc7f55fe165b
 %if %{with kqemu}
 Source1:	http://fabrice.bellard.free.fr/qemu/kqemu-0.6.2-1.tar.gz
 # NoSource1-md5:	c6bb3b40fb3d526d731eb0f1f9dee7ee
@@ -137,6 +137,9 @@ install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
 install kqemu/kqemu.smp $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/kqemu.ko
 install kqemu/kqemu.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc
 %endif
+
+# This dir is unneeded
+rm -rf $RPM_BUILD_ROOT/usr/share/doc/qemu
 
 %clean
 rm -rf $RPM_BUILD_ROOT
