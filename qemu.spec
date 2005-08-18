@@ -19,8 +19,7 @@ Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
 # Source0-md5:	b0c80d2c082049a5b8ccbc7f55fe165b
 %if %{with kqemu}
 Source1:	http://fabrice.bellard.free.fr/qemu/kqemu-0.7.1-1.tar.gz
-# Source1-md5:	012498dac620eb8c212bf5f622414dd0
-# NoSource1-md5:	c6bb3b40fb3d526d731eb0f1f9dee7ee
+# NoSource1-md5:	012498dac620eb8c212bf5f622414dd0
 NoSource:	1
 %endif
 Patch0:		%{name}-nostatic.patch
