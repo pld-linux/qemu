@@ -6,19 +6,24 @@
 %bcond_with	kqemu			# with QEMU accelerator module
 %bcond_with	cflags_passing		# with passing rpmcflags to Makefiles
 %bcond_with	nosdlgui		# do not use SDL gui (use X11 instead)
+%bcond_without	dist_kernel		# without distribution kernel
+%bcond_without	kernel			# don't build kernel modules
+%bcond_without	smp			# don't build SMP module
+%bcond_without	userspace		# don't build userspace utilities
 #
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
 Version:	0.7.1
-Release:	1
+%define		_rel	1
+Release:	%{_rel}%{?with_kqemu:k}
 License:	GPL
 Group:		Applications/Emulators
 #Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
 # Source0-md5:	b0c80d2c082049a5b8ccbc7f55fe165b
 %if %{with kqemu}
-Source1:	http://fabrice.bellard.free.fr/qemu/kqemu-0.7.1-1.tar.gz
+Source1:	http://fabrice.bellard.free.fr/qemu/kqemu-%{version}-1.tar.gz
 # NoSource1-md5:	012498dac620eb8c212bf5f622414dd0
 NoSource:	1
 %endif
@@ -32,18 +37,23 @@ Patch6:		%{name}-gcc4_ppc.patch
 Patch7:		%{name}-parallel.patch
 Patch8:		%{name}-nosdlgui.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
-Requires:	SDL >= 1.2.1
 BuildRequires:	SDL-devel >= 1.2.1
-BuildRequires:	sed >= 4.0
-%if %{with kqemu}
-BuildRequires: kernel-source
+%if %{with kqemu} && %{with dist_kernel}
+BuildRequires:	kernel-module-build >= 2.6.7
 %endif
+BuildRequires:	rpmbuild(macros) >= 1.217
+BuildRequires:	sed >= 4.0
+Requires:	SDL >= 1.2.1
 ExclusiveArch:	%{ix86} %{x8664} ppc
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # some SPARC boot image in ELF format
 %define		_noautostrip	.*%{_datadir}/qemu/proll.elf
+
+%if !%{with kqemu}
+%undefine	with_kernel
+%endif
 
 %description
 QEMU is a FAST! processor emulator. By using dynamic translation it
@@ -77,6 +87,34 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
   Mo¿e byæ tak¿e u¿ywane do wirtualnego hostowania kilku wirtualnych 
   pecetów na pojedynczym serwerze.
 
+%package -n kernel-misc-kqemu
+Summary:	kqemu - kernel module
+Summary(pl):	kqemu - modu³ j±dra
+Release:	%{_rel}@%{_kernel_ver_str}
+Group:		Base/Kernel
+%{?with_dist_kernel:%requires_releq_kernel_up}
+Requires(post,postun):	/sbin/depmod
+
+%description -n kernel-misc-kqemu
+kqemu - kernel module.
+
+%description -n kernel-misc-kqemu -l pl
+kqemu - modu³ j±dra.
+
+%package -n kernel-smp-misc-kqemu
+Summary:	kqemu - SMP kernel module
+Summary(pl):	kqemu - modu³ j±dra SMP
+Release:	%{_rel}@%{_kernel_ver_str}
+Group:		Base/Kernel
+%{?with_dist_kernel:%requires_releq_kernel_up}
+Requires(post,postun):	/sbin/depmod
+
+%description -n kernel-smp-misc-kqemu
+kqemu - SMP kernel module.
+
+%description -n kernel-smp-misc-kqemu -l pl
+kqemu - modu³ j±dra SMP.
+
 %prep
 %setup -q %{?with_kqemu:-a1}
 %patch0 -p1
@@ -90,6 +128,7 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
 %{?with_nosdlgui:%patch8 -p1}
 
 %{__sed} -i -e 's/sdl_static=yes/sdl_static=no/' configure
+%{__sed} -i 's/.*MAKE) -C kqemu$//' Makefile
 
 # cannot use optflags on x86 - they cause "no register to spill" errors
 %if %{with cflags_passing}
@@ -99,43 +138,56 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
 %{?with_kqemu:echo -n > kqemu/install.sh}
 
 %build
-
-%if %{with kqemu}
-cp -rdp %{_kernelsrcdir}/ .
-rm -f linux/.config
-cp -f linux/config-smp linux/.config
-make -C linux modules_prepare
+%if %{with kernel}
+cd kqemu
+for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}; do
+	if [ ! -r "%{_kernelsrcdir}/config-$cfg" ]; then
+		exit 1
+	fi
+	rm -rf include
+	install -d include/{linux,config}
+	ln -sf %{_kernelsrcdir}/config-$cfg .config
+	ln -sf %{_kernelsrcdir}/include/linux/autoconf-$cfg.h include/linux/autoconf.h
+	ln -sf %{_kernelsrcdir}/include/asm-%{_target_base_arch} include/asm
+%if %{without dist_kernel}
+	ln -sf %{_kernelsrcdir}/scripts
+%endif
+	touch include/config/MARKER
+	%{__make} -C %{_kernelsrcdir} clean \
+		RCS_FIND_IGNORE="-name 'kqemu-mod-*.*' -o" \
+		M=$PWD O=$PWD
+	%{__make} -C %{_kernelsrcdir} modules \
+		M=$PWD O=$PWD
+	mv kqemu.ko kqemu-mod-$cfg.ko
+done
+cd -
 %endif
 
+%if %{with userspace}
 # --extra-cflags don't work (overridden by CFLAGS in Makefile*)
 # they can be passed if the cflags_passing bcond is used
 ./configure \
 	--prefix=%{_prefix} \
 	--cc="%{__cc}" \
-  %if %{with kqemu}
-	--enable-kqemu }\
-	--kernel-path=`pwd`/linux \
-  %endif
+	%{!?with_kqemu:--disable-kqemu} \
 	--make="%{__make}"
-
-%{__make} 
-
-%if %{with kqemu}
-mv kqemu/kqemu.ko kqemu/kqemu.smp
-cp -f linux/config-up linux/.config
-make -C linux modules_prepare
+%{__make}
 %endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
+%if %{with userspace}
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
+%endif
 
-%if %{with kqemu}
+%if %{with kernel}
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
-install kqemu/kqemu.smp $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/kqemu.ko
-install kqemu/kqemu.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc
+install kqemu/kqemu-mod-up.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/kqemu.ko
+%if %{with smp} && %{with dist_kernel}
+install kqemu/kqemu-mod-smp.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/kqemu.ko
+%endif
 %endif
 
 # This dir is unneeded
@@ -144,23 +196,28 @@ rm -rf $RPM_BUILD_ROOT/usr/share/doc/qemu
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%post
 %if %{with kqemu}
-%depmod
-
+%post
 %banner %{name} -e << EOF
-To enable qemu accelerator (kqemu), You must manually create device for it:
-mknod /dev/kqemu c 250 0
-chmod 666 /dev/kqemu
-
-And before start qemu, the kqemu kernel module must be loaded:
+To enable qemu accelerator (kqemu), the kqemu kernel module must be loaded:
 modprobe kqemu
 EOF
 %endif
 
-%postun
-%{?with_kqemu: %depmod}
+%post	-n kernel-misc-kqemu
+%depmod %{_kernel_ver}
 
+%postun -n kernel-misc-kqemu
+%depmod %{_kernel_ver}
+
+%post	-n kernel-smp-misc-kqemu
+%depmod %{_kernel_ver}smp
+
+%postun -n kernel-smp-misc-kqemu
+%depmod %{_kernel_ver}smp
+
+
+%if %{with userspace}
 %files
 %defattr(644,root,root,755)
 %doc README qemu-doc.html qemu-tech.html
@@ -168,4 +225,20 @@ EOF
 %{_datadir}/qemu
 %{_mandir}/man1/qemu.1*
 %{_mandir}/man1/qemu-img.1*
-%{?with_kqemu: /lib/*}
+# FIXME: maybe better moved this into dev.spec
+%if %{with kqemu}
+%dev(c,250,0) %attr(666,root,root) /dev/kqemu
+%endif
+%endif
+
+%if %{with kernel}
+%files -n kernel-misc-kqemu
+%defattr(644,root,root,755)
+/lib/modules/%{_kernel_ver}/misc/kqemu.ko*
+
+%if %{with smp} && %{with dist_kernel}
+%files -n kernel-smp-misc-kqemu
+%defattr(644,root,root,755)
+/lib/modules/%{_kernel_ver}smp/misc/kqemu.ko*
+%endif
+%endif
