@@ -15,7 +15,7 @@ Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
 Version:	0.7.1
-%define		_rel	1
+%define		_rel	1.4
 Release:	%{_rel}%{?with_kqemu:k}
 License:	GPL
 Group:		Applications/Emulators
@@ -36,6 +36,7 @@ Patch5:		%{name}-gcc4_x86.patch
 Patch6:		%{name}-gcc4_ppc.patch
 Patch7:		%{name}-parallel.patch
 Patch8:		%{name}-nosdlgui.patch
+Patch9:		%{name}-ifup.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 BuildRequires:	SDL-devel >= 1.2.1
 %if %{with kqemu} && %{with dist_kernel}
@@ -126,6 +127,7 @@ kqemu - modu³ j±dra SMP.
 %patch6 -p1
 %patch7 -p1
 %{?with_nosdlgui:%patch8 -p1}
+%patch9 -p1
 
 %{__sed} -i -e 's/sdl_static=yes/sdl_static=no/' configure
 %{__sed} -i 's/.*MAKE) -C kqemu$//' Makefile
@@ -180,6 +182,16 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with userspace}
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
+
+install -d $RPM_BUILD_ROOT/sbin
+cat <<'EOF' > $RPM_BUILD_ROOT/sbin/qemu-ifup
+#!/bin/sh
+if [ -f /etc/sysconfig/qemu ]; then
+	. /etc/sysconfig/qemu
+fi
+# of course this will work only for one interface. a lot possible to involve
+sudo /sbin/ifconfig $1 ${INTERFACE_ADDR:-172.20.0.1}
+EOF
 %endif
 
 %if %{with kernel}
@@ -216,11 +228,11 @@ EOF
 %postun -n kernel-smp-misc-kqemu
 %depmod %{_kernel_ver}smp
 
-
 %if %{with userspace}
 %files
 %defattr(644,root,root,755)
 %doc README qemu-doc.html qemu-tech.html
+%attr(755,root,root) /sbin/qemu-ifup
 %attr(755,root,root) %{_bindir}/*
 %{_datadir}/qemu
 %{_mandir}/man1/qemu.1*
