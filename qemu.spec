@@ -14,17 +14,17 @@
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
-Version:	0.7.1
-%define		_rel	1.4
+Version:	0.7.2
+%define		_rel	1
 Release:	%{_rel}%{?with_kqemu:k}
 License:	GPL
 Group:		Applications/Emulators
 #Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
-# Source0-md5:	b0c80d2c082049a5b8ccbc7f55fe165b
+# Source0-md5:	7d69dd96edf7ae5298a9a7283a0e9fb8
 %if %{with kqemu}
-Source1:	http://fabrice.bellard.free.fr/qemu/kqemu-%{version}-1.tar.gz
-# NoSource1-md5:	012498dac620eb8c212bf5f622414dd0
+Source1:	http://fabrice.bellard.free.fr/qemu/kqemu-%{version}.tar.gz
+# NoSource1-md5:	02cfdecda90458d6393781496ec6b48b
 NoSource:	1
 %endif
 Patch0:		%{name}-nostatic.patch
@@ -135,6 +135,8 @@ kqemu - modu³ j±dra SMP.
 # cannot use optflags on x86 - they cause "no register to spill" errors
 %if %{with cflags_passing}
 %{__sed} -i -e 's/-Wall -O2 -g/-Wall %{rpmcflags}/' Makefile Makefile.target
+%else
+%{__sed} -i 's/-Wall -O2 -g/-Wall -O2/' Makefile Makefile.target
 %endif
 
 %{?with_kqemu:echo -n > kqemu/install.sh}
