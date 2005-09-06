@@ -212,7 +212,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %if %{with kqemu}
 %post
-%banner %{name} -e << EOF
+%banner %{name} -e <<EOF
 To enable qemu accelerator (kqemu), the kqemu kernel module must be loaded:
 modprobe kqemu
 EOF
@@ -220,12 +220,20 @@ EOF
 
 %post	-n kernel-misc-kqemu
 %depmod %{_kernel_ver}
+%banner %{name}-module -e <<EOF
+To autoload kqemu module, add to /etc/modprobe.conf:
+alias char-major-250 kqemu
+EOF
 
 %postun -n kernel-misc-kqemu
 %depmod %{_kernel_ver}
 
 %post	-n kernel-smp-misc-kqemu
 %depmod %{_kernel_ver}smp
+%banner %{name}-module -e <<EOF
+To autoload kqemu module, add to /etc/modprobe.conf:
+alias char-major-250 kqemu
+EOF
 
 %postun -n kernel-smp-misc-kqemu
 %depmod %{_kernel_ver}smp
