@@ -851,9 +851,9 @@ Index: exec-all.h
 RCS file: /cvsroot/qemu/qemu/exec-all.h,v
 retrieving revision 1.31
 diff -u -p -r1.31 exec-all.h
---- exec-all.h	17 Apr 2005 18:32:14 -0000	1.31
-+++ exec-all.h	11 May 2005 20:38:33 -0000
-@@ -335,14 +335,15 @@ do {\
+--- exec-all.h	2005-09-04 19:11:31.000000000 +0200
++++ exec-all.h	2005-09-06 03:16:54.000000000 +0200
+@@ -338,14 +338,15 @@
  
  #elif defined(__i386__) && defined(USE_DIRECT_JUMP)
  
@@ -863,7 +863,7 @@ diff -u -p -r1.31 exec-all.h
  #define GOTO_TB(opname, tbparam, n)\
  do {\
      asm volatile (".section .data\n"\
- 		  ASM_NAME(__op_label) #n "." ASM_NAME(opname) ":\n"\
+ 		  ASM_OP_LABEL_NAME(n, opname) ":\n"\
  		  ".long 1f\n"\
  		  ASM_PREVIOUS_SECTION \
 -                  "jmp " ASM_NAME(__op_jmp) #n "\n"\
