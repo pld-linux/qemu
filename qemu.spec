@@ -15,7 +15,7 @@ Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
 Version:	0.7.2
-%define		_rel	1
+%define		_rel	2
 Release:	%{_rel}%{?with_kqemu:k}
 License:	GPL
 Group:		Applications/Emulators
@@ -94,6 +94,7 @@ Summary(pl):	kqemu - modu³ j±dra
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
 %{?with_dist_kernel:%requires_releq_kernel_up}
+License:	Free to use, non-distributable
 Requires(post,postun):	/sbin/depmod
 
 %description -n kernel-misc-kqemu
@@ -108,6 +109,7 @@ Summary(pl):	kqemu - modu³ j±dra SMP
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
 %{?with_dist_kernel:%requires_releq_kernel_up}
+License:	Free to use, non-distributable
 Requires(post,postun):	/sbin/depmod
 
 %description -n kernel-smp-misc-kqemu
@@ -258,10 +260,12 @@ EOF
 %files -n kernel-misc-kqemu
 %defattr(644,root,root,755)
 /lib/modules/%{_kernel_ver}/misc/kqemu.ko*
+%doc kqemu/LICENSE
 
 %if %{with smp} && %{with dist_kernel}
 %files -n kernel-smp-misc-kqemu
 %defattr(644,root,root,755)
 /lib/modules/%{_kernel_ver}smp/misc/kqemu.ko*
+%doc kqemu/LICENSE
 %endif
 %endif
