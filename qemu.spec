@@ -10,20 +10,22 @@
 %bcond_without	kernel			# don't build kernel modules
 %bcond_without	smp			# don't build SMP module
 %bcond_without	userspace		# don't build userspace utilities
+
+%define	_kqemu_version	0.7.2
 #
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
-Version:	0.7.2
-%define		_rel	2
+Version:	0.8.0
+%define		_rel	1
 Release:	%{_rel}%{?with_kqemu:k}
 License:	GPL
 Group:		Applications/Emulators
 #Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
-# Source0-md5:	7d69dd96edf7ae5298a9a7283a0e9fb8
+# Source0-md5:	eb175b26583280706fe7e4d8910d320d
 %if %{with kqemu}
-Source1:	http://fabrice.bellard.free.fr/qemu/kqemu-%{version}.tar.gz
+Source1:	http://fabrice.bellard.free.fr/qemu/kqemu-%{_kqemu_version}.tar.gz
 # NoSource1-md5:	02cfdecda90458d6393781496ec6b48b
 NoSource:	1
 %endif
@@ -91,6 +93,7 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
 %package -n kernel-misc-kqemu
 Summary:	kqemu - kernel module
 Summary(pl):	kqemu - modu³ j±dra
+Version:	%{_kqemu_version}
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
 %{?with_dist_kernel:%requires_releq_kernel_up}
@@ -106,6 +109,7 @@ kqemu - modu³ j±dra.
 %package -n kernel-smp-misc-kqemu
 Summary:	kqemu - SMP kernel module
 Summary(pl):	kqemu - modu³ j±dra SMP
+Version:	%{_kqemu_version}
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
 %{?with_dist_kernel:%requires_releq_kernel_up}
@@ -127,7 +131,8 @@ kqemu - modu³ j±dra SMP.
 %patch4 -p1
 %patch5 -p0
 %patch6 -p1
-%patch7 -p1
+# probably not needed
+# %patch7 -p1
 %{?with_nosdlgui:%patch8 -p1}
 %patch9 -p1
 
