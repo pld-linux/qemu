@@ -42,6 +42,7 @@ Patch9:		%{name}-ifup.patch
 Patch10:	%{name}-gcc33.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 BuildRequires:	SDL-devel >= 1.2.1
+BuildRequires:	alsa-lib-devel
 %if %{with kqemu} && %{with dist_kernel}
 BuildRequires:	kernel-module-build >= 2.6.7
 %endif
@@ -183,6 +184,7 @@ cd -
 ./configure \
 	--prefix=%{_prefix} \
 	--cc="%{__cc}" \
+	--enable-alsa \
 	%{!?with_kqemu:--disable-kqemu} \
 	--make="%{__make}"
 %{__make}
@@ -266,13 +268,13 @@ EOF
 %if %{with kernel}
 %files -n kernel-misc-kqemu
 %defattr(644,root,root,755)
-/lib/modules/%{_kernel_ver}/misc/kqemu.ko*
 %doc kqemu/LICENSE
+/lib/modules/%{_kernel_ver}/misc/kqemu.ko*
 
 %if %{with smp} && %{with dist_kernel}
 %files -n kernel-smp-misc-kqemu
 %defattr(644,root,root,755)
-/lib/modules/%{_kernel_ver}smp/misc/kqemu.ko*
 %doc kqemu/LICENSE
+/lib/modules/%{_kernel_ver}smp/misc/kqemu.ko*
 %endif
 %endif
