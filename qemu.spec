@@ -6,6 +6,7 @@
 %bcond_with	kqemu			# with QEMU accelerator module
 %bcond_with	cflags_passing		# with passing rpmcflags to Makefiles
 %bcond_with	nosdlgui		# do not use SDL gui (use X11 instead)
+%bcond_with	gcc4			# use gcc4 patches (broke build on gcc33)
 %bcond_without	dist_kernel		# without distribution kernel
 %bcond_without	kernel			# don't build kernel modules
 %bcond_without	smp			# don't build SMP module
@@ -131,8 +132,10 @@ kqemu - modu³ j±dra SMP.
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
+%if %{with gcc4}
 %patch5 -p0
 %patch6 -p1
+%endif
 # probably not needed
 # %patch7 -p1
 %{?with_nosdlgui:%patch8 -p1}
@@ -186,7 +189,8 @@ cd -
 	--cc="%{__cc}" \
 	--enable-alsa \
 	%{!?with_kqemu:--disable-kqemu} \
-	--make="%{__make}"
+	--make="%{__make}" \
+	--interp-prefix=%{_libdir}/%{name}
 %{__make}
 %endif
 
