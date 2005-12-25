@@ -44,6 +44,7 @@ Patch10:	%{name}-gcc33.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
+%{!?with_gcc4:BuildRequires:	gcc < 5:4.0}
 %if %{with kqemu} && %{with dist_kernel}
 BuildRequires:	kernel-module-build >= 2.6.7
 %endif
@@ -187,8 +188,9 @@ cd -
 ./configure \
 	--prefix=%{_prefix} \
 	--cc="%{__cc}" \
-	--enable-alsa \
+	%{?with_gcc4:--disable-gcc-check} \
 	%{!?with_kqemu:--disable-kqemu} \
+	--enable-alsa \
 	--make="%{__make}" \
 	--interp-prefix=%{_libdir}/%{name}
 %{__make}
