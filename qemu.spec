@@ -18,7 +18,7 @@ Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
 Version:	0.8.0
-%define		_rel	1
+%define		_rel	1.1
 Release:	%{_rel}%{?with_kqemu:k}
 License:	GPL
 Group:		Applications/Emulators
@@ -41,6 +41,7 @@ Patch7:		%{name}-parallel.patch
 Patch8:		%{name}-nosdlgui.patch
 Patch9:		%{name}-ifup.patch
 Patch10:	%{name}-gcc33.patch
+Patch11:	%{name}-slirp_throttle.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
@@ -142,6 +143,7 @@ kqemu - modu³ j±dra SMP.
 %{?with_nosdlgui:%patch8 -p1}
 %patch9 -p1
 %patch10 -p1
+%patch11 -p0
 
 %{__sed} -i -e 's/sdl_static=yes/sdl_static=no/' configure
 %{__sed} -i 's/.*MAKE) -C kqemu$//' Makefile
