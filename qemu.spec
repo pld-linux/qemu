@@ -164,21 +164,21 @@ for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}
 	if [ ! -r "%{_kernelsrcdir}/config-$cfg" ]; then
 		exit 1
 	fi
-	rm -rf include
-	install -d include/{linux,config}
-	ln -sf %{_kernelsrcdir}/config-$cfg .config
-	ln -sf %{_kernelsrcdir}/include/linux/autoconf-$cfg.h include/linux/autoconf.h
-	ln -sf %{_kernelsrcdir}/include/asm-%{_target_base_arch} include/asm
-	ln -sf %{_kernelsrcdir}/Module.symvers-$cfg Module.symvers
+	install -d o/include/{linux,config}
+	ln -sf %{_kernelsrcdir}/config-$cfg o/.config
+	ln -sf %{_kernelsrcdir}/include/linux/autoconf-$cfg.h o/include/linux/autoconf.h
+	ln -sf %{_kernelsrcdir}/Module.symvers-$cfg o/Module.symvers
 %if %{without dist_kernel}
-	ln -sf %{_kernelsrcdir}/scripts
+	%{__make} -C %{_kernelsrcdir} O=$PWD/o prepare scripts
+%else
+	ln -sf %{_kernelsrcdir}/scripts o/scripts
+	touch o/include/config/MARKER
 %endif
-	touch include/config/MARKER
 	%{__make} -C %{_kernelsrcdir} clean \
 		RCS_FIND_IGNORE="-name 'kqemu-mod-*.*' -o" \
-		M=$PWD O=$PWD
+		M=$PWD O=$PWD/o
 	%{__make} -C %{_kernelsrcdir} modules \
-		M=$PWD O=$PWD
+		M=$PWD O=$PWD/o
 	mv kqemu.ko kqemu-mod-$cfg.ko
 done
 cd -
