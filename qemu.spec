@@ -52,7 +52,7 @@ BuildRequires:	kernel-module-build >= 2.6.7
 BuildRequires:	rpmbuild(macros) >= 1.217
 BuildRequires:	sed >= 4.0
 Requires:	SDL >= 1.2.1
-ExclusiveArch:	%{ix86} %{x8664} ppc
+ExclusiveArch:	%{ix86} %{x8664} %{!?with_kqemu:ppc}
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -160,6 +160,7 @@ kqemu - modu³ j±dra SMP.
 %build
 %if %{with kernel}
 cd kqemu
+mv -f kqemu-linux.c{,.orig}
 for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}; do
 	if [ ! -r "%{_kernelsrcdir}/config-$cfg" ]; then
 		exit 1
@@ -175,6 +176,13 @@ for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}
 	touch o/include/config/MARKER
 	ln -sf %{_kernelsrcdir}/scripts o/scripts
 %endif
+	if grep -q "^CONFIG_PREEMPT_RT=y$" o/.config; then
+		sed 's/SPIN_LOCK_UNLOCKED/SPIN_LOCK_UNLOCKED(kqemu_lock)/' \
+			kqemu-linux.c.orig > kqemu-linux.c
+	else
+		cat kqemu-linux.c.orig > kqemu-linux.c
+	fi
+
 	%{__make} -C %{_kernelsrcdir} modules \
 		CC="%{__cc}" CPP="%{__cpp}" \
 		M=$PWD O=$PWD/o \
