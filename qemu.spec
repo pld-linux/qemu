@@ -14,11 +14,11 @@
 
 %define	_kqemu_version	0.7.2
 #
+%define		_rel	1.1
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
 Version:	0.8.0
-%define		_rel	1.1
 Release:	%{_rel}%{?with_kqemu:k}
 License:	GPL
 Group:		Applications/Emulators
@@ -26,7 +26,7 @@ Group:		Applications/Emulators
 Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
 # Source0-md5:	eb175b26583280706fe7e4d8910d320d
 %if %{with kqemu}
-Source1:	http://fabrice.bellard.free.fr/qemu/kqemu-%{_kqemu_version}.tar.gz
+Source1:	http://fabrice.bellard.free.fr/qemu/k%{name}-%{_kqemu_version}.tar.gz
 # NoSource1-md5:	02cfdecda90458d6393781496ec6b48b
 NoSource:	1
 %endif
@@ -47,7 +47,7 @@ BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
 %{!?with_gcc4:BuildRequires:	gcc < 5:4.0}
 %if %{with kqemu} && %{with dist_kernel}
-BuildRequires:	kernel-module-build >= 2.6.7
+BuildRequires:	kernel-module-build >= 3:2.6.7
 %endif
 BuildRequires:	rpmbuild(macros) >= 1.217
 BuildRequires:	sed >= 4.0
@@ -74,9 +74,8 @@ CPUs. QEMU has two operating modes:
   emulation) and DOSEMU (DOS emulation) are the main targets for QEMU.
 
 - Full system emulation. In this mode, QEMU emulates a full system,
-  including a processor and various peripherials. 
-  It can also be used to provide virtual hosting of several 
-  virtual PC on a single server.
+  including a processor and various peripherials. It can also be used to
+  provide virtual hosting of several virtual PC on a single server.
 
 %description -l pl
 QEMU to szybki(!) emulator procesora. Poprzez u¿ycie dynamicznego
@@ -85,15 +84,15 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
 
 - Emulacja trybu u¿ytkownika. W tym trybie QEMU mo¿e uruchamiaæ
   procesy linuksowe skompilowane dla jednego procesora na innym
-  procesorze. Linuksowe wywo³ania systemowe s± t³umaczone ze wzglêdu
-  na niezgodno¶æ kolejno¶ci bajtów w s³owie i 32/64-bitowego rozmiaru
+  procesorze. Linuksowe wywo³ania systemowe s± t³umaczone ze wzglêdu na
+  niezgodno¶æ kolejno¶ci bajtów w s³owie i 32/64-bitowego rozmiaru
   s³owa. Wine (emulacja Windows) i DOSEMU (emulacja DOS-a) to g³ówne
   cele QEMU.
 
 - Pe³na emulacja systemu. W tym trybie QEMU emuluje ca³y system,
-  w³±czaj±c w to procesor i ró¿ne urz±dzenia peryferyjne.
-  Mo¿e byæ tak¿e u¿ywane do wirtualnego hostowania kilku wirtualnych 
-  pecetów na pojedynczym serwerze.
+  w³±czaj±c w to procesor i ró¿ne urz±dzenia peryferyjne. Mo¿e byæ tak¿e
+  u¿ywane do wirtualnego hostowania kilku wirtualnych pecetów na
+  pojedynczym serwerze.
 
 %package -n kernel-misc-kqemu
 Summary:	kqemu - kernel module
@@ -233,7 +232,7 @@ install kqemu/kqemu-mod-smp.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/mis
 %endif
 
 # This dir is unneeded
-rm -rf $RPM_BUILD_ROOT/usr/share/doc/qemu
+rm -rf $RPM_BUILD_ROOT%{_docdir}/qemu
 
 %clean
 rm -rf $RPM_BUILD_ROOT
