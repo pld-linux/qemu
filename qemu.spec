@@ -230,7 +230,7 @@ install kqemu-%{_kqemu_version}/kqemu-mod-up.ko $RPM_BUILD_ROOT/lib/modules/%{_k
 %if %{with smp} && %{with dist_kernel}
 install kqemu-%{_kqemu_version}/kqemu-mod-smp.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/kqemu.ko
 %endif
-install -d $RPM_BUILD_ROOT/etc/modprobe.d
+install -d $RPM_BUILD_ROOT/etc/modprobe.d/%{_kernel_ver}{,smp}
 echo 'alias char-major-250 kqemu' > $RPM_BUILD_ROOT/etc/modprobe.d/kqemu.conf
 %endif
 
@@ -276,14 +276,14 @@ EOF
 %files -n kernel-misc-kqemu
 %defattr(644,root,root,755)
 %doc kqemu-%{_kqemu_version}/LICENSE
-%config(noreplace) %verify(not md5 mtime size) /etc/modprobe.d/kqemu.conf
+%config(noreplace) %verify(not md5 mtime size) /etc/modprobe.d/%{_kernel_ver}/kqemu.conf
 /lib/modules/%{_kernel_ver}/misc/kqemu.ko*
 
 %if %{with smp} && %{with dist_kernel}
 %files -n kernel-smp-misc-kqemu
 %defattr(644,root,root,755)
 %doc kqemu-%{_kqemu_version}/LICENSE
-%config(noreplace) %verify(not md5 mtime size) /etc/modprobe.d/kqemu.conf
+%config(noreplace) %verify(not md5 mtime size) /etc/modprobe.d/%{_kernel_ver}smp/kqemu.conf
 /lib/modules/%{_kernel_ver}smp/misc/kqemu.ko*
 %endif
 %endif
