@@ -1,0 +1,12 @@
+--- qemu-0.8.1/configure~	2006-05-20 01:27:00.000000000 +0300
++++ qemu-0.8.1/configure	2006-05-20 01:29:38.000000000 +0300
+@@ -294,8 +294,7 @@
+ strip="${cross_prefix}${strip}"
+ 
+ if [ ! -x "`which $cc`" ] ; then
+-    echo "Compiler $cc could not be found"
+-    exit
++    echo "Warning: Compiler $cc could not be found"
+ fi
+ 
+ if test "$mingw32" = "yes" ; then
