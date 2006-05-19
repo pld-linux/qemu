@@ -1,6 +1,8 @@
 #
 # TODO:
 # - wait till the gcc bug http://gcc.gnu.org/PR16185 is fixed.
+# - kqemu could be distributable if somebody bothers to contact qemu
+#   author http://fabrice.bellard.free.fr/qemu/qemu-accel.html
 #
 # Conditional build:
 %bcond_with	kqemu			# with QEMU accelerator module
@@ -17,32 +19,32 @@
 %endif
 #
 %define	_kqemu_version	1.3.0pre7
-%define		_rel	1.2
+%define		_rel	0.2
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
-Version:	0.8.0
+Version:	0.8.1
 Release:	%{_rel}%{?with_kqemu:k}
 License:	GPL
 Group:		Applications/Emulators
 #Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
-# Source0-md5:	eb175b26583280706fe7e4d8910d320d
-Source1:	http://fabrice.bellard.free.fr/qemu/kqemu-%{_kqemu_version}.tar.gz
+# Source0-md5:	67d924324a5ab79d017bd97a1e767285
+Source1:	http://fabrice.bellard.free.fr/qemu/k%{name}-%{_kqemu_version}.tar.gz
 # NoSource1-md5:	3b77edbada790f924456aa4675edd0be
 NoSource:	1
 Patch0:		%{name}-nostatic.patch
-Patch1:		%{name}-DESTDIR.patch
+Patch1:		%{name}-cc.patch
 Patch2:		%{name}-longjmp.patch
 Patch3:		%{name}-dot.patch
-Patch4:		%{name}-initrd_load_addr.patch
+
 Patch5:		%{name}-gcc4_x86.patch
 Patch6:		%{name}-gcc4_ppc.patch
 Patch7:		%{name}-parallel.patch
 Patch8:		%{name}-nosdlgui.patch
 Patch9:		%{name}-ifup.patch
 Patch10:	%{name}-gcc33.patch
-Patch11:	%{name}-slirp_throttle.patch
+
 URL:		http://fabrice.bellard.free.fr/qemu/
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
@@ -131,7 +133,7 @@ kqemu - modu³ j±dra SMP.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
-%patch4 -p1
+
 %if %{with gcc4}
 %patch5 -p0
 %patch6 -p1
@@ -141,7 +143,6 @@ kqemu - modu³ j±dra SMP.
 %{?with_nosdlgui:%patch8 -p1}
 %patch9 -p1
 %patch10 -p1
-%patch11 -p0
 
 %{__sed} -i -e 's/sdl_static=yes/sdl_static=no/' configure
 %{__sed} -i 's/.*MAKE) -C kqemu$//' Makefile
@@ -155,6 +156,17 @@ kqemu - modu³ j±dra SMP.
 
 %if %{with kqemu}
 echo -n > kqemu-%{_kqemu_version}/install.sh
+
+cat <<'EOF' > modprobe.conf
+# enable dynamic major
+options kqemu major=0
+# for autoloading from static dev
+#alias char-major-250 kqemu
+EOF
+
+cat <<'EOF' > udev.conf
+KERNEL=="kqemu", NAME="%k", MODE="0666"
+EOF
 %endif
 
 %build
@@ -198,10 +210,11 @@ cd -
 ./configure \
 	--prefix=%{_prefix} \
 	--cc="%{__cc}" \
+	--host-cc="%{__cc}" \
+	--make="%{__make}" \
 	%{?with_gcc4:--disable-gcc-check} \
 	%{!?with_kqemu:--disable-kqemu} \
 	--enable-alsa \
-	--make="%{__make}" \
 	--interp-prefix=%{_libdir}/%{name}
 %{__make}
 %endif
@@ -226,13 +239,18 @@ EOF
 
 %if %{with kernel}
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
+install -d $RPM_BUILD_ROOT/etc/{modprobe.d/%{_kernel_ver}{,smp},udev/rules.d}
 install kqemu-%{_kqemu_version}/kqemu-mod-up.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/kqemu.ko
+install modprobe.conf $RPM_BUILD_ROOT/etc/modprobe.d/%{_kernel_ver}/kqemu.conf
 %if %{with smp} && %{with dist_kernel}
 install kqemu-%{_kqemu_version}/kqemu-mod-smp.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/kqemu.ko
+install modprobe.conf $RPM_BUILD_ROOT/etc/modprobe.d/%{_kernel_ver}smp/kqemu.conf
 %endif
-install -d $RPM_BUILD_ROOT/etc/modprobe.d/%{_kernel_ver}{,smp}
-echo 'alias char-major-250 kqemu' > $RPM_BUILD_ROOT/etc/modprobe.d/kqemu.conf
+install udev.conf $RPM_BUILD_ROOT/etc/udev/rules.d/kqemu.rules
 %endif
+
+# already packaged
+rm -rf $RPM_BUILD_ROOT%{_docdir}/qemu/qemu-{doc,tech}.html
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -276,6 +294,7 @@ EOF
 %files -n kernel-misc-kqemu
 %defattr(644,root,root,755)
 %doc kqemu-%{_kqemu_version}/LICENSE
+%config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/kqemu.rules
 %config(noreplace) %verify(not md5 mtime size) /etc/modprobe.d/%{_kernel_ver}/kqemu.conf
 /lib/modules/%{_kernel_ver}/misc/kqemu.ko*
 
@@ -283,6 +302,7 @@ EOF
 %files -n kernel-smp-misc-kqemu
 %defattr(644,root,root,755)
 %doc kqemu-%{_kqemu_version}/LICENSE
+%config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/kqemu.rules
 %config(noreplace) %verify(not md5 mtime size) /etc/modprobe.d/%{_kernel_ver}smp/kqemu.conf
 /lib/modules/%{_kernel_ver}smp/misc/kqemu.ko*
 %endif
