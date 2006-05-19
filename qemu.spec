@@ -11,10 +11,13 @@
 %bcond_without	kernel			# don't build kernel modules
 %bcond_without	smp			# don't build SMP module
 %bcond_without	userspace		# don't build userspace utilities
-
-%define	_kqemu_version	0.7.2
 #
-%define		_rel	1.1
+%if %{without kqemu}
+%undefine	with_kernel
+%endif
+#
+%define	_kqemu_version	1.3.0pre7
+%define		_rel	1.2
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
@@ -25,11 +28,9 @@ Group:		Applications/Emulators
 #Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
 # Source0-md5:	eb175b26583280706fe7e4d8910d320d
-%if %{with kqemu}
-Source1:	http://fabrice.bellard.free.fr/qemu/k%{name}-%{_kqemu_version}.tar.gz
-# NoSource1-md5:	02cfdecda90458d6393781496ec6b48b
+Source1:	http://fabrice.bellard.free.fr/qemu/kqemu-%{_kqemu_version}.tar.gz
+# NoSource1-md5:	3b77edbada790f924456aa4675edd0be
 NoSource:	1
-%endif
 Patch0:		%{name}-nostatic.patch
 Patch1:		%{name}-DESTDIR.patch
 Patch2:		%{name}-longjmp.patch
@@ -52,16 +53,12 @@ BuildRequires:	kernel-module-build >= 3:2.6.7
 BuildRequires:	rpmbuild(macros) >= 1.217
 BuildRequires:	sed >= 4.0
 Requires:	SDL >= 1.2.1
-ExclusiveArch:	%{ix86} %{x8664} %{!?with_kqemu:ppc}
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
+ExclusiveArch:	%{ix86} %{x8664} %{!?with_kqemu:ppc}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # some SPARC boot image in ELF format
 %define		_noautostrip	.*%{_datadir}/qemu/proll.elf
-
-%if !%{with kqemu}
-%undefine	with_kernel
-%endif
 
 %description
 QEMU is a FAST! processor emulator. By using dynamic translation it
@@ -103,6 +100,7 @@ Group:		Base/Kernel
 %{?with_dist_kernel:%requires_releq_kernel_up}
 License:	Free to use, non-distributable
 Requires(post,postun):	/sbin/depmod
+Requires:	module-init-tools >= 3.2.2-2
 
 %description -n kernel-misc-kqemu
 kqemu - kernel module.
@@ -119,6 +117,7 @@ Group:		Base/Kernel
 %{?with_dist_kernel:%requires_releq_kernel_up}
 License:	Free to use, non-distributable
 Requires(post,postun):	/sbin/depmod
+Requires:	module-init-tools >= 3.2.2-2
 
 %description -n kernel-smp-misc-kqemu
 kqemu - SMP kernel module.
@@ -154,11 +153,13 @@ kqemu - modu³ j±dra SMP.
 %{__sed} -i 's/-Wall -O2 -g/-Wall -O2/' Makefile Makefile.target
 %endif
 
-%{?with_kqemu:echo -n > kqemu/install.sh}
+%if %{with kqemu}
+echo -n > kqemu-%{_kqemu_version}/install.sh
+%endif
 
 %build
 %if %{with kernel}
-cd kqemu
+cd kqemu-%{_kqemu_version}
 mv -f kqemu-linux.c{,.orig}
 for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}; do
 	if [ ! -r "%{_kernelsrcdir}/config-$cfg" ]; then
@@ -225,14 +226,13 @@ EOF
 
 %if %{with kernel}
 install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
-install kqemu/kqemu-mod-up.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/kqemu.ko
+install kqemu-%{_kqemu_version}/kqemu-mod-up.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/kqemu.ko
 %if %{with smp} && %{with dist_kernel}
-install kqemu/kqemu-mod-smp.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/kqemu.ko
+install kqemu-%{_kqemu_version}/kqemu-mod-smp.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/kqemu.ko
 %endif
+install -d $RPM_BUILD_ROOT/etc/modprobe.d
+echo 'alias char-major-250 kqemu' > $RPM_BUILD_ROOT/etc/modprobe.d/kqemu.conf
 %endif
-
-# This dir is unneeded
-rm -rf $RPM_BUILD_ROOT%{_docdir}/qemu
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -247,20 +247,12 @@ EOF
 
 %post	-n kernel-misc-kqemu
 %depmod %{_kernel_ver}
-%banner %{name}-module -e <<EOF
-To autoload kqemu module, add to /etc/modprobe.conf:
-alias char-major-250 kqemu
-EOF
 
 %postun -n kernel-misc-kqemu
 %depmod %{_kernel_ver}
 
 %post	-n kernel-smp-misc-kqemu
 %depmod %{_kernel_ver}smp
-%banner %{name}-module -e <<EOF
-To autoload kqemu module, add to /etc/modprobe.conf:
-alias char-major-250 kqemu
-EOF
 
 %postun -n kernel-smp-misc-kqemu
 %depmod %{_kernel_ver}smp
@@ -283,13 +275,15 @@ EOF
 %if %{with kernel}
 %files -n kernel-misc-kqemu
 %defattr(644,root,root,755)
-%doc kqemu/LICENSE
+%doc kqemu-%{_kqemu_version}/LICENSE
+%config(noreplace) %verify(not md5 mtime size) /etc/modprobe.d/kqemu.conf
 /lib/modules/%{_kernel_ver}/misc/kqemu.ko*
 
 %if %{with smp} && %{with dist_kernel}
 %files -n kernel-smp-misc-kqemu
 %defattr(644,root,root,755)
-%doc kqemu/LICENSE
+%doc kqemu-%{_kqemu_version}/LICENSE
+%config(noreplace) %verify(not md5 mtime size) /etc/modprobe.d/kqemu.conf
 /lib/modules/%{_kernel_ver}smp/misc/kqemu.ko*
 %endif
 %endif
