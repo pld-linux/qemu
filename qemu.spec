@@ -5,21 +5,21 @@
 #   author http://fabrice.bellard.free.fr/qemu/qemu-accel.html
 #
 # Conditional build:
-%bcond_with	kqemu			# with QEMU accelerator module
+%bcond_without	kqemu			# disable QEMU accelerator support
 %bcond_with	cflags_passing		# with passing rpmcflags to Makefiles
 %bcond_with	nosdlgui		# do not use SDL gui (use X11 instead)
 %bcond_with	gcc4			# use gcc4 patches (broke build on gcc33)
 %bcond_without	dist_kernel		# without distribution kernel
-%bcond_without	kernel			# don't build kernel modules
+%bcond_with	kernel			# build kqemu kernel modules
 %bcond_without	smp			# don't build SMP module
 %bcond_without	userspace		# don't build userspace utilities
-#
-%if %{without kqemu}
-%undefine	with_kernel
+
+%if %{with dist_kernel}
+%define	with_kernel	1
 %endif
 #
 %define	_kqemu_version	1.3.0pre7
-%define		_rel	0.2
+%define		_rel	0.4
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
@@ -128,7 +128,7 @@ kqemu - SMP kernel module.
 kqemu - modu³ j±dra SMP.
 
 %prep
-%setup -q %{?with_kqemu:-a1}
+%setup -q %{?with_kernel:-a1}
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
@@ -154,7 +154,7 @@ kqemu - modu³ j±dra SMP.
 %{__sed} -i 's/-Wall -O2 -g/-Wall -O2/' Makefile Makefile.target
 %endif
 
-%if %{with kqemu}
+%if %{with kernel}
 echo -n > kqemu-%{_kqemu_version}/install.sh
 
 cat <<'EOF' > modprobe.conf
@@ -255,7 +255,7 @@ rm -rf $RPM_BUILD_ROOT%{_docdir}/qemu/qemu-{doc,tech}.html
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%if %{with kqemu}
+%if %{with kernel}
 %post
 %banner %{name} -e <<EOF
 To enable qemu accelerator (kqemu), the kqemu kernel module must be loaded:
@@ -284,10 +284,6 @@ EOF
 %{_datadir}/qemu
 %{_mandir}/man1/qemu.1*
 %{_mandir}/man1/qemu-img.1*
-# FIXME: maybe better moved this into dev.spec
-%if %{with kqemu}
-%dev(c,250,0) %attr(666,root,root) /dev/kqemu
-%endif
 %endif
 
 %if %{with kernel}
