@@ -13,10 +13,6 @@
 %bcond_with	kernel			# build kqemu kernel modules
 %bcond_without	smp			# don't build SMP module
 %bcond_without	userspace		# don't build userspace utilities
-
-%if %{with dist_kernel}
-%define	with_kernel	1
-%endif
 #
 %define	_kqemu_version	1.3.0pre7
 %define		_rel	0.4
