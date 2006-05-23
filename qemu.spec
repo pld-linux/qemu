@@ -33,14 +33,12 @@ Patch0:		%{name}-nostatic.patch
 Patch1:		%{name}-cc.patch
 Patch2:		%{name}-longjmp.patch
 Patch3:		%{name}-dot.patch
-
-Patch5:		%{name}-gcc4_x86.patch
-Patch6:		%{name}-gcc4_ppc.patch
-Patch7:		%{name}-parallel.patch
-Patch8:		%{name}-nosdlgui.patch
-Patch9:		%{name}-ifup.patch
-Patch10:	%{name}-gcc33.patch
-
+Patch4:		%{name}-gcc4_x86.patch
+Patch5:		%{name}-gcc4_ppc.patch
+Patch6:		%{name}-nosdlgui.patch
+Patch7:		%{name}-ifup.patch
+Patch8:	%{name}-gcc33.patch
+Patch9:		%{name}-parallel.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
@@ -129,16 +127,15 @@ kqemu - modu³ j±dra SMP.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
-
 %if %{with gcc4}
-%patch5 -p0
-%patch6 -p1
+%patch4 -p0
+%patch5 -p1
 %endif
+%{?with_nosdlgui:%patch6 -p1}
+%patch7 -p1
+%patch8 -p1
 # probably not needed
-# %patch7 -p1
-%{?with_nosdlgui:%patch8 -p1}
-%patch9 -p1
-%patch10 -p1
+#%%patch9 -p1
 
 %{__sed} -i -e 's/sdl_static=yes/sdl_static=no/' configure
 %{__sed} -i 's/.*MAKE) -C kqemu$//' Makefile
@@ -208,8 +205,12 @@ cd -
 	--cc="%{__cc}" \
 	--host-cc="%{__cc}" \
 	--make="%{__make}" \
+%if %{with kqemu}
+	--kernel-path=%{_kernelsrcdir} \
+%else
+	--disable-kqemu \
+%endif
 	%{?with_gcc4:--disable-gcc-check} \
-	%{!?with_kqemu:--disable-kqemu} \
 	--enable-alsa \
 	--interp-prefix=%{_libdir}/%{name}
 %{__make}
