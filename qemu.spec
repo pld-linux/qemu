@@ -46,7 +46,9 @@ BuildRequires:	alsa-lib-devel
 %if %{with kqemu} && %{with dist_kernel}
 BuildRequires:	kernel-module-build >= 3:2.6.7
 %endif
+BuildRequires:	perl-tools-pod
 BuildRequires:	rpmbuild(macros) >= 1.217
+BuildRequires:	tetex
 BuildRequires:	sed >= 4.0
 Requires:	SDL >= 1.2.1
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
