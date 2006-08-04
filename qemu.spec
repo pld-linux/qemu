@@ -14,20 +14,20 @@
 %bcond_without	smp			# don't build SMP module
 %bcond_without	userspace		# don't build userspace utilities
 #
-%define	_kqemu_version	1.3.0pre7
+%define	_kqemu_version	1.3.0pre9
 %define		_rel	0.4
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
-Version:	0.8.1
+Version:	0.8.2
 Release:	%{_rel}%{?with_kqemu:k}
 License:	GPL
 Group:		Applications/Emulators
 #Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
-# Source0-md5:	67d924324a5ab79d017bd97a1e767285
+# Source0-md5:	5b3a89eb2f256a8a6f3bb07f7b3f1b07
 Source1:	http://fabrice.bellard.free.fr/qemu/k%{name}-%{_kqemu_version}.tar.gz
-# NoSource1-md5:	3b77edbada790f924456aa4675edd0be
+# Source1-md5:	27888c3220844ad360a6a23345fa1bcb
 NoSource:	1
 Patch0:		%{name}-nostatic.patch
 Patch1:		%{name}-cc.patch
@@ -56,7 +56,7 @@ ExclusiveArch:	%{ix86} %{x8664} %{!?with_kqemu:ppc}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # some SPARC boot image in ELF format
-%define		_noautostrip	.*%{_datadir}/qemu/proll.elf
+%define		_noautostrip	.*%{_datadir}/qemu/openbios-sparc32
 
 %description
 QEMU is a FAST! processor emulator. By using dynamic translation it
@@ -135,7 +135,8 @@ kqemu - modu³ j±dra SMP.
 %endif
 %{?with_nosdlgui:%patch6 -p1}
 %patch7 -p1
-%patch8 -p1
+# probably not needed
+#%patch8 -p1
 # probably not needed
 #%%patch9 -p1
 
