@@ -36,8 +36,6 @@ Patch4:		%{name}-gcc4_x86.patch
 Patch5:		%{name}-gcc4_ppc.patch
 Patch6:		%{name}-nosdlgui.patch
 Patch7:		%{name}-ifup.patch
-Patch8:	%{name}-gcc33.patch
-Patch9:		%{name}-parallel.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
@@ -134,10 +132,6 @@ kqemu - modu³ j±dra SMP.
 %endif
 %{?with_nosdlgui:%patch6 -p1}
 %patch7 -p1
-# probably not needed
-#%patch8 -p1
-# probably not needed
-#%%patch9 -p1
 
 %{__sed} -i -e 's/sdl_static=yes/sdl_static=no/' configure
 %{__sed} -i 's/.*MAKE) -C kqemu$//' Makefile
