@@ -109,7 +109,7 @@ Summary(pl):	kqemu - modu³ j±dra SMP
 Version:	%{_kqemu_version}
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
-%{?with_dist_kernel:%requires_releq_kernel_up}
+%{?with_dist_kernel:%requires_releq_kernel_smp}
 License:	Free to use, non-distributable
 Requires(post,postun):	/sbin/depmod
 Requires:	module-init-tools >= 3.2.2-2
