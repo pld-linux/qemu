@@ -163,7 +163,7 @@ EOF
 cd kqemu-%{_kqemu_version}
 mv -f kqemu-linux.c{,.orig}
 %build_kernel_modules -m kqemu <<'EOF'
-if grep -q "CONFIG_PREEMPT_RT$" o/.config; then
+if grep -q "CONFIG_PREEMPT_RT" o/.config; then
 	sed 's/SPIN_LOCK_UNLOCKED/SPIN_LOCK_UNLOCKED(kqemu_lock)/' \
 		kqemu-linux.c.orig > kqemu-linux.c
 else
