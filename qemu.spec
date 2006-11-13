@@ -41,10 +41,10 @@ BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
 %{!?with_gcc4:BuildRequires:	gcc < 5:4.0}
 %if %{with kqemu} && %{with dist_kernel}
-BuildRequires:	kernel-module-build >= 3:2.6.7
+BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
 %endif
 BuildRequires:	perl-tools-pod
-BuildRequires:	rpmbuild(macros) >= 1.217
+BuildRequires:	rpmbuild(macros) >= 1.326
 BuildRequires:	tetex
 BuildRequires:	sed >= 4.0
 Requires:	SDL >= 1.2.1
@@ -86,7 +86,7 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
   u¿ywane do wirtualnego hostowania kilku wirtualnych pecetów na
   pojedynczym serwerze.
 
-%package -n kernel-misc-kqemu
+%package -n kernel%{_alt_kernel}-misc-kqemu
 Summary:	kqemu - kernel module
 Summary(pl):	kqemu - modu³ j±dra
 Version:	%{_kqemu_version}
@@ -97,13 +97,13 @@ License:	Free to use, non-distributable
 Requires(post,postun):	/sbin/depmod
 Requires:	module-init-tools >= 3.2.2-2
 
-%description -n kernel-misc-kqemu
+%description -n kernel%{_alt_kernel}-misc-kqemu
 kqemu - kernel module.
 
-%description -n kernel-misc-kqemu -l pl
+%description -n kernel%{_alt_kernel}-misc-kqemu -l pl
 kqemu - modu³ j±dra.
 
-%package -n kernel-smp-misc-kqemu
+%package -n kernel%{_alt_kernel}-smp-misc-kqemu
 Summary:	kqemu - SMP kernel module
 Summary(pl):	kqemu - modu³ j±dra SMP
 Version:	%{_kqemu_version}
@@ -114,10 +114,10 @@ License:	Free to use, non-distributable
 Requires(post,postun):	/sbin/depmod
 Requires:	module-init-tools >= 3.2.2-2
 
-%description -n kernel-smp-misc-kqemu
+%description -n kernel%{_alt_kernel}-smp-misc-kqemu
 kqemu - SMP kernel module.
 
-%description -n kernel-smp-misc-kqemu -l pl
+%description -n kernel%{_alt_kernel}-smp-misc-kqemu -l pl
 kqemu - modu³ j±dra SMP.
 
 %prep
@@ -162,34 +162,14 @@ EOF
 %if %{with kernel}
 cd kqemu-%{_kqemu_version}
 mv -f kqemu-linux.c{,.orig}
-for cfg in %{?with_dist_kernel:%{?with_smp:smp} up}%{!?with_dist_kernel:nondist}; do
-	if [ ! -r "%{_kernelsrcdir}/config-$cfg" ]; then
-		exit 1
-	fi
-	install -d o/include/linux
-	ln -sf %{_kernelsrcdir}/config-$cfg o/.config
-	ln -sf %{_kernelsrcdir}/Module.symvers-$cfg o/Module.symvers
-	ln -sf %{_kernelsrcdir}/include/linux/autoconf-$cfg.h o/include/linux/autoconf.h
-%if %{with dist_kernel}
-	%{__make} -j1 -C %{_kernelsrcdir} O=$PWD/o prepare scripts
-%else
-	install -d o/include/config
-	touch o/include/config/MARKER
-	ln -sf %{_kernelsrcdir}/scripts o/scripts
-%endif
-	if grep -q "^CONFIG_PREEMPT_RT=y$" o/.config; then
-		sed 's/SPIN_LOCK_UNLOCKED/SPIN_LOCK_UNLOCKED(kqemu_lock)/' \
-			kqemu-linux.c.orig > kqemu-linux.c
-	else
-		cat kqemu-linux.c.orig > kqemu-linux.c
-	fi
-
-	%{__make} -C %{_kernelsrcdir} modules \
-		CC="%{__cc}" CPP="%{__cpp}" \
-		M=$PWD O=$PWD/o \
-		%{?with_verbose:V=1}
-	mv kqemu.ko kqemu-mod-$cfg.ko
-done
+%build_kernel_modules -m kqemu <<'EOF'
+if grep -q "CONFIG_PREEMPT_RT$" o/.config; then
+	sed 's/SPIN_LOCK_UNLOCKED/SPIN_LOCK_UNLOCKED(kqemu_lock)/' \
+		kqemu-linux.c.orig > kqemu-linux.c
+else
+	cat kqemu-linux.c.orig > kqemu-linux.c
+fi
+EOF
 cd -
 %endif
 
@@ -231,12 +211,10 @@ EOF
 %endif
 
 %if %{with kernel}
-install -d $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}{,smp}/misc
+%install_kernel_modules -m kqemu-%{_kqemu_version}/kqemu -d misc
 install -d $RPM_BUILD_ROOT/etc/{modprobe.d/%{_kernel_ver}{,smp},udev/rules.d}
-install kqemu-%{_kqemu_version}/kqemu-mod-up.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}/misc/kqemu.ko
 install modprobe.conf $RPM_BUILD_ROOT/etc/modprobe.d/%{_kernel_ver}/kqemu.conf
 %if %{with smp} && %{with dist_kernel}
-install kqemu-%{_kqemu_version}/kqemu-mod-smp.ko $RPM_BUILD_ROOT/lib/modules/%{_kernel_ver}smp/misc/kqemu.ko
 install modprobe.conf $RPM_BUILD_ROOT/etc/modprobe.d/%{_kernel_ver}smp/kqemu.conf
 %endif
 install udev.conf $RPM_BUILD_ROOT/etc/udev/rules.d/kqemu.rules
@@ -256,16 +234,16 @@ modprobe kqemu
 EOF
 %endif
 
-%post	-n kernel-misc-kqemu
+%post	-n kernel%{_alt_kernel}-misc-kqemu
 %depmod %{_kernel_ver}
 
-%postun -n kernel-misc-kqemu
+%postun -n kernel%{_alt_kernel}-misc-kqemu
 %depmod %{_kernel_ver}
 
-%post	-n kernel-smp-misc-kqemu
+%post	-n kernel%{_alt_kernel}-smp-misc-kqemu
 %depmod %{_kernel_ver}smp
 
-%postun -n kernel-smp-misc-kqemu
+%postun -n kernel%{_alt_kernel}-smp-misc-kqemu
 %depmod %{_kernel_ver}smp
 
 %if %{with userspace}
@@ -280,7 +258,7 @@ EOF
 %endif
 
 %if %{with kernel}
-%files -n kernel-misc-kqemu
+%files -n kernel%{_alt_kernel}-misc-kqemu
 %defattr(644,root,root,755)
 %doc kqemu-%{_kqemu_version}/LICENSE
 %config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/kqemu.rules
@@ -288,7 +266,7 @@ EOF
 /lib/modules/%{_kernel_ver}/misc/kqemu.ko*
 
 %if %{with smp} && %{with dist_kernel}
-%files -n kernel-smp-misc-kqemu
+%files -n kernel%{_alt_kernel}-smp-misc-kqemu
 %defattr(644,root,root,755)
 %doc kqemu-%{_kqemu_version}/LICENSE
 %config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/kqemu.rules
