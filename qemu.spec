@@ -170,7 +170,7 @@ obj-m := kqemu.o
 kqemu-objs:= kqemu-linux.o kqemu-mod.o
 
 $(obj)/kqemu-mod.o: $(src)/kqemu-mod-$(ARCH).o.bin
-        cp $< $@
+	cp $< $@
 EOF
 
 %build_kernel_modules -m kqemu <<'EOF'
