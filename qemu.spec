@@ -161,7 +161,18 @@ EOF
 %build
 %if %{with kernel}
 cd kqemu-%{_kqemu_version}
+
+mv -f kqemu-mod-i386.o{,.bin}
+mv -f kqemu-mod-x86_64.o{,.bin}
 mv -f kqemu-linux.c{,.orig}
+cat > Makefile <<'EOF'
+obj-m := kqemu.o
+kqemu-objs:= kqemu-linux.o kqemu-mod.o
+
+$(obj)/kqemu-mod.o: $(src)/kqemu-mod-$(ARCH).o.bin
+        cp $< $@
+EOF
+
 %build_kernel_modules -m kqemu <<'EOF'
 if grep -q "CONFIG_PREEMPT_RT" o/.config; then
 	sed 's/SPIN_LOCK_UNLOCKED/SPIN_LOCK_UNLOCKED(kqemu_lock)/' \
