@@ -37,16 +37,18 @@ Patch5:		%{name}-gcc4_ppc.patch
 Patch6:		%{name}-nosdlgui.patch
 Patch7:		%{name}-ifup.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
+%if %{with kernel} && %{with dist_kernel}
+BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
+%endif
+%if %{with userspace}
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
 %{!?with_gcc4:BuildRequires:	gcc < 5:4.0}
-%if %{with kqemu} && %{with dist_kernel}
-BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
-%endif
 BuildRequires:	perl-tools-pod
 BuildRequires:	rpmbuild(macros) >= 1.326
 BuildRequires:	tetex
 BuildRequires:	sed >= 4.0
+%endif
 Requires:	SDL >= 1.2.1
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
 ExclusiveArch:	%{ix86} %{x8664} %{!?with_kqemu:ppc}
