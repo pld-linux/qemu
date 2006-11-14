@@ -45,7 +45,7 @@ BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
 %{!?with_gcc4:BuildRequires:	gcc < 5:4.0}
 BuildRequires:	perl-tools-pod
-BuildRequires:	rpmbuild(macros) >= 1.326
+BuildRequires:	rpmbuild(macros) >= 1.330
 BuildRequires:	tetex
 BuildRequires:	sed >= 4.0
 %endif
