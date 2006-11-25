@@ -36,6 +36,8 @@ Patch4:		%{name}-gcc4_x86.patch
 Patch5:		%{name}-gcc4_ppc.patch
 Patch6:		%{name}-nosdlgui.patch
 Patch7:		%{name}-ifup.patch
+# Proof of concept, for reference, do not remove
+Patch8:		%{name}-kde_virtual_workspaces_hack.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 %if %{with kernel} && %{with dist_kernel}
 BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
@@ -134,6 +136,7 @@ kqemu - modu³ j±dra SMP.
 %endif
 %{?with_nosdlgui:%patch6 -p1}
 %patch7 -p1
+#%patch8 -p1
 
 %{__sed} -i -e 's/sdl_static=yes/sdl_static=no/' configure
 %{__sed} -i 's/.*MAKE) -C kqemu$//' Makefile
