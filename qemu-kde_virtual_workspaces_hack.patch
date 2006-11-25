@@ -1,0 +1,79 @@
+Proof of concept patch for using kde's virtual workspaces from withing qemu,
+when running full screen (so that a virtual workspace is a whole OS).
+This should:
+- use configurable key bindings or even be able to get them from the current
+  environment
+- use dcop directly (preferably using runtime probing for dcop libs), without
+  having to invoke the dcop app (which is obviously slower)
+
+But for now whoever wants to can just hack in his key bindings and it will
+kind of work.
+
+Would actually be nice if kde (and gnome) had the ability to create workspaces
+on the fly, so qemu could have a mode when it assigns itself a completely new
+workspace on startup. This way I could have another OS running in the
+'background' without altering my workflow (that is -- without depriving me of
+one workspace which I normally use).
+
+--- qemu-0.8.2/sdl.c	2006-07-22 19:23:34.000000000 +0200
++++ qemu-0.8.2.new/sdl.c	2006-11-25 20:57:12.220599750 +0100
+@@ -35,9 +35,11 @@
+ static int gui_saved_grab;
+ static int gui_fullscreen;
+ static int gui_key_modifier_pressed;
++static int gui_key_modifier_pressed2;
+ static int gui_keysym;
+ static int gui_fullscreen_initial_grab;
+ static int gui_grab_code = KMOD_LALT | KMOD_LCTRL;
++static int gui_switch_workspace_code = KMOD_LMETA;
+ static uint8_t modifiers_state[256];
+ static int width, height;
+ static SDL_Cursor *sdl_cursor_normal;
+@@ -382,13 +384,36 @@
+         case SDL_KEYDOWN:
+         case SDL_KEYUP:
+             if (ev->type == SDL_KEYDOWN) {
++                mod_state = (SDL_GetModState() & gui_switch_workspace_code) ==
++                    gui_switch_workspace_code;
++				gui_key_modifier_pressed2 = mod_state;
+                 mod_state = (SDL_GetModState() & gui_grab_code) ==
+                     gui_grab_code;
+                 gui_key_modifier_pressed = mod_state;
+-                if (gui_key_modifier_pressed) {
++				if (gui_key_modifier_pressed2) {
+                     int keycode;
++					char cmd[] = "dcop kwin default setCurrentDesktop 1 >/dev/null";
+                     keycode = sdl_keyevent_to_keycode(&ev->key);
+                     switch(keycode) {
++					case 0x02 ... 0x0a: /* '1' to '9' keys */
++						sdl_grab_end();
++						cmd[36] =(char)keycode+'0'-1;
++						system(cmd);
++						break;
++					default:
++						break;
++
++					break;
++					}
++ 				}
++				else if (gui_key_modifier_pressed) {
++                    int keycode;
++                    keycode = sdl_keyevent_to_keycode(&ev->key);
++                    switch(keycode) {
++					case 0x10:
++					case 0x2d: /* 'q' or 'x' */
++						qemu_system_shutdown_request();
++						break;
+                     case 0x21: /* 'f' key on US keyboard */
+                         toggle_full_screen(ds);
+                         gui_keysym = 1;
+@@ -508,6 +533,9 @@
+                 !ev->active.gain && !gui_fullscreen_initial_grab) {
+                 sdl_grab_end();
+             }
++			else if(gui_fullscreen && ev->active.state == SDL_APPINPUTFOCUS) {
++				sdl_grab_start();
++			}
+             break;
+         default:
+             break;
