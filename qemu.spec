@@ -15,7 +15,7 @@
 %bcond_without	userspace		# don't build userspace utilities
 #
 %define	_kqemu_version	1.3.0pre9
-%define		_rel	0.4
+%define		_rel	0.5
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
@@ -38,6 +38,11 @@ Patch6:		%{name}-nosdlgui.patch
 Patch7:		%{name}-ifup.patch
 # Proof of concept, for reference, do not remove
 Patch8:		%{name}-kde_virtual_workspaces_hack.patch
+# http://gwenole.beauchesne.info/en/projects/qemu
+Patch9:		%{name}-0.8.0-gcc4-hacks.patch
+Patch10:	%{name}-0.7.0-gcc4.patch
+Patch11:	%{name}-0.7.2-gcc4-opts.patch
+Patch12:	%{name}-0.7.2-dyngen-check-stack-clobbers.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 %if %{with kernel} && %{with dist_kernel}
 BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
@@ -131,7 +136,11 @@ kqemu - modu³ j±dra SMP.
 %patch2 -p1
 %patch3 -p1
 %if %{with gcc4}
-%patch4 -p0
+%patch9 -p1
+%patch10 -p1
+%patch11 -p1
+%patch12 -p1
+#%patch4 -p0
 %patch5 -p1
 %endif
 %{?with_nosdlgui:%patch6 -p1}
