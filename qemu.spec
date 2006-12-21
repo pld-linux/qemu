@@ -3,6 +3,8 @@
 # - wait till the gcc bug http://gcc.gnu.org/PR16185 is fixed.
 # - kqemu module could be distributable if somebody bothers to contact qemu
 #   author http://fabrice.bellard.free.fr/qemu/qemu-accel.html
+#   (but only in source form as distribution of linked module would be
+#    violation of GPL)
 #
 # Conditional build:
 %bcond_without	kqemu			# disable QEMU accelerator support
