@@ -1,7 +1,7 @@
 #
 # TODO:
 # - wait till the gcc bug http://gcc.gnu.org/PR16185 is fixed.
-# - kqemu could be distributable if somebody bothers to contact qemu
+# - kqemu module could be distributable if somebody bothers to contact qemu
 #   author http://fabrice.bellard.free.fr/qemu/qemu-accel.html
 #
 # Conditional build:
@@ -10,12 +10,12 @@
 %bcond_with	nosdlgui		# do not use SDL gui (use X11 instead)
 %bcond_without	gcc4			# use gcc4 patches (broke build on gcc33)
 %bcond_without	dist_kernel		# without distribution kernel
-%bcond_with	kernel			# build kqemu kernel modules
+%bcond_with	kernel			# build kqemu kernel modules (see License)
 %bcond_without	smp			# don't build SMP module
 %bcond_without	userspace		# don't build userspace utilities
 #
 %define	_kqemu_version	1.3.0pre9
-%define		_rel	0.5
+%define		_rel	1
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
