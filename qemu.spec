@@ -29,7 +29,8 @@ Group:		Applications/Emulators
 Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
 # Source0-md5:	5b3a89eb2f256a8a6f3bb07f7b3f1b07
 Source1:	http://fabrice.bellard.free.fr/qemu/k%{name}-%{_kqemu_version}.tar.gz
-# Source1-md5:	27888c3220844ad360a6a23345fa1bcb
+# NoSource1-md5:	27888c3220844ad360a6a23345fa1bcb
+NoSource:	1
 Patch0:		%{name}-nostatic.patch
 Patch1:		%{name}-cc.patch
 Patch2:		%{name}-longjmp.patch
