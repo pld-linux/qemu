@@ -48,13 +48,13 @@ Patch12:	%{name}-0.7.2-dyngen-check-stack-clobbers.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 %if %{with kernel} && %{with dist_kernel}
 BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
+BuildRequires:	rpmbuild(macros) >= 1.330
 %endif
 %if %{with userspace}
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
 %{!?with_gcc4:BuildRequires:	gcc < 5:4.0}
 BuildRequires:	perl-tools-pod
-BuildRequires:	rpmbuild(macros) >= 1.330
 BuildRequires:	tetex
 BuildRequires:	sed >= 4.0
 %endif
