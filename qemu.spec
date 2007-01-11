@@ -10,7 +10,8 @@
 %bcond_without	kqemu			# disable QEMU accelerator support
 %bcond_with	cflags_passing		# with passing rpmcflags to Makefiles
 %bcond_with	nosdlgui		# do not use SDL gui (use X11 instead)
-%bcond_without	gcc4			# use gcc4 patches (broke build on gcc33)
+# Note that gcc4 build is very problematic and not supported by qemu team
+%bcond_with	gcc4			# use gcc4 patches (broke build on gcc33)
 %bcond_without	dist_kernel		# without distribution kernel
 %bcond_with	kernel			# build kqemu kernel modules (see License)
 %bcond_without	smp			# don't build SMP module
