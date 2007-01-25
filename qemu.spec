@@ -7,7 +7,7 @@
 #    violation of GPL)
 #
 # Conditional build:
-%bcond_without	kqemu			# disable QEMU accelerator support
+%bcond_with	kqemu			# disable QEMU accelerator support
 %bcond_with	cflags_passing		# with passing rpmcflags to Makefiles
 %bcond_with	nosdlgui		# do not use SDL gui (use X11 instead)
 # Note that gcc4 build is very problematic and not supported by qemu team
@@ -18,7 +18,7 @@
 %bcond_without	userspace		# don't build userspace utilities
 #
 %define	_kqemu_version	1.3.0pre9
-%define		_rel	1
+%define		_rel	2
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
