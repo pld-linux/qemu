@@ -1,10 +1,6 @@
 #
 # TODO:
 # - wait till the gcc bug http://gcc.gnu.org/PR16185 is fixed.
-# - kqemu MODULE could be distributable if somebody bothers to contact qemu
-#   author http://fabrice.bellard.free.fr/qemu/qemu-accel.html
-#   (but only in source form as distribution of linked module would be
-#    violation of GPL)
 #
 # Conditional build:
 %bcond_without	kqemu			# disable QEMU ACCELERATOR support
@@ -13,28 +9,26 @@
 # Note that gcc4 build is very problematic and not supported by qemu team
 %bcond_with	gcc4			# use gcc4 patches (broke build on gcc33)
 %bcond_without	dist_kernel		# without distribution kernel
-%bcond_with	kernel			# build kqemu KERNEL MODULES (see License)
+%bcond_without	kernel			# build kqemu KERNEL MODULES
 %bcond_without	smp			# don't build SMP module
 %bcond_without	userspace		# don't build userspace utilities
 #
-%define	_kqemu_version	1.3.0pre9
-%define		_rel	2
+%define	_kqemu_version	1.3.0pre11
+%define		_rel	1
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
-Version:	0.8.2
+Version:	0.9.0
 Release:	%{_rel}%{?with_kqemu:k}
 License:	GPL
 Group:		Applications/Emulators
 #Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
-# Source0-md5:	5b3a89eb2f256a8a6f3bb07f7b3f1b07
+# Source0-md5:	ab11a03ba30cf4a70641f0f170473d69
 Source1:	http://fabrice.bellard.free.fr/qemu/k%{name}-%{_kqemu_version}.tar.gz
-# NoSource1-md5:	27888c3220844ad360a6a23345fa1bcb
-NoSource:	1
+# Source1-md5:	970521874ef8b1ba4598925ace5936c3
 Patch0:		%{name}-nostatic.patch
 Patch1:		%{name}-cc.patch
-Patch2:		%{name}-longjmp.patch
 Patch3:		%{name}-dot.patch
 Patch4:		%{name}-gcc4_x86.patch
 Patch5:		%{name}-gcc4_ppc.patch
@@ -44,9 +38,8 @@ Patch7:		%{name}-ifup.patch
 Patch8:		%{name}-kde_virtual_workspaces_hack.patch
 # http://gwenole.beauchesne.info/en/projects/qemu
 Patch9:		%{name}-0.8.0-gcc4-hacks.patch
-Patch10:	%{name}-0.7.0-gcc4.patch
 Patch11:	%{name}-0.7.2-gcc4-opts.patch
-Patch12:	%{name}-0.7.2-dyngen-check-stack-clobbers.patch
+#Patch12:	%{name}-0.7.2-dyngen-check-stack-clobbers.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 %if %{with kernel} && %{with dist_kernel}
 BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
@@ -137,13 +130,11 @@ kqemu - modu³ j±dra SMP.
 %setup -q %{?with_kernel:-a1}
 %patch0 -p1
 %patch1 -p1
-%patch2 -p1
 %patch3 -p1
 %if %{with gcc4}
 %patch9 -p1
-%patch10 -p1
 %patch11 -p1
-%patch12 -p1
+#%patch12 -p1
 #%patch4 -p0
 %patch5 -p1
 %endif
