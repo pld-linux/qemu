@@ -1,43 +1,17 @@
---- qemu/dyngen.c.x	2005-05-16 10:30:43.000000000 +0100
-+++ qemu/dyngen.c	2005-05-16 10:32:41.000000000 +0100
-@@ -1996,6 +1996,9 @@ void gen_code(const char *name, host_ulo
-     int retpos;
-     int exit_addrs[MAX_EXITS];
+diff -ur qemu-0.9.0-o/dyngen.c qemu-0.9.0/dyngen.c
+--- qemu-0.9.0-o/dyngen.c	2007-02-06 14:44:57.000000000 -0700
++++ qemu-0.9.0/dyngen.c	2007-02-06 14:46:11.000000000 -0700
+@@ -1692,6 +1692,9 @@
+ #else
+         fprintf(outfile, "    extern void %s();\n", name);
  #endif
 +#if defined(HOST_PPC)
 +    uint8_t *blr_addr = NULL;
 +#endif
  
-     /* Compute exact size excluding prologue and epilogue instructions.
-      * Increment start_offset to skip epilogue instructions, then compute
-@@ -2018,9 +2021,23 @@ void gen_code(const char *name, host_ulo
-         p = (void *)(p_end - 4);
-         if (p == p_start)
-             error("empty code for %s", name);
--        if (get32((uint32_t *)p) != 0x4e800020)
--            error("blr expected at the end of %s", name);
--        copy_size = p - p_start;
-+        if (get32((uint32_t *)p) == 0x4e800020) {
-+		copy_size = p - p_start; /* blr at end */
-+	} else {
-+	    /* Find the blr and note its address so that we 
-+	       can emit code to rewrite it to a branch. */
-+	    do {
-+		p -= 4;
-+
-+		if (get32((uint32_t *)p) == 0x4e800020) {
-+		    blr_addr = p;
-+		    copy_size = p_end - p_start;
-+		    break;
-+		}
-+	    } while (p > p_start);
-+	    if (p == p_start)
-+		error("blr expected in the end of %s", name);
-+	}
-     }
- #elif defined(HOST_S390)
-     {
-@@ -2633,6 +2650,9 @@ void gen_code(const char *name, host_ulo
+         for(i = 0, rel = relocs;i < nb_relocs; i++, rel++) {
+             host_ulong offset = get_rel_offset(rel);
+@@ -2053,6 +2056,9 @@
  #else
  #error unsupport object format
  #endif
@@ -47,3 +21,36 @@
              }
  #elif defined(HOST_S390)
              {
+diff -ur qemu-0.9.0-o/dyngen.c.orig qemu-0.9.0/dyngen.c.orig
+--- qemu-0.9.0-o/dyngen.c.orig	2007-02-05 16:01:54.000000000 -0700
++++ qemu-0.9.0/dyngen.c.orig	2007-02-06 14:44:57.000000000 -0700
+@@ -1206,13 +1206,11 @@
+     } else if (strstart(sym_name, "__op_gen_label", &p)) {
+         snprintf(name, name_size, "gen_labels[param%s]", p);
+     } else {
+-#ifdef HOST_SPARC
+         if (sym_name[0] == '.')
+             snprintf(name, name_size,
+                      "(long)(&__dot_%s)",
+                      sym_name + 1);
+         else
+-#endif
+             snprintf(name, name_size, "(long)(&%s)", sym_name);
+     }
+ }
+@@ -1706,14 +1704,12 @@
+                     !strstart(sym_name, "__op_param", NULL) &&
+                     !strstart(sym_name, "__op_jmp", NULL) &&
+                     !strstart(sym_name, "__op_gen_label", NULL)) {
+-#if defined(HOST_SPARC)
+ 		    if (sym_name[0] == '.') {
+ 			fprintf(outfile,
+ 				"extern char __dot_%s __asm__(\"%s\");\n",
+ 				sym_name+1, sym_name);
+ 			continue;
+ 		    }
+-#endif
+ #if defined(__APPLE__)
+ /* set __attribute((unused)) on darwin because we wan't to avoid warning when we don't use the symbol */
+                     fprintf(outfile, "extern char %s __attribute__((unused));\n", sym_name);
+Only in qemu-0.9.0: dyngen.c.rej
