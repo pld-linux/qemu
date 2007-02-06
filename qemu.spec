@@ -3,7 +3,7 @@
 # - wait till the gcc bug http://gcc.gnu.org/PR16185 is fixed.
 #
 # Conditional build:
-%bcond_without	kqemu			# disable QEMU ACCELERATOR support
+%bcond_without	kqemu			# disable KQEMU ACCELERATOR support in QEMU
 %bcond_with	cflags_passing		# with passing rpmcflags to Makefiles
 %bcond_with	nosdlgui		# do not use SDL gui (use X11 instead)
 # Note that gcc4 build is very problematic and not supported by qemu team
@@ -99,7 +99,7 @@ Version:	%{_kqemu_version}
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
 %{?with_dist_kernel:%requires_releq_kernel_up}
-License:	Free to use, non-distributable
+License:	GPL v2
 Requires(post,postun):	/sbin/depmod
 Requires:	module-init-tools >= 3.2.2-2
 
@@ -116,7 +116,7 @@ Version:	%{_kqemu_version}
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
 %{?with_dist_kernel:%requires_releq_kernel_smp}
-License:	Free to use, non-distributable
+License:	GPL v2
 Requires(post,postun):	/sbin/depmod
 Requires:	module-init-tools >= 3.2.2-2
 
