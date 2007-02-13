@@ -16,7 +16,7 @@
 %define	_kqemu_version	1.3.0pre11
 %define		_rel	1
 Summary:	QEMU CPU Emulator
-Summary(pl.UTF-8):   QEMU - emulator procesora
+Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
 Version:	0.9.0
 Release:	%{_rel}%{?with_kqemu:k}
@@ -94,7 +94,7 @@ aby działał na kolejnych procesorach. QEMU ma dwa tryby pracy:
 
 %package -n kernel%{_alt_kernel}-misc-kqemu
 Summary:	kqemu - kernel module
-Summary(pl.UTF-8):   kqemu - moduł jądra
+Summary(pl.UTF-8):	kqemu - moduł jądra
 Version:	%{_kqemu_version}
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
@@ -111,7 +111,7 @@ kqemu - moduł jądra.
 
 %package -n kernel%{_alt_kernel}-smp-misc-kqemu
 Summary:	kqemu - SMP kernel module
-Summary(pl.UTF-8):   kqemu - moduł jądra SMP
+Summary(pl.UTF-8):	kqemu - moduł jądra SMP
 Version:	%{_kqemu_version}
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
