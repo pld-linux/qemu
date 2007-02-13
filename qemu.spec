@@ -171,8 +171,17 @@ EOF
 %if %{with kernel}
 cd kqemu-%{_kqemu_version}
 
-mv -f kqemu-mod-i386.o{,.bin}
+%{__sed} -i 's#include ../config-host.mak##' ./common/Makefile
+%ifarch %{x8664}
+%{__sed} -i 's/^#ARCH=x86_64/ARCH=x86_64/' ./common/Makefile
+%{__make} -C common
 mv -f kqemu-mod-x86_64.o{,.bin}
+%else
+%{__sed} -i 's/^#ARCH=i386/ARCH=i386/' ./common/Makefile
+%{__make} -C common
+mv -f kqemu-mod-i386.o{,.bin}
+%endif
+
 mv -f kqemu-linux.c{,.orig}
 cat > Makefile <<'EOF'
 obj-m := kqemu.o
