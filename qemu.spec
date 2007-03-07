@@ -11,6 +11,7 @@
 %bcond_without	gcc4			# use gcc4 patches (broke build on gcc33)
 %bcond_without	dist_kernel		# without distribution kernel
 %bcond_with	kernel			# build kqemu kernel modules (see License)
+%bcond_without	up			# don't build UP module
 %bcond_without	smp			# don't build SMP module
 %bcond_without	userspace		# don't build userspace utilities
 #
