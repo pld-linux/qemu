@@ -170,15 +170,13 @@ EOF
 cat <<'EOF' > udev.conf
 KERNEL=="kqemu", NAME="%k", MODE="0666"
 EOF
-%endif
 
-%build
-%if %{with kernel}
 cd kqemu-%{_kqemu_version}
 
 mv -f kqemu-mod-i386.o{,.bin}
 mv -f kqemu-mod-x86_64.o{,.bin}
 mv -f kqemu-linux.c{,.orig}
+
 cat > Makefile <<'EOF'
 obj-m := kqemu.o
 kqemu-objs:= kqemu-linux.o kqemu-mod.o
@@ -186,6 +184,11 @@ kqemu-objs:= kqemu-linux.o kqemu-mod.o
 $(obj)/kqemu-mod.o: $(src)/kqemu-mod-$(ARCH).o.bin
 	cp $< $@
 EOF
+%endif
+
+%build
+%if %{with kernel}
+cd kqemu-%{_kqemu_version}
 
 %build_kernel_modules -m kqemu <<'EOF'
 if grep -q "CONFIG_PREEMPT_RT" o/.config; then
