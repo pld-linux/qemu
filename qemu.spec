@@ -10,9 +10,11 @@
 %bcond_with	gcc4			# use gcc4 patches (broke build on gcc33)
 %bcond_without	dist_kernel		# without distribution kernel
 %bcond_without	kernel			# build kqemu KERNEL MODULES
+%bcond_without	up			# don't build up module
 %bcond_without	smp			# don't build SMP module
 %bcond_without	userspace		# don't build userspace utilities
 #
+
 %define	_kqemu_version	1.3.0pre11
 %define		_rel	1
 Summary:	QEMU CPU Emulator
@@ -127,6 +129,11 @@ kqemu - SMP kernel module.
 kqemu - moduł jądra SMP.
 
 %prep
+%if %{with dist_kernel} && %{without up} && %{without smp}
+%{error:%{name}: If building kernel module You need to enable at least one of up or smp}
+exit 1
+%endif
+
 %setup -q %{?with_kernel:-a1}
 %patch0 -p1
 %patch1 -p1
