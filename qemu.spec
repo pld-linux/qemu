@@ -129,9 +129,11 @@ kqemu - SMP kernel module.
 kqemu - moduł jądra SMP.
 
 %prep
+%if %{with kernel}
 %if %{with dist_kernel} && %{without up} && %{without smp}
 %{error:%{name}: If building kernel module You need to enable at least one of up or smp}
 exit 1
+%endif
 %endif
 
 %setup -q %{?with_kernel:-a1}
