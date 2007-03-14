@@ -1,0 +1,306 @@
+diff --exclude=CVS -upr qemu/hw/parallel.c qemu-sandbox/hw/parallel.c
+--- qemu/hw/parallel.c  2005-01-23 13:42:59.000000000 -0700
++++ qemu-sandbox/hw/parallel.c  2005-03-12 19:00:37.000000000 -0700
+@@ -22,6 +22,9 @@
+  * THE SOFTWARE.
+  */
+ #include "vl.h"
++#include <sys/ioctl.h>
++#include <linux/parport.h>
++#include <linux/ppdev.h>
+ 
+ //#define DEBUG_PARALLEL
+ 
+@@ -43,15 +46,6 @@
+ #define PARA_CTR_AUTOLF        0x02    /* Auto linefeed complement */
+ #define PARA_CTR_STROBE        0x01    /* Strobe complement */
+ 
+-struct ParallelState {
+-    uint8_t data;
+-    uint8_t status; /* read only register */
+-    uint8_t control;
+-    int irq;
+-    int irq_pending;
+-    CharDriverState *chr;
+-};
+-
+ static void parallel_update_irq(ParallelState *s)
+ {
+     if (s->irq_pending)
+@@ -70,29 +64,29 @@ static void parallel_ioport_write(void *
+ #endif
+     switch(addr) {
+     case 0:
+-        s->data = val;
++        qemu_pp_write_data(s, (uint8_t)val);
+         parallel_update_irq(s);
+         break;
+     case 2:
++        qemu_pp_write_control(s, (uint8_t)val);
+         if ((val & PARA_CTR_INIT) == 0 ) {
+-            s->status = PARA_STS_BUSY;
+-            s->status |= PARA_STS_ACK;
+-            s->status |= PARA_STS_ONLINE;
+-            s->status |= PARA_STS_ERROR;
++         s->status = PARA_STS_BUSY;
++         s->status |= PARA_STS_ACK;
++         s->status |= PARA_STS_ONLINE;
++         s->status |= PARA_STS_ERROR;
+         }
+         else if (val & PARA_CTR_SELECT) {
+-            if (val & PARA_CTR_STROBE) {
+-                s->status &= ~PARA_STS_BUSY;
+-                if ((s->control & PARA_CTR_STROBE) == 0)
+-                    qemu_chr_write(s->chr, &s->data, 1);
+-            } else {
+-                if (s->control & PARA_CTR_INTEN) {
+-                    s->irq_pending = 1;
+-                }
+-            }
++         if (val & PARA_CTR_STROBE) {
++             s->status &= ~PARA_STS_BUSY;
++             if ((s->control & PARA_CTR_STROBE) == 0)
++               qemu_chr_write(s->chr, &s->data, 1);
++         } else {
++             if (s->control & PARA_CTR_INTEN) {
++               s->irq_pending = 1;
++             }
++         }
+         }
+         parallel_update_irq(s);
+-        s->control = val;
+         break;
+     }
+ }
+@@ -105,25 +99,25 @@ static uint32_t parallel_ioport_read(voi
+     addr &= 7;
+     switch(addr) {
+     case 0:
+-        ret = s->data; 
++        ret = qemu_pp_read_data(s);
+         break;
+     case 1:
+-        ret = s->status;
++        ret = qemu_pp_read_status(s);
+         s->irq_pending = 0;
+         if ((s->status & PARA_STS_BUSY) == 0 && (s->control & PARA_CTR_STROBE) == 0) {
+-            /* XXX Fixme: wait 5 microseconds */
+-            if (s->status & PARA_STS_ACK)
+-                s->status &= ~PARA_STS_ACK;
+-            else {
+-            /* XXX Fixme: wait 5 microseconds */
+-                s->status |= PARA_STS_ACK;
+-                s->status |= PARA_STS_BUSY;
+-            }
++         /* XXX Fixme: wait 5 microseconds */
++         if (s->status & PARA_STS_ACK)
++             s->status &= ~PARA_STS_ACK;
++         else {
++         /* XXX Fixme: wait 5 microseconds */
++             s->status |= PARA_STS_ACK;
++             s->status |= PARA_STS_BUSY;
++         }
+         }
+         parallel_update_irq(s);
+         break;
+     case 2:
+-        ret = s->control;
++	ret = qemu_pp_read_control(s);
+         break;
+     }
+ #ifdef DEBUG_PARALLEL
+Only in qemu-sandbox: kqemu
+Only in qemu-sandbox: qemu-doc.html
+Only in qemu-sandbox: qemu-img.1
+Only in qemu-sandbox: qemu-tech.html
+Only in qemu-sandbox: qemu.1
+diff --exclude=CVS -upr qemu/vl.c qemu-sandbox/vl.c
+--- qemu/vl.c   2005-03-13 02:43:36.000000000 -0700
++++ qemu-sandbox/vl.c   2005-03-13 07:16:54.000000000 -0700
+@@ -46,6 +46,8 @@
+ #include <libutil.h>
+ #endif
+ #else
++#include <linux/parport.h>
++#include <linux/ppdev.h>
+ #include <linux/if.h>
+ #include <linux/if_tun.h>
+ #include <pty.h>
+@@ -1028,10 +1030,14 @@ CharDriverState *qemu_chr_open_null(void
+     return chr;
+ }
+ 
++
++
++
+ #ifndef _WIN32
+ 
+ typedef struct {
+     int fd_in, fd_out;
++    int parport_device;
+     /* for nographic stdio only */
+     IOCanRWHandler *fd_can_read;
+     IOReadHandler *fd_read;
+@@ -1084,6 +1090,76 @@ static void fd_chr_add_read_handler(Char
+     }
+ }
+ 
++uint8_t qemu_pp_read_status(ParallelState *s)
++{
++    uint8_t ret, status;
++    FDCharDriver *fd = s->chr->opaque;
++
++    if (fd->parport_device) {
++        ioctl(fd->fd_out, PPRSTATUS, &status);
++        ret = status;
++    } else {
++        ret = s->status;
++    }
++
++    return ret;
++}
++
++
++uint8_t qemu_pp_read_control(ParallelState *s)
++{
++    uint8_t ret, control;
++    FDCharDriver *fd = s->chr->opaque;
++
++    if (fd->parport_device) {
++        ioctl(fd->fd_out, PPRCONTROL, &control);
++        ret = control;
++    } else {
++        ret = s->control;
++    }
++
++    return ret;
++
++}
++uint8_t qemu_pp_read_data(ParallelState *s)
++{
++    uint8_t ret, data;
++    FDCharDriver *fd = s->chr->opaque;
++
++    if (fd->parport_device) {
++        ioctl(fd->fd_out, PPRDATA, &data);
++        ret = data;
++    } else {
++        ret = s->data;
++    }
++
++    return ret;
++}
++void qemu_pp_write_data(ParallelState *s, uint8_t val)
++{
++    uint8_t data;
++    FDCharDriver *fd = s->chr->opaque;
++
++    if (fd->parport_device) {
++        data = (uint8_t)val;
++        ioctl(fd->fd_out, PPWDATA, &data);
++    } else {
++        s->data = val;
++    }
++}
++
++void qemu_pp_write_control(ParallelState *s, uint8_t val)
++{
++    uint8_t control;
++    FDCharDriver *fd = s->chr->opaque;
++
++    if (fd->parport_device) {
++        control = (uint8_t)val;
++        ioctl(fd->fd_out, PPWCONTROL, &control);
++    } else {
++        s->control = val;
++    }
++}
+ /* open a character device to a unix fd */
+ CharDriverState *qemu_chr_open_fd(int fd_in, int fd_out)
+ {
+@@ -1263,6 +1339,24 @@ CharDriverState *qemu_chr_open_stdio(voi
+     return chr;
+ }
+ 
++CharDriverState *qemu_chr_open_dev(const char *filename)
++{
++    int fd = 0;
++
++    fd = open(filename, O_RDWR);
++    CharDriverState *s = qemu_chr_open_fd(fd, fd);
++
++    if (strstr(filename, "parport") != NULL) {
++        if (ioctl(((FDCharDriver *)s->opaque)->fd_in, PPCLAIM) == 0) {
++         ((FDCharDriver *)s->opaque)->parport_device = 1;
++        } else {
++         ((FDCharDriver *)s->opaque)->parport_device = 0;
++        }
++    }
++
++    return s;
++}
++
+ #if defined(__linux__)
+ CharDriverState *qemu_chr_open_pty(void)
+ {
+@@ -1297,11 +1391,14 @@ CharDriverState *qemu_chr_open(const cha
+         return qemu_chr_open_pty();
+     } else if (!strcmp(filename, "stdio")) {
+         return qemu_chr_open_stdio();
+-    } else 
+-#endif
++    } else {
++                               return qemu_chr_open_dev(filename);
++               }
++#else
+     {
+         return NULL;
+     }
++#endif
+ }
+ 
+ /***********************************************************/
+diff --exclude=CVS -upr qemu/vl.h qemu-sandbox/vl.h
+--- qemu/vl.h   2005-03-13 02:43:36.000000000 -0700
++++ qemu-sandbox/vl.h   2005-03-13 07:16:54.000000000 -0700
+@@ -199,6 +199,17 @@ typedef struct CharDriverState {
+     void *opaque;
+ } CharDriverState;
+ 
++
++typedef struct ParallelState {
++    uint8_t data;
++    uint8_t status; /* read only register */
++    uint8_t control;
++    int irq;
++    int irq_pending;
++    CharDriverState *chr;
++} ParallelState;
++
++
+ void qemu_chr_printf(CharDriverState *s, const char *fmt, ...);
+ int qemu_chr_write(CharDriverState *s, const uint8_t *buf, int len);
+ void qemu_chr_send_event(CharDriverState *s, int event);
+@@ -206,6 +217,13 @@ void qemu_chr_add_read_handler(CharDrive
+                                IOCanRWHandler *fd_can_read, 
+                                IOReadHandler *fd_read, void *opaque);
+ void qemu_chr_add_event_handler(CharDriverState *s, IOEventHandler *chr_event);
++
++
++uint8_t qemu_pp_read_status(ParallelState *s);
++uint8_t qemu_pp_read_control(ParallelState *s);
++uint8_t qemu_pp_read_data(ParallelState *s);
++void qemu_pp_write_data(ParallelState *s, uint8_t data);
++void qemu_pp_write_control(ParallelState *s, uint8_t control);
+                                
+ /* consoles */
+ 
+@@ -643,8 +661,6 @@ typedef struct SerialState SerialState;
+ SerialState *serial_init(int base, int irq, CharDriverState *chr);
+ 
+ /* parallel.c */
+-
+-typedef struct ParallelState ParallelState;
+ ParallelState *parallel_init(int base, int irq, CharDriverState *chr);
+ 
+ /* i8259.c */
