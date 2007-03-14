@@ -5,9 +5,10 @@
 # Conditional build:
 %bcond_without	kqemu			# disable KQEMU ACCELERATOR support in QEMU
 %bcond_with	cflags_passing		# with passing rpmcflags to Makefiles
+%bcond_with	dosguest		# add special patch when use with DOS as guest os
 %bcond_with	nosdlgui		# do not use SDL gui (use X11 instead)
 # Note that gcc4 build is very problematic and not supported by qemu team
-%bcond_with	gcc4			# use gcc4 patches (broke build on gcc33)
+%bcond_without	gcc4			# use gcc4 patches (broke build on gcc33)
 %bcond_without	dist_kernel		# without distribution kernel
 %bcond_without	kernel			# build kqemu KERNEL MODULES
 %bcond_without	up			# don't build up module
@@ -42,6 +43,7 @@ Patch8:		%{name}-kde_virtual_workspaces_hack.patch
 Patch9:		%{name}-0.8.0-gcc4-hacks.patch
 Patch11:	%{name}-0.7.2-gcc4-opts.patch
 #Patch12:	%{name}-0.7.2-dyngen-check-stack-clobbers.patch
+Patch13:	%{name}-dosguest.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 %if %{with kernel} && %{with dist_kernel}
 BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
@@ -174,6 +176,10 @@ EOF
 cat <<'EOF' > udev.conf
 KERNEL=="kqemu", NAME="%k", MODE="0666"
 EOF
+%endif
+
+%if %{with dosguest}
+%patch13 -p1
 %endif
 
 %build
