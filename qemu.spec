@@ -5,6 +5,7 @@
 # Conditional build:
 %bcond_without	kqemu			# disable KQEMU ACCELERATOR support in QEMU
 %bcond_with	cflags_passing		# with passing rpmcflags to Makefiles
+%bcond_with	dosguest		# add special patch when use with DOS as guest os
 %bcond_with	nosdlgui		# do not use SDL gui (use X11 instead)
 # Note that gcc4 build is very problematic and not supported by qemu team
 %bcond_with	gcc4			# use gcc4 patches (broke build on gcc33)
@@ -18,7 +19,7 @@
 %define	_kqemu_version	1.3.0pre11
 %define		_rel	1
 Summary:	QEMU CPU Emulator
-Summary(pl.UTF-8):	QEMU - emulator procesora
+Summary(pl):	QEMU - emulator procesora
 Name:		qemu
 Version:	0.9.0
 Release:	%{_rel}%{?with_kqemu:k}
@@ -42,6 +43,7 @@ Patch8:		%{name}-kde_virtual_workspaces_hack.patch
 Patch9:		%{name}-0.8.0-gcc4-hacks.patch
 Patch11:	%{name}-0.7.2-gcc4-opts.patch
 #Patch12:	%{name}-0.7.2-dyngen-check-stack-clobbers.patch
+Patch13:	%{name}-dosguest.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 %if %{with kernel} && %{with dist_kernel}
 BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
@@ -77,26 +79,26 @@ CPUs. QEMU has two operating modes:
   including a processor and various peripherials. It can also be used to
   provide virtual hosting of several virtual PC on a single server.
 
-%description -l pl.UTF-8
-QEMU to szybki(!) emulator procesora. Poprzez uÅ¼ycie dynamicznego
-tÅ‚umaczenia osiÄ…ga rozsÄ…dnÄ… szybkoÅ›Ä‡ i jest Å‚atwy do przeportowania,
-aby dziaÅ‚aÅ‚ na kolejnych procesorach. QEMU ma dwa tryby pracy:
+%description -l pl
+QEMU to szybki(!) emulator procesora. Poprzez u¿ycie dynamicznego
+t³umaczenia osi±ga rozs±dn± szybko¶æ i jest ³atwy do przeportowania,
+aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
 
-- Emulacja trybu uÅ¼ytkownika. W tym trybie QEMU moÅ¼e uruchamiaÄ‡
+- Emulacja trybu u¿ytkownika. W tym trybie QEMU mo¿e uruchamiaæ
   procesy linuksowe skompilowane dla jednego procesora na innym
-  procesorze. Linuksowe wywoÅ‚ania systemowe sÄ… tÅ‚umaczone ze wzglÄ™du na
-  niezgodnoÅ›Ä‡ kolejnoÅ›ci bajtÃ³w w sÅ‚owie i 32/64-bitowego rozmiaru
-  sÅ‚owa. Wine (emulacja Windows) i DOSEMU (emulacja DOS-a) to gÅ‚Ã³wne
+  procesorze. Linuksowe wywo³ania systemowe s± t³umaczone ze wzglêdu na
+  niezgodno¶æ kolejno¶ci bajtów w s³owie i 32/64-bitowego rozmiaru
+  s³owa. Wine (emulacja Windows) i DOSEMU (emulacja DOS-a) to g³ówne
   cele QEMU.
 
-- PeÅ‚na emulacja systemu. W tym trybie QEMU emuluje caÅ‚y system,
-  wÅ‚Ä…czajÄ…c w to procesor i rÃ³Å¼ne urzÄ…dzenia peryferyjne. MoÅ¼e byÄ‡ takÅ¼e
-  uÅ¼ywane do wirtualnego hostowania kilku wirtualnych pecetÃ³w na
+- Pe³na emulacja systemu. W tym trybie QEMU emuluje ca³y system,
+  w³±czaj±c w to procesor i ró¿ne urz±dzenia peryferyjne. Mo¿e byæ tak¿e
+  u¿ywane do wirtualnego hostowania kilku wirtualnych pecetów na
   pojedynczym serwerze.
 
 %package -n kernel%{_alt_kernel}-misc-kqemu
 Summary:	kqemu - kernel module
-Summary(pl.UTF-8):	kqemu - moduÅ‚ jÄ…dra
+Summary(pl):	kqemu - modu³ j±dra
 Version:	%{_kqemu_version}
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
@@ -108,12 +110,12 @@ Requires:	module-init-tools >= 3.2.2-2
 %description -n kernel%{_alt_kernel}-misc-kqemu
 kqemu - kernel module.
 
-%description -n kernel%{_alt_kernel}-misc-kqemu -l pl.UTF-8
-kqemu - moduÅ‚ jÄ…dra.
+%description -n kernel%{_alt_kernel}-misc-kqemu -l pl
+kqemu - modu³ j±dra.
 
 %package -n kernel%{_alt_kernel}-smp-misc-kqemu
 Summary:	kqemu - SMP kernel module
-Summary(pl.UTF-8):	kqemu - moduÅ‚ jÄ…dra SMP
+Summary(pl):	kqemu - modu³ j±dra SMP
 Version:	%{_kqemu_version}
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
@@ -125,8 +127,8 @@ Requires:	module-init-tools >= 3.2.2-2
 %description -n kernel%{_alt_kernel}-smp-misc-kqemu
 kqemu - SMP kernel module.
 
-%description -n kernel%{_alt_kernel}-smp-misc-kqemu -l pl.UTF-8
-kqemu - moduÅ‚ jÄ…dra SMP.
+%description -n kernel%{_alt_kernel}-smp-misc-kqemu -l pl
+kqemu - modu³ j±dra SMP.
 
 %prep
 %if %{with kernel}
@@ -174,6 +176,10 @@ EOF
 cat <<'EOF' > udev.conf
 KERNEL=="kqemu", NAME="%k", MODE="0666"
 EOF
+%endif
+
+%if %{with dosguest}
+%patch13 -p1
 %endif
 
 %build
