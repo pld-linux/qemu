@@ -15,9 +15,13 @@
 %bcond_without	smp			# don't build SMP module
 %bcond_without	userspace		# don't build userspace utilities
 #
-
+# no kernel kqemu module for ppc
+%ifarch ppc
+%undefine      with_kqemu
+%undefine      with_kernel
+%endif
 %define	_kqemu_version	1.3.0pre11
-%define		_rel	2
+%define		_rel	3
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
