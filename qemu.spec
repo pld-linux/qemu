@@ -16,6 +16,11 @@
 %bcond_without	userspace		# don't build userspace utilities
 #
 
+# no kqemu for ppc
+%ifarch ppc
+%undefine	with_kqemu
+%undefine	with_kernel
+%endif
 %define	_kqemu_version	1.3.0pre11
 %define		_rel	1
 Summary:	QEMU CPU Emulator
@@ -59,7 +64,7 @@ BuildRequires:	sed >= 4.0
 %endif
 Requires:	SDL >= 1.2.1
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
-ExclusiveArch:	%{ix86} %{x8664} %{!?with_kqemu:ppc}
+ExclusiveArch:	%{ix86} %{x8664} ppc
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # some SPARC boot image in ELF format
