@@ -11,9 +11,7 @@
 %bcond_without	gcc4			# use gcc4 patches (broke build on gcc33)
 %bcond_without	dist_kernel		# without distribution kernel
 %bcond_without	kernel			# build kqemu KERNEL MODULES
-%bcond_without	up			# don't build up module
-%bcond_without	smp			# don't build SMP module
-%bcond_without	userspace		# don't build userspace utilities
+%bcond_without	userspace		# don't build userspace
 #
 
 # no kqemu for ppc
@@ -52,7 +50,7 @@ Patch13:	%{name}-dosguest.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 %if %{with kernel} && %{with dist_kernel}
 BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
-BuildRequires:	rpmbuild(macros) >= 1.330
+BuildRequires:	rpmbuild(macros) >= 1.379
 %endif
 %if %{with userspace}
 BuildRequires:	SDL-devel >= 1.2.1
@@ -107,8 +105,9 @@ Summary(pl.UTF-8):	kqemu - moduł jądra
 Version:	%{_kqemu_version}
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
-%{?with_dist_kernel:%requires_releq_kernel_up}
+%{?with_dist_kernel:%requires_releq_kernel}
 License:	GPL v2
+Obsoletes:	kernel%{_alt_kernel}-smp-misc-kqemu
 Requires(post,postun):	/sbin/depmod
 Requires:	module-init-tools >= 3.2.2-2
 
@@ -118,29 +117,10 @@ kqemu - kernel module.
 %description -n kernel%{_alt_kernel}-misc-kqemu -l pl.UTF-8
 kqemu - moduł jądra.
 
-%package -n kernel%{_alt_kernel}-smp-misc-kqemu
-Summary:	kqemu - SMP kernel module
-Summary(pl.UTF-8):	kqemu - moduł jądra SMP
-Version:	%{_kqemu_version}
-Release:	%{_rel}@%{_kernel_ver_str}
-Group:		Base/Kernel
-%{?with_dist_kernel:%requires_releq_kernel_smp}
-License:	GPL v2
-Requires(post,postun):	/sbin/depmod
-Requires:	module-init-tools >= 3.2.2-2
-
-%description -n kernel%{_alt_kernel}-smp-misc-kqemu
-kqemu - SMP kernel module.
-
-%description -n kernel%{_alt_kernel}-smp-misc-kqemu -l pl.UTF-8
-kqemu - moduł jądra SMP.
-
 %prep
-%if %{with kernel}
-%if %{with dist_kernel} && %{without up} && %{without smp}
+%if %{without kernel} && %{without dist_kernel}
 %{error:%{name}: If building kernel module You need to enable at least one of up or smp}
 exit 1
-%endif
 %endif
 
 %setup -q %{?with_kernel:-a1}
@@ -194,11 +174,11 @@ cd kqemu-%{_kqemu_version}
 %{__sed} -i 's#include ../config-host.mak##' ./common/Makefile
 %ifarch %{x8664}
 %{__sed} -i 's/^#ARCH=x86_64/ARCH=x86_64/' ./common/Makefile
-%{__make} -C common
+%{__make} -j1 -C common
 mv -f kqemu-mod-x86_64.o{,.bin}
 %else
 %{__sed} -i 's/^#ARCH=i386/ARCH=i386/' ./common/Makefile
-%{__make} -C common
+%{__make} -j1 -C common
 mv -f kqemu-mod-i386.o{,.bin}
 %endif
 
@@ -263,9 +243,6 @@ EOF
 %install_kernel_modules -m kqemu-%{_kqemu_version}/kqemu -d misc
 install -d $RPM_BUILD_ROOT/etc/{modprobe.d/%{_kernel_ver}{,smp},udev/rules.d}
 install modprobe.conf $RPM_BUILD_ROOT/etc/modprobe.d/%{_kernel_ver}/kqemu.conf
-%if %{with smp} && %{with dist_kernel}
-install modprobe.conf $RPM_BUILD_ROOT/etc/modprobe.d/%{_kernel_ver}smp/kqemu.conf
-%endif
 install udev.conf $RPM_BUILD_ROOT/etc/udev/rules.d/kqemu.rules
 %endif
 
@@ -289,12 +266,6 @@ EOF
 %postun -n kernel%{_alt_kernel}-misc-kqemu
 %depmod %{_kernel_ver}
 
-%post	-n kernel%{_alt_kernel}-smp-misc-kqemu
-%depmod %{_kernel_ver}smp
-
-%postun -n kernel%{_alt_kernel}-smp-misc-kqemu
-%depmod %{_kernel_ver}smp
-
 %if %{with userspace}
 %files
 %defattr(644,root,root,755)
@@ -313,13 +284,4 @@ EOF
 %config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/kqemu.rules
 %config(noreplace) %verify(not md5 mtime size) /etc/modprobe.d/%{_kernel_ver}/kqemu.conf
 /lib/modules/%{_kernel_ver}/misc/kqemu.ko*
-
-%if %{with smp} && %{with dist_kernel}
-%files -n kernel%{_alt_kernel}-smp-misc-kqemu
-%defattr(644,root,root,755)
-%doc kqemu-%{_kqemu_version}/LICENSE
-%config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/kqemu.rules
-%config(noreplace) %verify(not md5 mtime size) /etc/modprobe.d/%{_kernel_ver}smp/kqemu.conf
-/lib/modules/%{_kernel_ver}smp/misc/kqemu.ko*
-%endif
 %endif
