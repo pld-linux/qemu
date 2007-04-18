@@ -21,7 +21,7 @@
 %undefine      with_kernel
 %endif
 %define	_kqemu_version	1.3.0pre11
-%define		_rel	3
+%define		_rel	4
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		qemu
@@ -48,6 +48,9 @@ Patch9:		%{name}-0.8.0-gcc4-hacks.patch
 Patch11:	%{name}-0.7.2-gcc4-opts.patch
 #Patch12:	%{name}-0.7.2-dyngen-check-stack-clobbers.patch
 Patch13:	%{name}-dosguest.patch
+# Fix crash when using qemu instances with NICs connected via socket
+# This patch will be obsolete in versions after 0.9.0
+Patch14:	%{name}-0.9.0-remove-iohandlers.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 %if %{with kernel} && %{with dist_kernel}
 BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
@@ -156,6 +159,7 @@ exit 1
 %{?with_nosdlgui:%patch6 -p1}
 %patch7 -p1
 #%patch8 -p1
+%patch14 -p1
 
 %{__sed} -i -e 's/sdl_static=yes/sdl_static=no/' configure
 %{__sed} -i 's/.*MAKE) -C kqemu$//' Makefile
