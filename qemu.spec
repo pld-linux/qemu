@@ -39,7 +39,6 @@ Patch3:		%{name}-dot.patch
 Patch4:		%{name}-gcc4_x86.patch
 Patch5:		%{name}-gcc4_ppc.patch
 Patch6:		%{name}-nosdlgui.patch
-Patch7:		%{name}-ifup.patch
 # Proof of concept, for reference, do not remove
 Patch8:		%{name}-kde_virtual_workspaces_hack.patch
 # http://gwenole.beauchesne.info/en/projects/qemu
@@ -135,7 +134,6 @@ exit 1
 %patch5 -p1
 %endif
 %{?with_nosdlgui:%patch6 -p1}
-%patch7 -p1
 #%patch8 -p1
 
 %{__sed} -i -e 's/sdl_static=yes/sdl_static=no/' configure
@@ -228,14 +226,10 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-install -d $RPM_BUILD_ROOT/sbin
-cat <<'EOF' > $RPM_BUILD_ROOT/sbin/qemu-ifup
+install -d $RPM_BUILD_ROOT%{_sysconfdir}
+cat <<'EOF' > $RPM_BUILD_ROOT%{_sysconfdir}/qemu-ifup
 #!/bin/sh
-if [ -f /etc/sysconfig/qemu ]; then
-	. /etc/sysconfig/qemu
-fi
-# of course this will work only for one interface. a lot possible to involve
-sudo /sbin/ifconfig $1 ${INTERFACE_ADDR:-172.20.0.1}
+
 EOF
 %endif
 
@@ -270,7 +264,7 @@ EOF
 %files
 %defattr(644,root,root,755)
 %doc README qemu-doc.html qemu-tech.html
-%attr(755,root,root) /sbin/qemu-ifup
+%attr(755,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu-ifup
 %attr(755,root,root) %{_bindir}/*
 %{_datadir}/qemu
 %{_mandir}/man1/qemu.1*
