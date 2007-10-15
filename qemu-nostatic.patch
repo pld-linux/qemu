@@ -1,0 +1,32 @@
+diff -ur qemu-0.9.0-o/Makefile.target qemu-0.9.0/Makefile.target
+--- qemu-0.9.0-o/Makefile.target	2007-02-05 16:01:54.000000000 -0700
++++ qemu-0.9.0/Makefile.target	2007-02-06 14:34:25.000000000 -0700
+@@ -66,7 +66,7 @@
+ endif # !CONFIG_USER_ONLY
+ 
+ ifdef CONFIG_STATIC
+-BASE_LDFLAGS+=-static
++#BASE_LDFLAGS+=-static
+ endif
+ 
+ # We require -O2 to avoid the stack setup prologue in EXIT_TB
+@@ -124,7 +124,7 @@
+ OP_CFLAGS+=-fno-delayed-branch -ffixed-i0
+ HELPER_CFLAGS=$(CFLAGS) -ffixed-i0 -mflat
+ # -static is used to avoid g1/g3 usage by the dynamic linker
+-BASE_LDFLAGS+=-Wl,-T,$(SRC_PATH)/$(ARCH).ld -static
++#BASE_LDFLAGS+=-Wl,-T,$(SRC_PATH)/$(ARCH).ld -static
+ endif
+ endif
+ 
+@@ -432,7 +432,7 @@
+ VL_LDFLAGS=
+ # specific flags are needed for non soft mmu emulator
+ ifdef CONFIG_STATIC
+-VL_LDFLAGS+=-static
++#VL_LDFLAGS+=-static
+ endif
+ ifndef CONFIG_SOFTMMU
+ VL_LDFLAGS+=-Wl,-T,$(SRC_PATH)/i386-vl.ld 
+Only in qemu-0.9.0: Makefile.target~
+Only in qemu-0.9.0: Makefile.target.orig
