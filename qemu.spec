@@ -14,6 +14,12 @@
 %bcond_without	up			# don't build up module
 %bcond_without	smp			# don't build SMP module
 %bcond_without	userspace		# don't build userspace utilities
+%bcond_with	grsec_kernel	# build for kernel-grsecurity
+#
+%if %{with kernel} && %{with dist_kernel} && %{with grsec_kernel}
+%define	alt_kernel	grsecurity
+%endif
+#
 #
 # no kernel kqemu module for ppc
 %ifarch ppc
@@ -197,11 +203,11 @@ cd kqemu-%{_kqemu_version}
 %{__sed} -i 's#include ../config-host.mak##' ./common/Makefile
 %ifarch %{x8664}
 %{__sed} -i 's/^#ARCH=x86_64/ARCH=x86_64/' ./common/Makefile
-%{__make} -C common
+%{__make} -C common -j1
 mv -f kqemu-mod-x86_64.o{,.bin}
 %else
 %{__sed} -i 's/^#ARCH=i386/ARCH=i386/' ./common/Makefile
-%{__make} -C common
+%{__make} -C common -j1
 mv -f kqemu-mod-i386.o{,.bin}
 %endif
 
