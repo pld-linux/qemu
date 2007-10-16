@@ -121,11 +121,6 @@ kqemu - kernel module.
 kqemu - moduł jądra.
 
 %prep
-%if %{without kernel} && %{without dist_kernel}
-%{error:%{name}: If building kernel module You need to enable at least one of up or smp}
-exit 1
-%endif
-
 %setup -q %{?with_kernel:-a1}
 %patch0 -p1
 %patch1 -p1
