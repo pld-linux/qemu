@@ -12,7 +12,11 @@
 %bcond_without	dist_kernel		# without distribution kernel
 %bcond_without	kernel			# build kqemu KERNEL MODULES
 %bcond_without	userspace		# don't build userspace
+%bcond_with	grsec_kernel	# build for kernel-grsecurity
 #
+%if %{with kernel} && %{with dist_kernel} && %{with grsec_kernel}
+%define	alt_kernel	grsecurity
+%endif
 
 # no kqemu for ppc
 %ifarch ppc
