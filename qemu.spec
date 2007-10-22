@@ -15,19 +15,21 @@
 %bcond_without	smp			# don't build SMP module
 %bcond_without	userspace		# don't build userspace utilities
 %bcond_with	grsec_kernel	# build for kernel-grsecurity
-#
+
 # no kernel kqemu module for ppc
 %ifarch ppc
 %undefine      with_kqemu
 %undefine      with_kernel
 %endif
-#
+
 %if %{without kernel}
 %undefine	with_dist_kernel
 %endif
-#
 %if %{with kernel} && %{with dist_kernel} && %{with grsec_kernel}
 %define	alt_kernel	grsecurity
+%endif
+%if "%{_alt_kernel}" != "%{nil}"
+%undefine	with_userspace
 %endif
 
 %define	_kqemu_version	1.3.0pre11
