@@ -16,16 +16,20 @@
 %bcond_without	userspace		# don't build userspace utilities
 %bcond_with	grsec_kernel	# build for kernel-grsecurity
 #
-%if %{with kernel} && %{with dist_kernel} && %{with grsec_kernel}
-%define	alt_kernel	grsecurity
-%endif
-#
-#
 # no kernel kqemu module for ppc
 %ifarch ppc
 %undefine      with_kqemu
 %undefine      with_kernel
 %endif
+#
+%if %{without kernel}
+%undefine	with_dist_kernel
+%endif
+#
+%if %{with kernel} && %{with dist_kernel} && %{with grsec_kernel}
+%define	alt_kernel	grsecurity
+%endif
+
 %define	_kqemu_version	1.3.0pre11
 %define		_rel	55
 Summary:	QEMU CPU Emulator
@@ -58,8 +62,8 @@ Patch13:	%{name}-dosguest.patch
 # This patch will be obsolete in versions after 0.9.0
 Patch14:	%{name}-0.9.0-remove-iohandlers.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
-%if %{with kernel} && %{with dist_kernel}
-BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
+%if %{with kernel}
+%{?with_dist_kernel:BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7}
 BuildRequires:	rpmbuild(macros) >= 1.330
 %endif
 %if %{with userspace}
