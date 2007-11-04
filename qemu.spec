@@ -33,36 +33,38 @@
 %endif
 
 %define	_kqemu_version	1.3.0pre11
+%define	_qemu_version	0.9.0
 %define		_rel	56
+%define		pname	qemu
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
-Name:		qemu
-Version:	0.9.0
+Name:		%{pname}%{_alt_kernel}
+Version:	%{_qemu_version}
 Release:	%{_rel}%{?with_kqemu:k}
 License:	GPL
 Group:		Applications/Emulators
 #Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
-Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
+Source0:	http://fabrice.bellard.free.fr/qemu/%{pname}-%{version}.tar.gz
 # Source0-md5:	ab11a03ba30cf4a70641f0f170473d69
-Source1:	http://fabrice.bellard.free.fr/qemu/k%{name}-%{_kqemu_version}.tar.gz
+Source1:	http://fabrice.bellard.free.fr/qemu/k%{pname}-%{_kqemu_version}.tar.gz
 # Source1-md5:	970521874ef8b1ba4598925ace5936c3
-Patch0:		%{name}-nostatic.patch
-Patch1:		%{name}-cc.patch
-Patch3:		%{name}-dot.patch
-Patch4:		%{name}-gcc4_x86.patch
-Patch5:		%{name}-gcc4_ppc.patch
-Patch6:		%{name}-nosdlgui.patch
-Patch7:		%{name}-ifup.patch
+Patch0:		%{pname}-nostatic.patch
+Patch1:		%{pname}-cc.patch
+Patch3:		%{pname}-dot.patch
+Patch4:		%{pname}-gcc4_x86.patch
+Patch5:		%{pname}-gcc4_ppc.patch
+Patch6:		%{pname}-nosdlgui.patch
+Patch7:		%{pname}-ifup.patch
 # Proof of concept, for reference, do not remove
-Patch8:		%{name}-kde_virtual_workspaces_hack.patch
+Patch8:		%{pname}-kde_virtual_workspaces_hack.patch
 # http://gwenole.beauchesne.info/en/projects/qemu
-Patch9:		%{name}-0.8.0-gcc4-hacks.patch
-Patch11:	%{name}-0.7.2-gcc4-opts.patch
-#Patch12:	%{name}-0.7.2-dyngen-check-stack-clobbers.patch
-Patch13:	%{name}-dosguest.patch
+Patch9:		%{pname}-0.8.0-gcc4-hacks.patch
+Patch11:	%{pname}-0.7.2-gcc4-opts.patch
+#Patch12:	%{pname}-0.7.2-dyngen-check-stack-clobbers.patch
+Patch13:	%{pname}-dosguest.patch
 # Fix crash when using qemu instances with NICs connected via socket
 # This patch will be obsolete in versions after 0.9.0
-Patch14:	%{name}-0.9.0-remove-iohandlers.patch
+Patch14:	%{pname}-0.9.0-remove-iohandlers.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 %if %{with kernel}
 %{?with_dist_kernel:BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7}
@@ -152,12 +154,12 @@ kqemu - modu³ j±dra SMP.
 %prep
 %if %{with kernel}
 %if %{with dist_kernel} && %{without up} && %{without smp}
-%{error:%{name}: If building kernel module You need to enable at least one of up or smp}
+%{error:%{pname}: If building kernel module You need to enable at least one of up or smp}
 exit 1
 %endif
 %endif
 
-%setup -q %{?with_kernel:-a1}
+%setup -q -n %{pname}-%{_qemu_version} %{?with_kernel:-a1}
 %patch0 -p1
 %patch1 -p1
 %patch3 -p1
@@ -252,7 +254,7 @@ cd -
 %endif
 	%{?with_gcc4:--disable-gcc-check} \
 	--enable-alsa \
-	--interp-prefix=%{_libdir}/%{name}
+	--interp-prefix=%{_libdir}/%{pname}
 %{__make}
 %endif
 
@@ -292,7 +294,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %if %{with kernel}
 %post
-%banner %{name} -e <<EOF
+%banner %{pname} -e <<EOF
 To enable qemu accelerator (kqemu), the kqemu kernel module must be loaded:
 modprobe kqemu
 EOF
