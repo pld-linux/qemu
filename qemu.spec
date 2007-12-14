@@ -24,7 +24,7 @@
 %undefine	with_kernel
 %endif
 %define	_kqemu_version	1.3.0pre11
-%define		_rel	3
+%define		_rel	4
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
