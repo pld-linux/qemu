@@ -17,39 +17,44 @@
 %if %{with kernel} && %{with dist_kernel} && %{with grsec_kernel}
 %define	alt_kernel	grsecurity
 %endif
+%if "%{_alt_kernel}" != "%{nil}"
+%undefine	with_userspace
+%endif
 
 # no kqemu for ppc
 %ifarch ppc
 %undefine	with_kqemu
 %undefine	with_kernel
 %endif
-%define	_kqemu_version	1.3.0pre11
+%define		kqemu_version	1.3.0pre11
+%define		qemu_version	0.9.0
 %define		_rel	4
+%define		pname	qemu
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
-Name:		qemu
-Version:	0.9.0
+Name:		%{pname}%{_alt_kernel}
+Version:	%{qemu_version}
 Release:	%{_rel}%{?with_kqemu:k}
 License:	GPL
 Group:		Applications/Emulators
 #Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
-Source0:	http://fabrice.bellard.free.fr/qemu/%{name}-%{version}.tar.gz
+Source0:	http://fabrice.bellard.free.fr/qemu/%{pname}-%{version}.tar.gz
 # Source0-md5:	ab11a03ba30cf4a70641f0f170473d69
-Source1:	http://fabrice.bellard.free.fr/qemu/k%{name}-%{_kqemu_version}.tar.gz
+Source1:	http://fabrice.bellard.free.fr/qemu/k%{pname}-%{kqemu_version}.tar.gz
 # Source1-md5:	970521874ef8b1ba4598925ace5936c3
-Patch0:		%{name}-nostatic.patch
-Patch1:		%{name}-cc.patch
-Patch3:		%{name}-dot.patch
-Patch4:		%{name}-gcc4_x86.patch
-Patch5:		%{name}-gcc4_ppc.patch
-Patch6:		%{name}-nosdlgui.patch
+Patch0:		%{pname}-nostatic.patch
+Patch1:		%{pname}-cc.patch
+Patch3:		%{pname}-dot.patch
+Patch4:		%{pname}-gcc4_x86.patch
+Patch5:		%{pname}-gcc4_ppc.patch
+Patch6:		%{pname}-nosdlgui.patch
 # Proof of concept, for reference, do not remove
-Patch8:		%{name}-kde_virtual_workspaces_hack.patch
+Patch8:		%{pname}-kde_virtual_workspaces_hack.patch
 # http://gwenole.beauchesne.info/en/projects/qemu
-Patch9:		%{name}-0.8.0-gcc4-hacks.patch
-Patch11:	%{name}-0.7.2-gcc4-opts.patch
-#Patch12:	%{name}-0.7.2-dyngen-check-stack-clobbers.patch
-Patch13:	%{name}-dosguest.patch
+Patch9:		%{pname}-0.8.0-gcc4-hacks.patch
+Patch11:	%{pname}-0.7.2-gcc4-opts.patch
+#Patch12:	%{pname}-0.7.2-dyngen-check-stack-clobbers.patch
+Patch13:	%{pname}-dosguest.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 %if %{with kernel} && %{with dist_kernel}
 BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
@@ -105,7 +110,7 @@ aby działał na kolejnych procesorach. QEMU ma dwa tryby pracy:
 %package -n kernel%{_alt_kernel}-misc-kqemu
 Summary:	kqemu - kernel module
 Summary(pl.UTF-8):	kqemu - moduł jądra
-Version:	%{_kqemu_version}
+Version:	%{kqemu_version}
 Release:	%{_rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
 %{?with_dist_kernel:%requires_releq_kernel}
@@ -121,7 +126,7 @@ kqemu - kernel module.
 kqemu - moduł jądra.
 
 %prep
-%setup -q %{?with_kernel:-a1}
+%setup -q -n %{pname}-%{qemu_version} %{?with_kernel:-a1}
 %patch0 -p1
 %patch1 -p1
 %patch3 -p1
@@ -146,7 +151,7 @@ kqemu - moduł jądra.
 %endif
 
 %if %{with kernel}
-echo -n > kqemu-%{_kqemu_version}/install.sh
+echo -n > kqemu-%{kqemu_version}/install.sh
 
 cat <<'EOF' > modprobe.conf
 # enable dynamic major
@@ -158,16 +163,8 @@ EOF
 cat <<'EOF' > udev.conf
 KERNEL=="kqemu", NAME="%k", MODE="0666"
 EOF
-%endif
 
-%if %{with dosguest}
-%patch13 -p1
-%endif
-
-%build
-%if %{with kernel}
-cd kqemu-%{_kqemu_version}
-
+cd kqemu-%{kqemu_version}
 %{__sed} -i 's#include ../config-host.mak##' ./common/Makefile
 %ifarch %{x8664}
 %{__sed} -i 's/^#ARCH=x86_64/ARCH=x86_64/' ./common/Makefile
@@ -187,7 +184,16 @@ kqemu-objs:= kqemu-linux.o kqemu-mod.o
 $(obj)/kqemu-mod.o: $(src)/kqemu-mod-$(ARCH).o.bin
 	cp $< $@
 EOF
+cd -
+%endif
 
+%if %{with dosguest}
+%patch13 -p1
+%endif
+
+%build
+%if %{with kernel}
+cd kqemu-%{kqemu_version}
 %build_kernel_modules -m kqemu <<'EOF'
 if grep -q "CONFIG_PREEMPT_RT" o/.config; then
 	sed 's/SPIN_LOCK_UNLOCKED/SPIN_LOCK_UNLOCKED(kqemu_lock)/' \
@@ -214,7 +220,7 @@ cd -
 %endif
 	%{?with_gcc4:--disable-gcc-check} \
 	--enable-alsa \
-	--interp-prefix=%{_libdir}/%{name}
+	--interp-prefix=%{_libdir}/%{pname}
 %{__make}
 %endif
 
@@ -233,7 +239,7 @@ EOF
 %endif
 
 %if %{with kernel}
-%install_kernel_modules -m kqemu-%{_kqemu_version}/kqemu -d misc
+%install_kernel_modules -m kqemu-%{kqemu_version}/kqemu -d misc
 install -d $RPM_BUILD_ROOT/etc/{modprobe.d/%{_kernel_ver}{,smp},udev/rules.d}
 install modprobe.conf $RPM_BUILD_ROOT/etc/modprobe.d/%{_kernel_ver}/kqemu.conf
 install udev.conf $RPM_BUILD_ROOT/etc/udev/rules.d/kqemu.rules
@@ -247,7 +253,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %if %{with kernel}
 %post
-%banner %{name} -e <<EOF
+%banner %{pname} -e <<EOF
 To enable qemu accelerator (kqemu), the kqemu kernel module must be loaded:
 modprobe kqemu
 EOF
@@ -273,7 +279,7 @@ EOF
 %if %{with kernel}
 %files -n kernel%{_alt_kernel}-misc-kqemu
 %defattr(644,root,root,755)
-%doc kqemu-%{_kqemu_version}/LICENSE
+%doc kqemu-%{kqemu_version}/LICENSE
 %config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/kqemu.rules
 %config(noreplace) %verify(not md5 mtime size) /etc/modprobe.d/%{_kernel_ver}/kqemu.conf
 /lib/modules/%{_kernel_ver}/misc/kqemu.ko*
