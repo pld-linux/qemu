@@ -65,8 +65,9 @@ BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
 %{!?with_gcc4:BuildRequires:	gcc < 5:4.0}
 BuildRequires:	perl-tools-pod
-BuildRequires:	tetex
 BuildRequires:	sed >= 4.0
+BuildRequires:	tetex
+BuildRequires:	which
 %endif
 Requires:	SDL >= 1.2.1
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
