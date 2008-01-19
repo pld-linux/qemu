@@ -33,8 +33,8 @@
 %endif
 
 %define	_kqemu_version	1.3.0pre11
-%define	_qemu_version	0.9.0
-%define		_rel	58
+%define	_qemu_version	0.9.1
+%define		_rel	0.1
 %define		pname	qemu
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
@@ -45,7 +45,7 @@ License:	GPL
 Group:		Applications/Emulators
 #Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 Source0:	http://fabrice.bellard.free.fr/qemu/%{pname}-%{version}.tar.gz
-# Source0-md5:	ab11a03ba30cf4a70641f0f170473d69
+# Source0-md5:	6591df8e9270eb358c881de4ebea1262
 Source1:	http://fabrice.bellard.free.fr/qemu/k%{pname}-%{_kqemu_version}.tar.gz
 # Source1-md5:	970521874ef8b1ba4598925ace5936c3
 Patch0:		%{pname}-nostatic.patch
@@ -62,9 +62,6 @@ Patch9:		%{pname}-0.8.0-gcc4-hacks.patch
 Patch11:	%{pname}-0.7.2-gcc4-opts.patch
 #Patch12:	%{pname}-0.7.2-dyngen-check-stack-clobbers.patch
 Patch13:	%{pname}-dosguest.patch
-# Fix crash when using qemu instances with NICs connected via socket
-# This patch will be obsolete in versions after 0.9.0
-Patch14:	%{pname}-0.9.0-remove-iohandlers.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 %if %{with kernel}
 %{?with_dist_kernel:BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7}
@@ -173,7 +170,6 @@ exit 1
 %{?with_nosdlgui:%patch6 -p1}
 %patch7 -p1
 #%patch8 -p1
-%patch14 -p1
 
 %{__sed} -i -e 's/sdl_static=yes/sdl_static=no/' configure
 %{__sed} -i 's/.*MAKE) -C kqemu$//' Makefile
@@ -247,9 +243,7 @@ cd -
 	--cc="%{__cc}" \
 	--host-cc="%{__cc}" \
 	--make="%{__make}" \
-%if %{with kqemu}
-	--kernel-path=%{_kernelsrcdir} \
-%else
+%if %{without kqemu}
 	--disable-kqemu \
 %endif
 	%{?with_gcc4:--disable-gcc-check} \

@@ -1,15 +1,14 @@
 diff -ur qemu-0.9.0-o/vl.c qemu-0.9.0/vl.c
---- qemu-0.9.0-o/vl.c	2007-02-05 16:01:54.000000000 -0700
-+++ qemu-0.9.0/vl.c	2007-02-06 14:49:35.000000000 -0700
-@@ -88,7 +88,7 @@
+--- qemu-0.9.1-o/vl.c	2007-02-05 16:01:54.000000000 -0700
++++ qemu-0.9.1/vl.c	2007-02-06 14:49:35.000000000 -0700
+@@ -131,8 +131,8 @@
  
  #include "exec-all.h"
  
 -#define DEFAULT_NETWORK_SCRIPT "/etc/qemu-ifup"
+-#define DEFAULT_NETWORK_DOWN_SCRIPT "/etc/qemu-ifdown"
 +#define DEFAULT_NETWORK_SCRIPT "/sbin/qemu-ifup"
++#define DEFAULT_NETWORK_DOWN_SCRIPT "/sbin/qemu-ifdown"
  #ifdef __sun__
  #define SMBD_COMMAND "/usr/sfw/sbin/smbd"
  #else
-Only in qemu-0.9.0: vl.c~
-Only in qemu-0.9.0: vl.c.orig
-Only in qemu-0.9.0: vl.c.rej
