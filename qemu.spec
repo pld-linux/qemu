@@ -34,7 +34,7 @@
 
 %define	_kqemu_version	1.3.0pre11
 %define	_qemu_version	0.9.1
-%define		_rel	0.1
+%define		_rel	1
 %define		pname	qemu
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
@@ -62,6 +62,7 @@ Patch9:		%{pname}-0.8.0-gcc4-hacks.patch
 Patch11:	%{pname}-0.7.2-gcc4-opts.patch
 #Patch12:	%{pname}-0.7.2-dyngen-check-stack-clobbers.patch
 Patch13:	%{pname}-dosguest.patch
+Patch14:	%{pname}-ppc_old_binutils.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 %if %{with kernel}
 %{?with_dist_kernel:BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7}
@@ -199,6 +200,7 @@ EOF
 %if %{with dosguest}
 %patch13 -p1
 %endif
+%patch14 -p1
 
 %build
 %if %{with kernel}
