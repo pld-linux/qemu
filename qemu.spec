@@ -32,21 +32,22 @@
 %undefine	with_userspace
 %endif
 
-%define	_kqemu_version	1.3.0pre11
-%define	_qemu_version	0.9.1
-%define		_rel	1
+%define		kqemu_version	1.3.0pre11
+%define		qemu_version	0.9.1
 %define		pname	qemu
+
+%define		rel	1
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		%{pname}%{_alt_kernel}
-Version:	%{_qemu_version}
-Release:	%{_rel}%{?with_kqemu:k}
+Version:	%{qemu_version}
+Release:	%{rel}%{?with_kqemu:k}
 License:	GPL
 Group:		Applications/Emulators
 #Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 Source0:	http://fabrice.bellard.free.fr/qemu/%{pname}-%{version}.tar.gz
 # Source0-md5:	6591df8e9270eb358c881de4ebea1262
-Source1:	http://fabrice.bellard.free.fr/qemu/k%{pname}-%{_kqemu_version}.tar.gz
+Source1:	http://fabrice.bellard.free.fr/qemu/k%{pname}-%{kqemu_version}.tar.gz
 # Source1-md5:	970521874ef8b1ba4598925ace5936c3
 Patch0:		%{pname}-nostatic.patch
 Patch1:		%{pname}-cc.patch
@@ -118,8 +119,8 @@ aby dzia³a³ na kolejnych procesorach. QEMU ma dwa tryby pracy:
 %package -n kernel%{_alt_kernel}-misc-kqemu
 Summary:	kqemu - kernel module
 Summary(pl):	kqemu - modu³ j±dra
-Version:	%{_kqemu_version}
-Release:	%{_rel}@%{_kernel_ver_str}
+Version:	%{kqemu_version}
+Release:	%{rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
 %{?with_dist_kernel:%requires_releq_kernel_up}
 License:	GPL v2
@@ -135,8 +136,8 @@ kqemu - modu³ j±dra.
 %package -n kernel%{_alt_kernel}-smp-misc-kqemu
 Summary:	kqemu - SMP kernel module
 Summary(pl):	kqemu - modu³ j±dra SMP
-Version:	%{_kqemu_version}
-Release:	%{_rel}@%{_kernel_ver_str}
+Version:	%{kqemu_version}
+Release:	%{rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
 %{?with_dist_kernel:%requires_releq_kernel_smp}
 License:	GPL v2
@@ -157,7 +158,7 @@ exit 1
 %endif
 %endif
 
-%setup -q -n %{pname}-%{_qemu_version} %{?with_kernel:-a1}
+%setup -q -n %{pname}-%{qemu_version} %{?with_kernel:-a1}
 %patch0 -p1
 %patch1 -p1
 %patch3 -p1
@@ -183,7 +184,7 @@ exit 1
 %endif
 
 %if %{with kernel}
-echo -n > kqemu-%{_kqemu_version}/install.sh
+echo -n > kqemu-%{kqemu_version}/install.sh
 
 cat <<'EOF' > modprobe.conf
 # enable dynamic major
@@ -204,7 +205,7 @@ EOF
 
 %build
 %if %{with kernel}
-cd kqemu-%{_kqemu_version}
+cd kqemu-%{kqemu_version}
 
 %{__sed} -i 's#include ../config-host.mak##' ./common/Makefile
 %ifarch %{x8664}
@@ -273,7 +274,7 @@ EOF
 %endif
 
 %if %{with kernel}
-%install_kernel_modules -m kqemu-%{_kqemu_version}/kqemu -d misc
+%install_kernel_modules -m kqemu-%{kqemu_version}/kqemu -d misc
 install -d $RPM_BUILD_ROOT/etc/{modprobe.d/%{_kernel_ver}{,smp},udev/rules.d}
 install modprobe.conf $RPM_BUILD_ROOT/etc/modprobe.d/%{_kernel_ver}/kqemu.conf
 %if %{with smp} && %{with dist_kernel}
@@ -323,7 +324,7 @@ EOF
 %if %{with up} || %{without dist_kernel}
 %files -n kernel%{_alt_kernel}-misc-kqemu
 %defattr(644,root,root,755)
-%doc kqemu-%{_kqemu_version}/LICENSE
+%doc kqemu-%{kqemu_version}/LICENSE
 %config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/kqemu.rules
 %config(noreplace) %verify(not md5 mtime size) /etc/modprobe.d/%{_kernel_ver}/kqemu.conf
 /lib/modules/%{_kernel_ver}/misc/kqemu.ko*
@@ -332,7 +333,7 @@ EOF
 %if %{with smp} && %{with dist_kernel}
 %files -n kernel%{_alt_kernel}-smp-misc-kqemu
 %defattr(644,root,root,755)
-%doc kqemu-%{_kqemu_version}/LICENSE
+%doc kqemu-%{kqemu_version}/LICENSE
 %config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/kqemu.rules
 %config(noreplace) %verify(not md5 mtime size) /etc/modprobe.d/%{_kernel_ver}smp/kqemu.conf
 /lib/modules/%{_kernel_ver}smp/misc/kqemu.ko*
