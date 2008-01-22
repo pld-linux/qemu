@@ -1,0 +1,3 @@
+- add qemu-ppc_old_binutils.patch to fix build on ppc with our AnCientic
+  binutils (don't use function from binutils 2.17, when we use 2.15 on ac
+- release 1 - works fine.
