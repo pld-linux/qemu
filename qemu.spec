@@ -37,7 +37,7 @@
 %define		qemu_version	0.9.1
 %define		pname	qemu
 
-%define		rel	2
+%define		rel	3
 Summary:	QEMU CPU Emulator
 Summary(pl):	QEMU - emulator procesora
 Name:		%{pname}%{_alt_kernel}
