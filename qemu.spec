@@ -19,7 +19,7 @@
 %if %{without kernel}
 %undefine	with_dist_kernel
 %endif
-%if %{with kernel} && %{with dist_kernel} && %{with grsec_kernel}
+%if %{with dist_kernel} && %{with grsec_kernel}
 %define	alt_kernel	grsecurity
 %endif
 
