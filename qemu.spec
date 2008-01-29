@@ -79,7 +79,7 @@ BuildRequires:	sed >= 4.0
 %endif
 Requires:	SDL >= 1.2.1
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
-ExclusiveArch:	%{ix86} %{x8664} %{!?with_kqemu:ppc}
+ExclusiveArch:	%{ix86} %{x8664} %{?with_userspace:ppc}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # some SPARC boot image in ELF format
