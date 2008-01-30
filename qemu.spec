@@ -65,6 +65,10 @@ Patch11:	%{pname}-0.7.2-gcc4-opts.patch
 #Patch12:	%{pname}-0.7.2-dyngen-check-stack-clobbers.patch
 Patch13:	%{pname}-dosguest.patch
 Patch14:	%{pname}-ppc_old_binutils.patch
+Patch15:	%{pname}-isa-bios-ram.patch
+# below one fixes problems with passing ram size to bios/bootloader
+# which affects coreboot/linuxbios
+Patch16:	%{pname}-piix-ram-size.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 %if %{with kernel}
 %{?with_dist_kernel:BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7}
@@ -203,6 +207,8 @@ EOF
 %patch13 -p1
 %endif
 %patch14 -p1
+%patch15 -p1
+%patch16 -p1
 
 %build
 %if %{with kernel}
