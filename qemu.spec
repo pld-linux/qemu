@@ -45,7 +45,7 @@ License:	GPL
 Group:		Applications/Emulators
 #Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 Source0:	http://fabrice.bellard.free.fr/qemu/%{pname}-%{version}.tar.gz
-# Source0-md5:	ab11a03ba30cf4a70641f0f170473d69
+# Source0-md5:	6591df8e9270eb358c881de4ebea1262
 Source1:	http://fabrice.bellard.free.fr/qemu/k%{pname}-%{kqemu_version}.tar.gz
 # Source1-md5:	970521874ef8b1ba4598925ace5936c3
 Patch0:		%{pname}-nostatic.patch
