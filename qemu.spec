@@ -13,28 +13,34 @@
 %bcond_without	kernel			# build kqemu KERNEL MODULES
 %bcond_without	userspace		# don't build userspace
 %bcond_with	grsec_kernel	# build for kernel-grsecurity
-#
-%if %{with kernel} && %{with dist_kernel} && %{with grsec_kernel}
+
+%if %{without kernel}
+%undefine	with_dist_kernel
+%endif
+%if %{with dist_kernel} && %{with grsec_kernel}
 %define	alt_kernel	grsecurity
 %endif
+
+# no kernel kqemu module for ppc
+%ifarch ppc
+%undefine      with_kqemu
+%undefine      with_kernel
+%endif
+
 %if "%{_alt_kernel}" != "%{nil}"
 %undefine	with_userspace
 %endif
 
-# no kqemu for ppc
-%ifarch ppc
-%undefine	with_kqemu
-%undefine	with_kernel
-%endif
 %define		kqemu_version	1.3.0pre11
-%define		qemu_version	0.9.0
-%define		_rel	60
+%define		qemu_version	0.9.1
 %define		pname	qemu
+
+%define		rel	4
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		%{pname}%{_alt_kernel}
 Version:	%{qemu_version}
-Release:	%{_rel}%{?with_kqemu:k}
+Release:	%{rel}%{?with_kqemu:k}
 License:	GPL
 Group:		Applications/Emulators
 #Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
@@ -71,7 +77,7 @@ BuildRequires:	which
 %endif
 Requires:	SDL >= 1.2.1
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
-ExclusiveArch:	%{ix86} %{x8664} ppc
+ExclusiveArch:	%{ix86} %{x8664} %{?with_userspace:ppc}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # some SPARC boot image in ELF format
@@ -112,7 +118,7 @@ aby działał na kolejnych procesorach. QEMU ma dwa tryby pracy:
 Summary:	kqemu - kernel module
 Summary(pl.UTF-8):	kqemu - moduł jądra
 Version:	%{kqemu_version}
-Release:	%{_rel}@%{_kernel_ver_str}
+Release:	%{rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
 %{?with_dist_kernel:%requires_releq_kernel}
 License:	GPL v2
