@@ -1,6 +1,7 @@
 #
 # TODO:
 # - wait till the gcc bug http://gcc.gnu.org/PR16185 is fixed.
+# - update or drop gcc4 bcond patches
 #
 # Conditional build:
 %bcond_without	kqemu			# disable KQEMU ACCELERATOR support in QEMU
@@ -8,7 +9,7 @@
 %bcond_with	dosguest		# add special patch when use with DOS as guest os
 %bcond_with	nosdlgui		# do not use SDL gui (use X11 instead)
 # Note that gcc4 build is very problematic and not supported by qemu team
-%bcond_without	gcc4			# use gcc4 patches (broke build on gcc33)
+%bcond_with	gcc4			# use gcc4 patches (broke build on gcc33)
 %bcond_without	dist_kernel		# without distribution kernel
 %bcond_without	kernel			# build kqemu KERNEL MODULES
 %bcond_without	userspace		# don't build userspace
@@ -35,7 +36,7 @@
 %define		qemu_version	0.9.1
 %define		pname	qemu
 
-%define		rel	6
+%define		rel	7
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		%{pname}%{_alt_kernel}
