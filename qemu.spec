@@ -70,7 +70,7 @@ Patch16:	%{pname}-piix-ram-size.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 %if %{with kernel} && %{with dist_kernel}
 BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
-BuildRequires:	rpmbuild(macros) >= 1.431
+BuildRequires:	rpmbuild(macros) >= 1.379
 %endif
 %if %{with userspace}
 BuildRequires:	SDL-devel >= 1.2.1
@@ -85,6 +85,9 @@ Requires:	SDL >= 1.2.1
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
 ExclusiveArch:	%{ix86} %{x8664} %{?with_userspace:ppc}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+
+# some SPARC boot image in ELF format
+%define		_noautostrip	.*%{_datadir}/qemu/openbios-sparc32
 
 %description
 QEMU is a FAST! processor emulator. By using dynamic translation it
@@ -257,9 +260,6 @@ install -d $RPM_BUILD_ROOT/etc/{modprobe.d/%{_kernel_ver}{,smp},udev/rules.d}
 install modprobe.conf $RPM_BUILD_ROOT/etc/modprobe.d/%{_kernel_ver}/kqemu.conf
 install udev.conf $RPM_BUILD_ROOT/etc/udev/rules.d/kqemu.rules
 %endif
-
-# some SPARC boot image in ELF format
-chmod a-x $RPM_BUILD_ROOT%{_datadir}/qemu/openbios-sparc32
 
 # already packaged
 rm -rf $RPM_BUILD_ROOT%{_docdir}/qemu/qemu-{doc,tech}.html
