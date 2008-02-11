@@ -61,6 +61,11 @@ Patch9:		%{pname}-0.8.0-gcc4-hacks.patch
 Patch11:	%{pname}-0.7.2-gcc4-opts.patch
 #Patch12:	%{pname}-0.7.2-dyngen-check-stack-clobbers.patch
 Patch13:	%{pname}-dosguest.patch
+Patch14:	%{pname}-ppc_old_binutils.patch
+Patch15:	%{pname}-isa-bios-ram.patch
+# below one fixes problems with passing ram size to bios/bootloader
+# which affects coreboot/linuxbios
+Patch16:	%{pname}-piix-ram-size.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 %if %{with kernel} && %{with dist_kernel}
 BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
@@ -171,15 +176,22 @@ cat <<'EOF' > udev.conf
 KERNEL=="kqemu", NAME="%k", MODE="0666"
 EOF
 
+%if %{with dosguest}
+%patch13 -p1
+%endif
+%patch14 -p1
+%patch15 -p1
+%patch16 -p1
+
 cd kqemu-%{kqemu_version}
 %{__sed} -i 's#include ../config-host.mak##' ./common/Makefile
 %ifarch %{x8664}
 %{__sed} -i 's/^#ARCH=x86_64/ARCH=x86_64/' ./common/Makefile
-%{__make} -j1 -C common
+%{__make} -C common -j1
 mv -f kqemu-mod-x86_64.o{,.bin}
 %else
 %{__sed} -i 's/^#ARCH=i386/ARCH=i386/' ./common/Makefile
-%{__make} -j1 -C common
+%{__make} -C common -j1
 mv -f kqemu-mod-i386.o{,.bin}
 %endif
 
@@ -192,10 +204,6 @@ $(obj)/kqemu-mod.o: $(src)/kqemu-mod-$(ARCH).o.bin
 	cp $< $@
 EOF
 cd -
-%endif
-
-%if %{with dosguest}
-%patch13 -p1
 %endif
 
 %build
