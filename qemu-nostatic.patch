@@ -10,13 +10,13 @@ diff -ur qemu-0.9.0-o/Makefile.target qemu-0.9.0/Makefile.target
  endif
  
  # We require -O2 to avoid the stack setup prologue in EXIT_TB
-@@ -124,7 +124,7 @@
- OP_CFLAGS+=-fno-delayed-branch -ffixed-i0
- HELPER_CFLAGS=$(CFLAGS) -ffixed-i0 -mflat
- # -static is used to avoid g1/g3 usage by the dynamic linker
--BASE_LDFLAGS+=-Wl,-T,$(SRC_PATH)/$(ARCH).ld -static
-+#BASE_LDFLAGS+=-Wl,-T,$(SRC_PATH)/$(ARCH).ld -static
- endif
+@@ -160,7 +160,7 @@
+     BASE_CFLAGS+=-ffixed-g1 -ffixed-g6
+     HELPER_CFLAGS=$(CFLAGS) -ffixed-i0
+     # -static is used to avoid g1/g3 usage by the dynamic linker
+-    BASE_LDFLAGS+=-Wl,-T,$(SRC_PATH)/$(ARCH).ld -static
++    #BASE_LDFLAGS+=-Wl,-T,$(SRC_PATH)/$(ARCH).ld -static
+   endif
  endif
  
 @@ -432,7 +432,7 @@
@@ -28,5 +28,3 @@ diff -ur qemu-0.9.0-o/Makefile.target qemu-0.9.0/Makefile.target
  endif
  ifndef CONFIG_SOFTMMU
  VL_LDFLAGS+=-Wl,-T,$(SRC_PATH)/i386-vl.ld 
-Only in qemu-0.9.0: Makefile.target~
-Only in qemu-0.9.0: Makefile.target.orig
