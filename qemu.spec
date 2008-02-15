@@ -14,13 +14,9 @@
 %bcond_without	up			# don't build up module
 %bcond_without	smp			# don't build SMP module
 %bcond_without	userspace		# don't build userspace utilities
-%bcond_with	grsec_kernel	# build for kernel-grsecurity
 
 %if %{without kernel}
 %undefine	with_dist_kernel
-%endif
-%if %{with dist_kernel} && %{with grsec_kernel}
-%define	alt_kernel	grsecurity
 %endif
 
 # no kernel kqemu module for ppc
@@ -37,7 +33,7 @@
 %define		qemu_version	0.9.1
 %define		pname	qemu
 
-%define		rel	4
+%define		rel	5
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		%{pname}%{_alt_kernel}
@@ -125,10 +121,10 @@ aby działał na kolejnych procesorach. QEMU ma dwa tryby pracy:
 Summary:	kqemu - kernel module
 Summary(pl.UTF-8):	kqemu - moduł jądra
 Version:	%{kqemu_version}
-Release:	%{rel}@%{_kernel_ver_str}
+Release:	%{rel}
 Group:		Base/Kernel
-%{?with_dist_kernel:%requires_releq_kernel_up}
 License:	GPL v2
+%{?with_dist_kernel:Requires:	kernel%{_alt_kernel}(vermagic) = %{_kernel_ver}}
 Requires(post,postun):	/sbin/depmod
 Requires:	module-init-tools >= 3.2.2-2
 
@@ -142,10 +138,10 @@ kqemu - moduł jądra.
 Summary:	kqemu - SMP kernel module
 Summary(pl.UTF-8):	kqemu - moduł jądra SMP
 Version:	%{kqemu_version}
-Release:	%{rel}@%{_kernel_ver_str}
+Release:	%{rel}
 Group:		Base/Kernel
-%{?with_dist_kernel:%requires_releq_kernel_smp}
 License:	GPL v2
+%{?with_dist_kernel:Requires:	kernel%{_alt_kernel}-smp(vermagic) = %{_kernel_ver}}
 Requires(post,postun):	/sbin/depmod
 Requires:	module-init-tools >= 3.2.2-2
 
