@@ -12,14 +12,10 @@
 %bcond_with	gcc4			# use gcc4 patches (broke build on gcc33)
 %bcond_without	dist_kernel		# without distribution kernel
 %bcond_without	kernel			# build kqemu KERNEL MODULES
-%bcond_without	userspace		# don't build userspace
-%bcond_with	grsec_kernel	# build for kernel-grsecurity
+%bcond_without	userspace		# don't build userspace utilities
 
 %if %{without kernel}
 %undefine	with_dist_kernel
-%endif
-%if %{with dist_kernel} && %{with grsec_kernel}
-%define	alt_kernel	grsecurity
 %endif
 
 # no kernel kqemu module for ppc
@@ -36,7 +32,7 @@
 %define		qemu_version	0.9.1
 %define		pname	qemu
 
-%define		rel	7
+%define		rel	8
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		%{pname}%{_alt_kernel}
@@ -126,11 +122,11 @@ Summary(pl.UTF-8):	kqemu - moduł jądra
 Version:	%{kqemu_version}
 Release:	%{rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
-%{?with_dist_kernel:%requires_releq_kernel}
 License:	GPL v2
-Obsoletes:	kernel%{_alt_kernel}-smp-misc-kqemu
 Requires(post,postun):	/sbin/depmod
+%{?with_dist_kernel:Requires:	kernel%{_alt_kernel}(vermagic) = %{_kernel_ver}}
 Requires:	module-init-tools >= 3.2.2-2
+Obsoletes:	kernel%{_alt_kernel}-smp-misc-kqemu
 
 %description -n kernel%{_alt_kernel}-misc-kqemu
 kqemu - kernel module.
@@ -229,9 +225,7 @@ cd -
 	--cc="%{__cc}" \
 	--host-cc="%{__cc}" \
 	--make="%{__make}" \
-%if %{with kqemu}
-	--kernel-path=%{_kernelsrcdir} \
-%else
+%if %{without kqemu}
 	--disable-kqemu \
 %endif
 	%{?with_gcc4:--disable-gcc-check} \
