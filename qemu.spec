@@ -225,9 +225,7 @@ cd -
 	--cc="%{__cc}" \
 	--host-cc="%{__cc}" \
 	--make="%{__make}" \
-%if %{with kqemu}
-	--kernel-path=%{_kernelsrcdir} \
-%else
+%if %{without kqemu}
 	--disable-kqemu \
 %endif
 	%{?with_gcc4:--disable-gcc-check} \
