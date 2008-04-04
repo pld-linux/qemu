@@ -12,14 +12,10 @@
 %bcond_with	gcc4			# use gcc4 patches (broke build on gcc33)
 %bcond_without	dist_kernel		# without distribution kernel
 %bcond_without	kernel			# build kqemu KERNEL MODULES
-%bcond_without	userspace		# don't build userspace
-%bcond_with	grsec_kernel	# build for kernel-grsecurity
+%bcond_without	userspace		# don't build userspace utilities
 
 %if %{without kernel}
 %undefine	with_dist_kernel
-%endif
-%if %{with dist_kernel} && %{with grsec_kernel}
-%define	alt_kernel	grsecurity
 %endif
 
 # no kernel kqemu module for ppc
