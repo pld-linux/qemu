@@ -14,25 +14,28 @@
 %bcond_without	kernel			# build kqemu KERNEL MODULES
 %bcond_without	userspace		# don't build userspace utilities
 
-%if %{without kernel}
-%undefine	with_dist_kernel
-%endif
-
 # no kernel kqemu module for ppc
 %ifarch ppc
 %undefine      with_kqemu
 %undefine      with_kernel
 %endif
 
+%if %{without kernel}
+%undefine	with_dist_kernel
+%endif
 %if "%{_alt_kernel}" != "%{nil}"
 %undefine	with_userspace
 %endif
+%if %{without userspace}
+# nothing to be placed to debuginfo package
+%define		_enable_debug_packages	0
+%endif
+
+%define		rel	9
 
 %define		kqemu_version	1.3.0pre11
 %define		qemu_version	0.9.1
 %define		pname	qemu
-
-%define		rel	9
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		%{pname}%{_alt_kernel}
