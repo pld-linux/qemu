@@ -33,7 +33,7 @@
 %define		qemu_version	0.9.1
 %define		pname	qemu
 
-%define		rel	6
+%define		rel	7
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		%{pname}%{_alt_kernel}
@@ -41,7 +41,7 @@ Version:	%{qemu_version}
 Release:	%{rel}%{?with_kqemu:k}
 License:	GPL
 Group:		Applications/Emulators
-#Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
+# Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 Source0:	http://fabrice.bellard.free.fr/qemu/%{pname}-%{version}.tar.gz
 # Source0-md5:	6591df8e9270eb358c881de4ebea1262
 Source1:	http://fabrice.bellard.free.fr/qemu/k%{pname}-%{kqemu_version}.tar.gz
@@ -65,6 +65,8 @@ Patch15:	%{pname}-isa-bios-ram.patch
 # below one fixes problems with passing ram size to bios/bootloader
 # which affects coreboot/linuxbios
 Patch16:	%{pname}-piix-ram-size.patch
+Patch17:	%{pname}-CVE-2008-0928.patch
+Patch18:	%{pname}-CVE-2008-2004.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
 %if %{with kernel}
 %{?with_dist_kernel:BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7}
@@ -75,8 +77,9 @@ BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
 %{!?with_gcc4:BuildRequires:	gcc < 5:4.0}
 BuildRequires:	perl-tools-pod
-BuildRequires:	tetex
 BuildRequires:	sed >= 4.0
+BuildRequires:	tetex
+BuildRequires:	which
 %endif
 Requires:	SDL >= 1.2.1
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
@@ -205,6 +208,8 @@ EOF
 %patch14 -p1
 %patch15 -p1
 %patch16 -p1
+%patch17 -p2
+%patch18 -p0
 
 %build
 %if %{with kernel}
