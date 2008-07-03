@@ -1,6 +1,7 @@
 #
 # TODO:
 # - wait till the gcc bug http://gcc.gnu.org/PR16185 is fixed.
+# - update or drop gcc4 bcond patches
 #
 # Conditional build:
 %bcond_without	kqemu			# disable KQEMU ACCELERATOR support in QEMU
@@ -11,8 +12,6 @@
 %bcond_with	gcc4			# use gcc4 patches (broke build on gcc33)
 %bcond_without	dist_kernel		# without distribution kernel
 %bcond_without	kernel			# build kqemu KERNEL MODULES
-%bcond_without	up			# don't build up module
-%bcond_without	smp			# don't build SMP module
 %bcond_without	userspace		# don't build userspace utilities
 
 %if %{without kernel}
@@ -33,7 +32,7 @@
 %define		qemu_version	0.9.1
 %define		pname	qemu
 
-%define		rel	7
+%define		rel	8
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		%{pname}%{_alt_kernel}
@@ -52,7 +51,6 @@ Patch3:		%{pname}-dot.patch
 Patch4:		%{pname}-gcc4_x86.patch
 Patch5:		%{pname}-gcc4_ppc.patch
 Patch6:		%{pname}-nosdlgui.patch
-Patch7:		%{pname}-ifup.patch
 # Proof of concept, for reference, do not remove
 Patch8:		%{pname}-kde_virtual_workspaces_hack.patch
 # http://gwenole.beauchesne.info/en/projects/qemu
@@ -68,9 +66,9 @@ Patch16:	%{pname}-piix-ram-size.patch
 Patch17:	%{pname}-CVE-2008-0928.patch
 Patch18:	%{pname}-CVE-2008-2004.patch
 URL:		http://fabrice.bellard.free.fr/qemu/
-%if %{with kernel}
-%{?with_dist_kernel:BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7}
-BuildRequires:	rpmbuild(macros) >= 1.330
+%if %{with kernel} && %{with dist_kernel}
+BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
+BuildRequires:	rpmbuild(macros) >= 1.452
 %endif
 %if %{with userspace}
 BuildRequires:	SDL-devel >= 1.2.1
@@ -124,12 +122,13 @@ aby działał na kolejnych procesorach. QEMU ma dwa tryby pracy:
 Summary:	kqemu - kernel module
 Summary(pl.UTF-8):	kqemu - moduł jądra
 Version:	%{kqemu_version}
-Release:	%{rel}
+Release:	%{rel}@%{_kernel_vermagic}
 Group:		Base/Kernel
 License:	GPL v2
-%{?with_dist_kernel:Requires:	kernel%{_alt_kernel}(vermagic) = %{_kernel_ver}}
 Requires(post,postun):	/sbin/depmod
+%{?with_dist_kernel:Requires:	kernel%{_alt_kernel}(vermagic) = %{_kernel_ver}}
 Requires:	module-init-tools >= 3.2.2-2
+Obsoletes:	kernel%{_alt_kernel}-smp-misc-kqemu
 
 %description -n kernel%{_alt_kernel}-misc-kqemu
 kqemu - kernel module.
@@ -137,31 +136,7 @@ kqemu - kernel module.
 %description -n kernel%{_alt_kernel}-misc-kqemu -l pl.UTF-8
 kqemu - moduł jądra.
 
-%package -n kernel%{_alt_kernel}-smp-misc-kqemu
-Summary:	kqemu - SMP kernel module
-Summary(pl.UTF-8):	kqemu - moduł jądra SMP
-Version:	%{kqemu_version}
-Release:	%{rel}
-Group:		Base/Kernel
-License:	GPL v2
-%{?with_dist_kernel:Requires:	kernel%{_alt_kernel}-smp(vermagic) = %{_kernel_ver}}
-Requires(post,postun):	/sbin/depmod
-Requires:	module-init-tools >= 3.2.2-2
-
-%description -n kernel%{_alt_kernel}-smp-misc-kqemu
-kqemu - SMP kernel module.
-
-%description -n kernel%{_alt_kernel}-smp-misc-kqemu -l pl.UTF-8
-kqemu - moduł jądra SMP.
-
 %prep
-%if %{with kernel}
-%if %{with dist_kernel} && %{without up} && %{without smp}
-%{error:%{pname}: If building kernel module You need to enable at least one of up or smp}
-exit 1
-%endif
-%endif
-
 %setup -q -n %{pname}-%{qemu_version} %{?with_kernel:-a1}
 %patch0 -p1
 %patch1 -p1
@@ -174,7 +149,6 @@ exit 1
 %patch5 -p1
 %endif
 %{?with_nosdlgui:%patch6 -p1}
-%patch7 -p1
 #%patch8 -p1
 
 %{__sed} -i -e 's/sdl_static=yes/sdl_static=no/' configure
@@ -200,7 +174,6 @@ EOF
 cat <<'EOF' > udev.conf
 KERNEL=="kqemu", NAME="%k", MODE="0666"
 EOF
-%endif
 
 %if %{with dosguest}
 %patch13 -p1
@@ -211,10 +184,7 @@ EOF
 %patch17 -p2
 %patch18 -p0
 
-%build
-%if %{with kernel}
 cd kqemu-%{kqemu_version}
-
 %{__sed} -i 's#include ../config-host.mak##' ./common/Makefile
 %ifarch %{x8664}
 %{__sed} -i 's/^#ARCH=x86_64/ARCH=x86_64/' ./common/Makefile
@@ -234,7 +204,12 @@ kqemu-objs:= kqemu-linux.o kqemu-mod.o
 $(obj)/kqemu-mod.o: $(src)/kqemu-mod-$(ARCH).o.bin
 	cp $< $@
 EOF
+cd -
+%endif
 
+%build
+%if %{with kernel}
+cd kqemu-%{kqemu_version}
 %build_kernel_modules -m kqemu <<'EOF'
 if grep -q "CONFIG_PREEMPT_RT" o/.config; then
 	sed 's/SPIN_LOCK_UNLOCKED/SPIN_LOCK_UNLOCKED(kqemu_lock)/' \
@@ -270,14 +245,10 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-install -d $RPM_BUILD_ROOT/sbin
-cat <<'EOF' > $RPM_BUILD_ROOT/sbin/qemu-ifup
+install -d $RPM_BUILD_ROOT%{_sysconfdir}
+cat <<'EOF' > $RPM_BUILD_ROOT%{_sysconfdir}/qemu-ifup
 #!/bin/sh
-if [ -f /etc/sysconfig/qemu ]; then
-	. /etc/sysconfig/qemu
-fi
-# of course this will work only for one interface. a lot possible to involve
-sudo /sbin/ifconfig $1 ${INTERFACE_ADDR:-172.20.0.1}
+
 EOF
 %endif
 
@@ -285,9 +256,6 @@ EOF
 %install_kernel_modules -m kqemu-%{kqemu_version}/kqemu -d misc
 install -d $RPM_BUILD_ROOT/etc/{modprobe.d/%{_kernel_ver}{,smp},udev/rules.d}
 install modprobe.conf $RPM_BUILD_ROOT/etc/modprobe.d/%{_kernel_ver}/kqemu.conf
-%if %{with smp} && %{with dist_kernel}
-install modprobe.conf $RPM_BUILD_ROOT/etc/modprobe.d/%{_kernel_ver}smp/kqemu.conf
-%endif
 install udev.conf $RPM_BUILD_ROOT/etc/udev/rules.d/kqemu.rules
 %endif
 
@@ -311,17 +279,11 @@ EOF
 %postun -n kernel%{_alt_kernel}-misc-kqemu
 %depmod %{_kernel_ver}
 
-%post	-n kernel%{_alt_kernel}-smp-misc-kqemu
-%depmod %{_kernel_ver}smp
-
-%postun -n kernel%{_alt_kernel}-smp-misc-kqemu
-%depmod %{_kernel_ver}smp
-
 %if %{with userspace}
 %files
 %defattr(644,root,root,755)
 %doc README qemu-doc.html qemu-tech.html
-%attr(755,root,root) /sbin/qemu-ifup
+%attr(755,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu-ifup
 %attr(755,root,root) %{_bindir}/*
 %{_datadir}/qemu
 %{_mandir}/man1/qemu.1*
@@ -329,21 +291,10 @@ EOF
 %endif
 
 %if %{with kernel}
-%if %{with up} || %{without dist_kernel}
 %files -n kernel%{_alt_kernel}-misc-kqemu
 %defattr(644,root,root,755)
 %doc kqemu-%{kqemu_version}/LICENSE
 %config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/kqemu.rules
 %config(noreplace) %verify(not md5 mtime size) /etc/modprobe.d/%{_kernel_ver}/kqemu.conf
 /lib/modules/%{_kernel_ver}/misc/kqemu.ko*
-%endif
-
-%if %{with smp} && %{with dist_kernel}
-%files -n kernel%{_alt_kernel}-smp-misc-kqemu
-%defattr(644,root,root,755)
-%doc kqemu-%{kqemu_version}/LICENSE
-%config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/kqemu.rules
-%config(noreplace) %verify(not md5 mtime size) /etc/modprobe.d/%{_kernel_ver}smp/kqemu.conf
-/lib/modules/%{_kernel_ver}smp/misc/kqemu.ko*
-%endif
 %endif
