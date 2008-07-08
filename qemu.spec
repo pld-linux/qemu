@@ -44,9 +44,9 @@ Release:	%{rel}%{?with_kqemu:k}
 License:	GPL
 Group:		Applications/Emulators
 # Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
-Source0:	http://fabrice.bellard.free.fr/qemu/%{pname}-%{version}.tar.gz
+Source0:	http://bellard.org/qemu/%{pname}-%{version}.tar.gz
 # Source0-md5:	6591df8e9270eb358c881de4ebea1262
-Source1:	http://fabrice.bellard.free.fr/qemu/k%{pname}-%{kqemu_version}.tar.gz
+Source1:	http://bellard.org/qemu/k%{pname}-%{kqemu_version}.tar.gz
 # Source1-md5:	970521874ef8b1ba4598925ace5936c3
 Patch0:		%{pname}-nostatic.patch
 Patch1:		%{pname}-cc.patch
@@ -68,7 +68,7 @@ Patch15:	%{pname}-isa-bios-ram.patch
 Patch16:	%{pname}-piix-ram-size.patch
 Patch17:	%{pname}-CVE-2008-0928.patch
 Patch18:	%{pname}-CVE-2008-2004.patch
-URL:		http://fabrice.bellard.free.fr/qemu/
+URL:		http://bellard.org/qemu/
 %if %{with kernel} && %{with dist_kernel}
 BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
 BuildRequires:	rpmbuild(macros) >= 1.379
