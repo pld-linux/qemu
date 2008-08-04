@@ -8,8 +8,6 @@
 %bcond_with	cflags_passing		# with passing rpmcflags to Makefiles
 %bcond_with	dosguest		# add special patch when use with DOS as guest os
 %bcond_with	nosdlgui		# do not use SDL gui (use X11 instead)
-# Note that gcc4 build is very problematic and not supported by qemu team
-%bcond_with	gcc4			# use gcc4 patches (broke build on gcc33)
 %bcond_without	dist_kernel		# without distribution kernel
 %bcond_without	kernel			# build kqemu KERNEL MODULES
 %bcond_without	userspace		# don't build userspace utilities
@@ -31,7 +29,9 @@
 %define		_enable_debug_packages	0
 %endif
 
-%define		rel	9
+%define		__ucc	gcc-3.4
+
+%define		rel	10
 
 %define		kqemu_version	1.3.0pre11
 %define		qemu_version	0.9.1
@@ -51,14 +51,9 @@ Source1:	http://bellard.org/qemu/k%{pname}-%{kqemu_version}.tar.gz
 Patch0:		%{pname}-nostatic.patch
 Patch1:		%{pname}-cc.patch
 Patch3:		%{pname}-dot.patch
-Patch4:		%{pname}-gcc4_x86.patch
-Patch5:		%{pname}-gcc4_ppc.patch
 Patch6:		%{pname}-nosdlgui.patch
 # Proof of concept, for reference, do not remove
 Patch8:		%{pname}-kde_virtual_workspaces_hack.patch
-# http://gwenole.beauchesne.info/en/projects/qemu
-Patch9:		%{pname}-0.8.0-gcc4-hacks.patch
-Patch11:	%{pname}-0.7.2-gcc4-opts.patch
 #Patch12:	%{pname}-0.7.2-dyngen-check-stack-clobbers.patch
 Patch13:	%{pname}-dosguest.patch
 Patch14:	%{pname}-ppc_old_binutils.patch
@@ -76,7 +71,7 @@ BuildRequires:	rpmbuild(macros) >= 1.379
 %if %{with userspace}
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
-%{!?with_gcc4:BuildRequires:	gcc < 5:4.0}
+BuildRequires:	compat-gcc-34
 BuildRequires:	perl-tools-pod
 BuildRequires:	sed >= 4.0
 BuildRequires:	tetex
@@ -144,13 +139,6 @@ kqemu - moduł jądra.
 %patch0 -p1
 %patch1 -p1
 %patch3 -p1
-%if %{with gcc4}
-%patch9 -p1
-%patch11 -p1
-#%patch12 -p1
-#%patch4 -p0
-%patch5 -p1
-%endif
 %{?with_nosdlgui:%patch6 -p1}
 #%patch8 -p1
 
@@ -229,13 +217,12 @@ cd -
 # they can be passed if the cflags_passing bcond is used
 ./configure \
 	--prefix=%{_prefix} \
-	--cc="%{__cc}" \
-	--host-cc="%{__cc}" \
+	--cc="%{__ucc}" \
+	--host-cc="%{__ucc}" \
 	--make="%{__make}" \
 %if %{without kqemu}
 	--disable-kqemu \
 %endif
-	%{?with_gcc4:--disable-gcc-check} \
 	--enable-alsa \
 	--interp-prefix=%{_libdir}/%{pname}
 %{__make}
