@@ -1,0 +1,27 @@
+--- Makefile.target	2008-08-05 08:38:17.991144535 +0200
++++ Makefile.target	2008-08-05 08:37:45.207818516 +0200
+@@ -71,6 +71,15 @@
+     TARGET_ARCH2=mips64el
+   endif
+ endif
++
++ifeq ($(TARGET_ARCH),mips)
++	GCC_WORKAROUND="-O0"
++endif
++ifeq ($(TARGET_ARCH),mips64)
++	GCC_WORKAROUND="-O0"
++endif
++
++
+ QEMU_USER=qemu-$(TARGET_ARCH2)
+ # system emulator name
+ ifdef CONFIG_SOFTMMU
+@@ -599,7 +608,7 @@
+ 	$(DYNGEN) -g -o $@ $<
+ 
+ op.o: op.c
+-	$(CC) $(OP_CFLAGS) $(CPPFLAGS) -c -o $@ $<
++	$(CC) $(OP_CFLAGS) $(CPPFLAGS) $(GCC_WORKAROUND) -c -o $@ $<
+ 
+ # HELPER_CFLAGS is used for all the code compiled with static register
+ # variables
