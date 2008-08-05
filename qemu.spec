@@ -31,7 +31,7 @@
 
 %define		__ucc	gcc-3.4
 
-%define		rel	10
+%define		rel	11
 
 %define		kqemu_version	1.3.0pre11
 %define		qemu_version	0.9.1
@@ -63,6 +63,7 @@ Patch15:	%{pname}-isa-bios-ram.patch
 Patch16:	%{pname}-piix-ram-size.patch
 Patch17:	%{pname}-CVE-2008-0928.patch
 Patch18:	%{pname}-CVE-2008-2004.patch
+Patch19:	%{pname}-gcc-workaround.patch
 URL:		http://bellard.org/qemu/
 %if %{with kernel} && %{with dist_kernel}
 BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
@@ -174,6 +175,7 @@ EOF
 %patch16 -p1
 %patch17 -p2
 %patch18 -p0
+%patch19 -p0
 
 cd kqemu-%{kqemu_version}
 %{__sed} -i 's#include ../config-host.mak##' ./common/Makefile
