@@ -31,7 +31,7 @@
 
 %define		__ucc	gcc-3.4
 
-%define		rel	19
+%define		rel	20
 
 %define		kqemu_version	1.3.0pre11
 %define		qemu_version	0.9.1
