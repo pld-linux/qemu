@@ -66,6 +66,9 @@ Patch18:	%{pname}-CVE-2008-2004.patch
 Patch19:	%{pname}-gcc-workaround.patch
 Patch20:	%{pname}-dirent.patch
 URL:		http://bellard.org/qemu/
+# http://securitytracker.com/alerts/2008/Dec/1021488.html
+# patch in vendor's svn:
+BuildRequires:	security(CVE-2008-2382)
 %if %{with kernel} && %{with dist_kernel}
 BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
 BuildRequires:	rpmbuild(macros) >= 1.379
