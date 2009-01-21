@@ -31,7 +31,7 @@
 
 %define		__ucc	gcc-3.4
 
-%define		rel	24
+%define		rel	25
 
 %define		kqemu_version	1.3.0pre11
 %define		qemu_version	0.9.1
@@ -65,10 +65,8 @@ Patch17:	%{pname}-CVE-2008-0928.patch
 Patch18:	%{pname}-CVE-2008-2004.patch
 Patch19:	%{pname}-gcc-workaround.patch
 Patch20:	%{pname}-dirent.patch
+Patch21:	%{pname}-CVE-2008-2382.patch
 URL:		http://bellard.org/qemu/
-# http://securitytracker.com/alerts/2008/Dec/1021488.html
-# patch in vendor's svn:
-BuildRequires:	security(CVE-2008-2382)
 %if %{with kernel} && %{with dist_kernel}
 BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
 BuildRequires:	rpmbuild(macros) >= 1.379
@@ -181,6 +179,7 @@ EOF
 %patch18 -p0
 %patch19 -p0
 %patch20 -p1
+%patch21 -p1
 
 cd kqemu-%{kqemu_version}
 %{__sed} -i 's#include ../config-host.mak##' ./common/Makefile
