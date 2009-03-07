@@ -1,7 +1,7 @@
 #
 # TODO:
-# - wait till the gcc bug http://gcc.gnu.org/PR16185 is fixed.
-# - update or drop gcc4 bcond patches
+# - fix ncurses detection
+# - update patches
 #
 # Conditional build:
 %bcond_without	kqemu			# disable KQEMU ACCELERATOR support in QEMU
@@ -29,12 +29,10 @@
 %define		_enable_debug_packages	0
 %endif
 
-%define		__ucc	gcc-3.4
+%define		rel	0.1
 
-%define		rel	30
-
-%define		kqemu_version	1.3.0pre11
-%define		qemu_version	0.9.1
+%define		kqemu_version	1.4.0pre1
+%define		qemu_version	0.10.0
 %define		pname	qemu
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
@@ -44,13 +42,10 @@ Release:	%{rel}%{?with_kqemu:k}
 License:	GPL
 Group:		Applications/Emulators
 # Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
-Source0:	http://bellard.org/qemu/%{pname}-%{version}.tar.gz
-# Source0-md5:	6591df8e9270eb358c881de4ebea1262
-Source1:	http://bellard.org/qemu/k%{pname}-%{kqemu_version}.tar.gz
-# Source1-md5:	970521874ef8b1ba4598925ace5936c3
-Patch0:		%{pname}-nostatic.patch
-Patch1:		%{pname}-cc.patch
-Patch3:		%{pname}-dot.patch
+Source0:	http://download.savannah.gnu.org/releases/qemu/%{pname}-%{version}.tar.gz
+# Source0-md5:	8dc50b834fa3f5f6a17d7bc3d0559e53
+Source1:	http://www.nongnu.org/qemu/k%{pname}-%{kqemu_version}.tar.gz
+# Source1-md5:	d738d8ca7332211ab716ec3213d82ee1
 Patch6:		%{pname}-nosdlgui.patch
 # Proof of concept, for reference, do not remove
 Patch8:		%{pname}-kde_virtual_workspaces_hack.patch
@@ -61,12 +56,7 @@ Patch15:	%{pname}-isa-bios-ram.patch
 # below one fixes problems with passing ram size to bios/bootloader
 # which affects coreboot/linuxbios
 Patch16:	%{pname}-piix-ram-size.patch
-Patch17:	%{pname}-CVE-2008-0928.patch
-Patch18:	%{pname}-CVE-2008-2004.patch
-Patch19:	%{pname}-gcc-workaround.patch
-Patch20:	%{pname}-dirent.patch
-Patch21:	%{pname}-CVE-2008-2382.patch
-URL:		http://bellard.org/qemu/
+URL:		http://www.nongnu.org/qemu/
 %if %{with kernel} && %{with dist_kernel}
 BuildRequires:	kernel%{_alt_kernel}-module-build >= 3:2.6.7
 BuildRequires:	rpmbuild(macros) >= 1.379
@@ -74,7 +64,7 @@ BuildRequires:	rpmbuild(macros) >= 1.379
 %if %{with userspace}
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
-BuildRequires:	compat-gcc-34
+BuildRequires:	ncurses-devel
 BuildRequires:	perl-tools-pod
 BuildRequires:	sed >= 4.0
 BuildRequires:	tetex
@@ -85,8 +75,8 @@ Requires:	SDL >= 1.2.1
 ExclusiveArch:	%{ix86} %{x8664} %{?with_userspace:ppc}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-# some SPARC boot image in ELF format
-%define		_noautostrip	.*%{_datadir}/qemu/openbios-sparc32
+# some PPC/SPARC boot image in ELF format
+%define		_noautostrip	.*%{_datadir}/qemu/openbios-.*
 
 %description
 QEMU is a FAST! processor emulator. By using dynamic translation it
@@ -139,9 +129,6 @@ kqemu - moduł jądra.
 
 %prep
 %setup -q -n %{pname}-%{qemu_version} %{?with_kernel:-a1}
-%patch0 -p1
-%patch1 -p1
-%patch3 -p1
 %{?with_nosdlgui:%patch6 -p1}
 #%patch8 -p1
 
@@ -173,13 +160,8 @@ EOF
 %patch13 -p1
 %endif
 %patch14 -p1
-%patch15 -p1
+#%patch15 -p1
 %patch16 -p1
-%patch17 -p2
-%patch18 -p0
-%patch19 -p0
-%patch20 -p1
-%patch21 -p1
 
 cd kqemu-%{kqemu_version}
 %{__sed} -i 's#include ../config-host.mak##' ./common/Makefile
@@ -223,13 +205,13 @@ cd -
 # they can be passed if the cflags_passing bcond is used
 ./configure \
 	--prefix=%{_prefix} \
-	--cc="%{__ucc}" \
-	--host-cc="%{__ucc}" \
+	--cc="%{__cc}" \
+	--host-cc="%{__cc}" \
 	--make="%{__make}" \
 %if %{without kqemu}
 	--disable-kqemu \
 %endif
-	--enable-alsa \
+	--audio-drv-list="alsa" \
 	--interp-prefix=%{_libdir}/%{pname}
 %{__make}
 %endif
@@ -284,6 +266,7 @@ EOF
 %{_datadir}/qemu
 %{_mandir}/man1/qemu.1*
 %{_mandir}/man1/qemu-img.1*
+%{_mandir}/man8/qemu-nbd.8*
 %endif
 
 %if %{with kernel}
