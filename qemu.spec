@@ -1,6 +1,5 @@
 #
 # TODO:
-# - fix ncurses detection
 # - update patches
 #
 # Conditional build:
@@ -46,6 +45,7 @@ Source0:	http://download.savannah.gnu.org/releases/qemu/%{pname}-%{version}.tar.
 # Source0-md5:	8dc50b834fa3f5f6a17d7bc3d0559e53
 Source1:	http://www.nongnu.org/qemu/k%{pname}-%{kqemu_version}.tar.gz
 # Source1-md5:	d738d8ca7332211ab716ec3213d82ee1
+Patch0:		%{pname}-ncurses.patch
 Patch6:		%{pname}-nosdlgui.patch
 # Proof of concept, for reference, do not remove
 Patch8:		%{pname}-kde_virtual_workspaces_hack.patch
@@ -64,7 +64,8 @@ BuildRequires:	rpmbuild(macros) >= 1.379
 %if %{with userspace}
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
-BuildRequires:	blues-libs-devel
+BuildRequires:	bluez-libs-devel
+BuildRequires:	gnutls-devel
 BuildRequires:	ncurses-devel
 BuildRequires:	perl-tools-pod
 BuildRequires:	sed >= 4.0
@@ -130,6 +131,7 @@ kqemu - moduł jądra.
 
 %prep
 %setup -q -n %{pname}-%{qemu_version} %{?with_kernel:-a1}
+%patch0 -p0
 %{?with_nosdlgui:%patch6 -p1}
 #%patch8 -p1
 
@@ -212,6 +214,7 @@ cd -
 %if %{without kqemu}
 	--disable-kqemu \
 %endif
+	--enable-mixemu \
 	--audio-drv-list="alsa" \
 	--interp-prefix=%{_libdir}/%{pname}
 %{__make}
