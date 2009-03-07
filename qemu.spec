@@ -64,6 +64,7 @@ BuildRequires:	rpmbuild(macros) >= 1.379
 %if %{with userspace}
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
+BuildRequires:	blues-libs-devel
 BuildRequires:	ncurses-devel
 BuildRequires:	perl-tools-pod
 BuildRequires:	sed >= 4.0
