@@ -1,0 +1,10 @@
+--- configure~	2009-03-04 23:54:45.000000000 +0100
++++ configure	2009-03-07 23:38:51.018285221 +0100
+@@ -944,6 +944,7 @@
+ # curses probe
+ 
+ if test "$curses" = "yes" ; then
++  ARCH_CFLAGS="$ARCH_CFLAGS -I/usr/include/ncurses"
+   curses=no
+   cat > $TMPC << EOF
+ #include <curses.h>
