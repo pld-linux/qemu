@@ -68,9 +68,11 @@ BuildRequires:	bluez-libs-devel
 BuildRequires:	gnutls-devel
 BuildRequires:	ncurses-devel
 BuildRequires:	perl-tools-pod
+BuildRequires:	pkgconfig
 BuildRequires:	sed >= 4.0
 BuildRequires:	tetex
 BuildRequires:	which
+BuildRequires:	xorg-lib-libX11-devel
 %endif
 Requires:	SDL >= 1.2.1
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
