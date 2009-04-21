@@ -28,10 +28,10 @@
 %define		_enable_debug_packages	0
 %endif
 
-%define		rel	3
+%define		rel	1
 
 %define		kqemu_version	1.4.0pre1
-%define		qemu_version	0.10.1
+%define		qemu_version	0.10.2
 %define		pname	qemu
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
@@ -42,7 +42,7 @@ License:	GPL
 Group:		Applications/Emulators
 # Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 Source0:	http://download.savannah.gnu.org/releases/qemu/%{pname}-%{version}.tar.gz
-# Source0-md5:	99b6da099343f6a32e02211aa5925154
+# Source0-md5:	85a323cdf620687f39c5328f450a547d
 Source1:	http://www.nongnu.org/qemu/k%{pname}-%{kqemu_version}.tar.gz
 # Source1-md5:	d738d8ca7332211ab716ec3213d82ee1
 Patch0:		%{pname}-ncurses.patch
