@@ -31,7 +31,7 @@
 %define		rel	1
 
 %define		kqemu_version	1.4.0pre1
-%define		qemu_version	0.10.2
+%define		qemu_version	0.10.3
 %define		pname	qemu
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
@@ -42,7 +42,7 @@ License:	GPL
 Group:		Applications/Emulators
 # Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 Source0:	http://download.savannah.gnu.org/releases/qemu/%{pname}-%{version}.tar.gz
-# Source0-md5:	85a323cdf620687f39c5328f450a547d
+# Source0-md5:	320d6c536c8a1288cdc6c809f487e6d7
 Source1:	http://www.nongnu.org/qemu/k%{pname}-%{kqemu_version}.tar.gz
 # Source1-md5:	d738d8ca7332211ab716ec3213d82ee1
 Patch0:		%{pname}-ncurses.patch
@@ -70,7 +70,8 @@ BuildRequires:	ncurses-devel
 BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
 BuildRequires:	sed >= 4.0
-BuildRequires:	tetex
+BuildRequires:	texi2html
+BuildRequires:	texinfo-texi2dvi
 BuildRequires:	which
 BuildRequires:	xorg-lib-libX11-devel
 %endif
