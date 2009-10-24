@@ -12,9 +12,9 @@ Index: qemu-snapshot-2007-02-09_05/hw/piix_pci.c
      PCIBus *b;
      PCIDevice *d;
 @@ -186,6 +186,10 @@ PCIBus *i440fx_init(PCIDevice **pi440fx_
-     d->config[0x0a] = 0x00; // class_sub = host2pci
-     d->config[0x0b] = 0x06; // class_base = PCI_bridge
-     d->config[0x0e] = 0x00; // header_type
+     d->config[0x08] = 0x02; // revision
+     pci_config_set_class(d->config, PCI_CLASS_BRIDGE_HOST);
+     d->config[PCI_HEADER_TYPE] = PCI_HEADER_TYPE_NORMAL; // header_type
 +    ram_size = ram_size / 8 / 1024 / 1024;
 +    if (ram_size > 255)
 +        ram_size = 255;
