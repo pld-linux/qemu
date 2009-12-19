@@ -28,7 +28,7 @@
 %define		_enable_debug_packages	0
 %endif
 
-%define		rel	5
+%define		rel	6
 
 %define		kqemu_version	1.4.0pre1
 %define		qemu_version	0.11.1
