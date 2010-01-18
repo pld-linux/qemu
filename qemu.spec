@@ -123,9 +123,9 @@ Release:	%{rel}@%{_kernel_ver_str}
 Group:		Base/Kernel
 %{?with_dist_kernel:%requires_releq_kernel}
 License:	GPL v2
-Obsoletes:	kernel%{_alt_kernel}-smp-misc-kqemu
 Requires(post,postun):	/sbin/depmod
 Requires:	module-init-tools >= 3.2.2-2
+Obsoletes:	kernel%{_alt_kernel}-smp-misc-kqemu
 
 %description -n kernel%{_alt_kernel}-misc-kqemu
 kqemu - kernel module.
@@ -160,7 +160,7 @@ options kqemu major=0
 EOF
 
 cat <<'EOF' > udev.conf
-KERNEL=="kqemu", NAME="%k", MODE="0666"
+KERNEL=="kqemu", MODE="0666"
 EOF
 
 %if %{with dosguest}
