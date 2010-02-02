@@ -83,7 +83,7 @@ aby działał na kolejnych procesorach. QEMU ma dwa tryby pracy:
 
 %prep
 %setup -q 
-#patch0 -p0
+%patch0 -p1
 %{?with_nosdlgui:%patch6 -p1}
 #patch8 -p1
 
