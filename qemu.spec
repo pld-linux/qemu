@@ -39,7 +39,6 @@ BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
 BuildRequires:	sed >= 4.0
 BuildRequires:	texi2html
-BuildRequires:	texinfo-texi2dvi
 BuildRequires:	which
 BuildRequires:	xorg-lib-libX11-devel
 Requires:	SDL >= 1.2.1
@@ -82,7 +81,7 @@ aby działał na kolejnych procesorach. QEMU ma dwa tryby pracy:
   pojedynczym serwerze.
 
 %prep
-%setup -q 
+%setup -q
 %patch0 -p1
 %{?with_nosdlgui:%patch6 -p1}
 #patch8 -p1
