@@ -1,6 +1,9 @@
-#
 # TODO:
 # - update patches
+# - qemu-system-ppc -hda ac-ppc.img says:
+#   qemu: could not open disk image ac-ppc.img: Success
+#   qemu-0.12.2-2.x86_64.rpm - broken
+#   qemu-0.11.1-7k.x86_64.rpm - OK
 #
 # Conditional build:
 %bcond_with	cflags_passing		# with passing rpmcflags to Makefiles
