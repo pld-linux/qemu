@@ -13,13 +13,13 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	0.12.2
-Release:	2
+Version:	0.12.3
+Release:	1
 License:	GPL
 Group:		Applications/Emulators
 # Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 Source0:	http://download.savannah.gnu.org/releases/qemu/%{name}-%{version}.tar.gz
-# Source0-md5:	1d7c2d95acb6d0789de86508c608e26d
+# Source0-md5:	d215e4568650e8019816397174c090e1
 Patch0:		%{name}-ncurses.patch
 Patch6:		%{name}-nosdlgui.patch
 # Proof of concept, for reference, do not remove
@@ -31,6 +31,7 @@ Patch15:	%{name}-isa-bios-ram.patch
 # below one fixes problems with passing ram size to bios/bootloader
 # which affects coreboot/linuxbios
 Patch16:	%{name}-piix-ram-size.patch
+Patch17:        %{name}-whitelist.patch
 URL:		http://www.nongnu.org/qemu/
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
@@ -88,6 +89,7 @@ aby działał na kolejnych procesorach. QEMU ma dwa tryby pracy:
 %patch0 -p1
 %{?with_nosdlgui:%patch6 -p1}
 #patch8 -p1
+%patch17 -p0
 
 %{__sed} -i -e 's/sdl_static=yes/sdl_static=no/' configure
 %{__sed} -i 's/.*MAKE) -C kqemu$//' Makefile
