@@ -3,7 +3,7 @@
 # - qemu-system-ppc -hda ac-ppc.img says:
 #   qemu: could not open disk image ac-ppc.img: Success
 #   qemu-0.12.2-2.x86_64.rpm - broken
-#   qemu-0.12.3-3.x86_64 - stops on "returning from prom_init"
+#   qemu-0.12.3-3.x86_64/qemu-0.12.4-1.x86_64 - stops on "returning from prom_init"
 #   qemu-0.11.1-7k.x86_64.rpm - OK
 #
 # Conditional build:
