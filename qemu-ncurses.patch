@@ -9,8 +9,8 @@
  #ifdef __OpenBSD__
  #define resize_term resizeterm
  #endif
---- qemu-0.12.2.a/curses.c	2010-02-02 18:29:18.000000000 +0100
-+++ qemu-0.12.2.a/curses.c	2010-02-02 18:29:47.000000000 +0100
+--- qemu-0.12.2.a/ui/curses.c	2010-02-02 18:29:18.000000000 +0100
++++ qemu-0.12.2.a/ui/curses.c	2010-02-02 18:29:47.000000000 +0100
 @@ -21,7 +21,7 @@
   * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   * THE SOFTWARE.
@@ -20,3 +20,14 @@
  
  #ifndef _WIN32
  #include <signal.h>
+--- qemu-0.13.0/ui/curses_keys.h~	2010-10-15 21:56:09.000000000 +0100
++++ qemu-0.13.0/ui/curses_keys.h	2010-10-20 13:38:16.578832783 +0100
+@@ -22,7 +22,7 @@
+  * THE SOFTWARE.
+  */
+ 
+-#include <curses.h>
++#include <ncurses/curses.h>
+ #include "keymaps.h"
+ 
+ 

@@ -14,13 +14,13 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	0.12.5
+Version:	0.13.0
 Release:	1
 License:	GPL
 Group:		Applications/Emulators
 # Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 Source0:	http://download.savannah.gnu.org/releases/qemu/%{name}-%{version}.tar.gz
-# Source0-md5:	1d02ee0a04dfae2894340273372c1de4
+# Source0-md5:	397a0d665da8ba9d3b9583629f3d6421
 Patch0:		%{name}-ncurses.patch
 Patch6:		%{name}-nosdlgui.patch
 # Proof of concept, for reference, do not remove
@@ -33,7 +33,7 @@ Patch15:	%{name}-isa-bios-ram.patch
 # which affects coreboot/linuxbios
 Patch16:	%{name}-piix-ram-size.patch
 Patch17:	%{name}-whitelist.patch
-URL:		http://www.nongnu.org/qemu/
+URL:		http://wiki.qemu.org/Index.html
 BuildRequires:	SDL-devel >= 1.2.1
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bluez-libs-devel
