@@ -1,11 +1,11 @@
---- create_config.orig	2010-02-23 20:54:38.000000000 +0000
-+++ create_config	2010-03-26 00:07:45.048375421 +0000
-@@ -29,7 +29,9 @@
+--- scripts/create_config.org	2011-02-16 15:44:05.000000000 +0100
++++ scripts/create_config	2011-03-21 21:26:16.136615526 +0100
+@@ -33,7 +33,9 @@
   CONFIG_BDRV_WHITELIST=*)
      echo "#define CONFIG_BDRV_WHITELIST \\"
      for drv in ${line#*=}; do
 -      echo "    \"${drv}\",\\"
-+      if [ ! -z "$drv" ]; then     
++      if [ ! -z "$drv" ]; then
 +        echo "    \"${drv}\",\\"
 +      fi
      done
