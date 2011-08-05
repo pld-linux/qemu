@@ -11,16 +11,19 @@
 %bcond_with	dosguest		# add special patch when use with DOS as guest os
 %bcond_with	nosdlgui		# do not use SDL gui (use X11 instead)
 
+%define		subver	rc2
+
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	0.14.1
+Version:	0.15.0
 Release:	1
 License:	GPL
 Group:		Applications/Emulators
 # Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
-Source0:	http://download.savannah.gnu.org/releases/qemu/%{name}-%{version}.tar.gz
-# Source0-md5:	b6c713a8db638e173af53a62d5178640
+#Source0:	http://download.savannah.gnu.org/releases/qemu/%{name}-%{version}.tar.gz
+Source0:	http://wiki.qemu.org/download/%{name}-%{version}-%{subver}.tar.gz
+# Source0-md5:	f35980566af26a9d3d32d93509807f77
 Patch0:		%{name}-ncurses.patch
 Patch6:		%{name}-nosdlgui.patch
 # Proof of concept, for reference, do not remove
@@ -86,10 +89,9 @@ aby działał na kolejnych procesorach. QEMU ma dwa tryby pracy:
   pojedynczym serwerze.
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}-%{subver}
 %patch0 -p1
 %{?with_nosdlgui:%patch6 -p1}
-#patch8 -p1
 %patch17 -p0
 
 %{__sed} -i -e 's/sdl_static=yes/sdl_static=no/' configure
