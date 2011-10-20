@@ -103,6 +103,9 @@ aby działał na kolejnych procesorach. QEMU ma dwa tryby pracy:
 %{__sed} -i 's/-g $CFLAGS/-Wall -fno-var-tracking-assignments/' configure
 %endif
 
+# workaround for conflict with alsa/error.h
+ln -s ../error.h qapi/error.h
+
 %build
 # --extra-cflags don't work (overridden by CFLAGS in Makefile*)
 # they can be passed if the cflags_passing bcond is used
