@@ -31,3 +31,14 @@
  #include "keymaps.h"
  
  
+--- qemu-1.0/console.h.wiget	2011-12-01 23:44:44.809570527 +0100
++++ qemu-1.0/console.h	2011-12-01 23:45:02.775490445 +0100
+@@ -329,7 +329,7 @@ static inline int ds_get_bytes_per_pixel
+ }
+ 
+ #ifdef CONFIG_CURSES
+-#include <curses.h>
++#include <ncurses/curses.h>
+ typedef chtype console_ch_t;
+ #else
+ typedef unsigned long console_ch_t;

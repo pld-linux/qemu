@@ -14,14 +14,14 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	0.15.1
-Release:	1
+Version:	1.0
+Release:	0.1
 License:	GPL
 Group:		Applications/Emulators
 # Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
 #Source0:	http://download.savannah.gnu.org/releases/qemu/%{name}-%{version}.tar.gz
 Source0:	http://wiki.qemu.org/download/%{name}-%{version}.tar.gz
-# Source0-md5:	34f17737baaf1b3495c89cd6d4a607ed
+# Source0-md5:	a64b36067a191451323b0d34ebb44954
 Patch0:		%{name}-ncurses.patch
 Patch6:		%{name}-nosdlgui.patch
 # Proof of concept, for reference, do not remove
@@ -116,7 +116,7 @@ ln -s ../error.h qapi/error.h
 	--enable-mixemu \
 	--audio-drv-list="alsa" \
 	--interp-prefix=%{_libdir}/%{name}
-%{__make}
+%{__make} V=1
 
 %install
 rm -rf $RPM_BUILD_ROOT
