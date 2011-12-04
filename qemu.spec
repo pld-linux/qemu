@@ -15,7 +15,7 @@ Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
 Version:	1.0
-Release:	0.1
+Release:	1
 License:	GPL
 Group:		Applications/Emulators
 # Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
@@ -48,12 +48,13 @@ BuildRequires:	texi2html
 BuildRequires:	which
 BuildRequires:	xorg-lib-libX11-devel
 Requires:	SDL >= 1.2.1
+Obsoletes:	qemu-kvm
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
 ExclusiveArch:	%{ix86} %{x8664} %{?with_userspace:ppc}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # some PPC/SPARC boot image in ELF format
-%define		_noautostrip	.*%{_datadir}/qemu/openbios-.*
+%define		_noautostrip	.*%{_datadir}/qemu/.*-.*
 
 %description
 QEMU is a FAST! processor emulator. By using dynamic translation it
@@ -110,6 +111,7 @@ ln -s ../error.h qapi/error.h
 # --extra-cflags don't work (overridden by CFLAGS in Makefile*)
 # they can be passed if the cflags_passing bcond is used
 ./configure \
+	--sysconfdir=%{_sysconfdir} \
 	--prefix=%{_prefix} \
 	--cc="%{__cc}" \
 	--host-cc="%{__cc}" \
@@ -142,6 +144,8 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu-ifup
 %attr(755,root,root) %{_bindir}/*
 %{_datadir}/qemu
+%dir %{_sysconfdir}/qemu
+%attr(644,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu/target-*.conf
 %{_mandir}/man1/qemu.1*
 %{_mandir}/man1/qemu-img.1*
 %{_mandir}/man8/qemu-nbd.8*
