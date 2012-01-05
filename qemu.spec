@@ -1,10 +1,11 @@
 # TODO:
 # - update patches
 # - qemu-system-ppc -hda ac-ppc.img says:
-#   qemu: could not open disk image ac-ppc.img: Success
+#   qemu: could not open disk image ac-ppc.img: error "Success"
 #   qemu-0.12.2-2.x86_64.rpm - broken
 #   qemu-0.12.3-3.x86_64/qemu-0.12.4-1.x86_64 - stops on "returning from prom_init"
-#   qemu-0.11.1-7k.x86_64.rpm - OK
+#   qemu-0.15.0-2.x86_64.rpm - qemu-system-sparc/ppc booting with -kernel, -initrd options stalls in openbios prompt
+#   qemu-0.11.1-*.x86_64.rpm - OK
 #
 # Conditional build:
 %bcond_with	cflags_passing		# with passing rpmcflags to Makefiles
@@ -15,11 +16,9 @@ Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
 Version:	1.0
-Release:	1
+Release:	2
 License:	GPL
 Group:		Applications/Emulators
-# Source0Download: http://fabrice.bellard.free.fr/qemu/download.html
-#Source0:	http://download.savannah.gnu.org/releases/qemu/%{name}-%{version}.tar.gz
 Source0:	http://wiki.qemu.org/download/%{name}-%{version}.tar.gz
 # Source0-md5:	a64b36067a191451323b0d34ebb44954
 Patch0:		%{name}-ncurses.patch
@@ -47,8 +46,21 @@ BuildRequires:	sed >= 4.0
 BuildRequires:	texi2html
 BuildRequires:	which
 BuildRequires:	xorg-lib-libX11-devel
-Requires:	SDL >= 1.2.1
-Obsoletes:	qemu-kvm
+Requires:	%{name}-img = %{version}-%{release}
+Requires:	%{name}-system-alpha = %{version}-%{release}
+Requires:	%{name}-system-arm = %{version}-%{release}
+Requires:	%{name}-system-cris = %{version}-%{release}
+Requires:	%{name}-system-lm32 = %{version}-%{release}
+Requires:	%{name}-system-m68k = %{version}-%{release}
+Requires:	%{name}-system-microblaze = %{version}-%{release}
+Requires:	%{name}-system-mips = %{version}-%{release}
+Requires:	%{name}-system-ppc = %{version}-%{release}
+Requires:	%{name}-system-s390x = %{version}-%{release}
+Requires:	%{name}-system-sh4 = %{version}-%{release}
+Requires:	%{name}-system-sparc = %{version}-%{release}
+Requires:	%{name}-system-x86 = %{version}-%{release}
+Requires:	%{name}-system-xtensa = %{version}-%{release}
+Requires:	%{name}-user = %{version}-%{release}
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
 ExclusiveArch:	%{ix86} %{x8664} %{?with_userspace:ppc}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -86,6 +98,183 @@ aby działał na kolejnych procesorach. QEMU ma dwa tryby pracy:
   włączając w to procesor i różne urządzenia peryferyjne. Może być także
   używane do wirtualnego hostowania kilku wirtualnych pecetów na
   pojedynczym serwerze.
+
+%package  common
+Summary:	QEMU common files needed by all QEMU targets
+Group:		Development/Tools
+Requires:	SDL >= 1.2.1
+Conflicts:	qemu < 1.0-2
+
+%description common
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the common files needed by all QEMU targets.
+
+%package  img
+Summary:	QEMU command line tool for manipulating disk images
+Group:		Development/Tools
+Conflicts:	qemu < 1.0-2
+
+%description img
+This package provides a command line tool for manipulating disk images
+
+%package user
+Summary:	QEMU user mode emulation of qemu targets
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description user
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the user mode emulation of QEMU targets.
+
+%package system-alpha
+Summary:	QEMU system emulator for alpha
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description system-alpha
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator for alpha.
+
+%package system-arm
+Summary:	QEMU system emulator for arm
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description system-arm
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator for arm.
+
+%package system-cris
+Summary:	QEMU system emulator for cris
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description system-cris
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator for cris.
+
+%package system-lm32
+Summary:	QEMU system emulator for lm32
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description system-lm32
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator for lm32.
+
+%package system-m68k
+Summary:	QEMU system emulator for m68k
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description system-m68k
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator for m68k.
+
+%package system-microblaze
+Summary:	QEMU system emulator for microblaze
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description system-microblaze
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator for microblaze.
+
+%package system-mips
+Summary:	QEMU system emulator for mips
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description system-mips
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator for mips.
+
+%package system-ppc
+Summary:	QEMU system emulator for ppc
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description system-ppc
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator for ppc.
+
+%package system-s390x
+Summary:	QEMU system emulator for s390x
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description system-s390x
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator for s390x.
+
+%package system-sh4
+Summary:	QEMU system emulator for sh4
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description system-sh4
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator for sh4.
+
+%package system-sparc
+Summary:	QEMU system emulator for sparc
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description system-sparc
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator for sparc/sparc64.
+
+%package system-x86
+Summary:	QEMU system emulator for x86
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+Obsoletes:	qemu-kvm
+
+%description system-x86
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator for x86. When being run in a
+x86 machine that supports it, this package also provides the KVM
+virtualization platform.
+
+%package system-xtensa
+Summary:	QEMU system emulator for xtensa
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description system-xtensa
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator for xtensa.
 
 %prep
 %setup -q
@@ -140,12 +329,116 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
+
+%files common
+%defattr(644,root,root,755)
 %doc README qemu-doc.html qemu-tech.html
 %attr(755,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu-ifup
-%attr(755,root,root) %{_bindir}/*
-%{_datadir}/qemu
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu/target-*.conf
 %dir %{_sysconfdir}/qemu
-%attr(644,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu/target-*.conf
+%attr(755,root,root) %{_bindir}/qemu-nbd
 %{_mandir}/man1/qemu.1*
-%{_mandir}/man1/qemu-img.1*
 %{_mandir}/man8/qemu-nbd.8*
+
+%dir %{_datadir}/qemu
+%{_datadir}/%{name}/keymaps
+# various bios images
+%{_datadir}/%{name}/*.bin
+%{_datadir}/%{name}/*.rom
+%{_datadir}/%{name}/*.dtb
+%{_datadir}/%{name}/openbios-ppc
+%{_datadir}/%{name}/openbios-sparc*
+%{_datadir}/%{name}/palcode-clipper
+
+%files img
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-img
+%{_mandir}/man1/qemu-img.1*
+
+%files user
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-x86_64
+%attr(755,root,root) %{_bindir}/qemu-i386
+%attr(755,root,root) %{_bindir}/qemu-alpha
+%attr(755,root,root) %{_bindir}/qemu-arm
+%attr(755,root,root) %{_bindir}/qemu-armeb
+%attr(755,root,root) %{_bindir}/qemu-cris
+%attr(755,root,root) %{_bindir}/qemu-ga
+%attr(755,root,root) %{_bindir}/qemu-io
+%attr(755,root,root) %{_bindir}/qemu-m68k
+%attr(755,root,root) %{_bindir}/qemu-microblaze
+%attr(755,root,root) %{_bindir}/qemu-microblazeel
+%attr(755,root,root) %{_bindir}/qemu-mips
+%attr(755,root,root) %{_bindir}/qemu-mipsel
+%attr(755,root,root) %{_bindir}/qemu-ppc
+%attr(755,root,root) %{_bindir}/qemu-ppc64
+%attr(755,root,root) %{_bindir}/qemu-ppc64abi32
+%attr(755,root,root) %{_bindir}/qemu-s390x
+%attr(755,root,root) %{_bindir}/qemu-sh4
+%attr(755,root,root) %{_bindir}/qemu-sh4eb
+%attr(755,root,root) %{_bindir}/qemu-sparc
+%attr(755,root,root) %{_bindir}/qemu-sparc32plus
+%attr(755,root,root) %{_bindir}/qemu-sparc64
+%attr(755,root,root) %{_bindir}/qemu-unicore32
+
+%files system-alpha
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-alpha
+
+%files system-arm
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-arm
+
+%files system-cris
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-cris
+
+%files system-lm32
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-lm32
+
+%files system-m68k
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-m68k
+
+%files system-microblaze
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-microblaze
+%attr(755,root,root) %{_bindir}/qemu-system-microblazeel
+
+%files system-mips
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-mips
+%attr(755,root,root) %{_bindir}/qemu-system-mipsel
+%attr(755,root,root) %{_bindir}/qemu-system-mips64
+%attr(755,root,root) %{_bindir}/qemu-system-mips64el
+
+%files system-ppc
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-ppc
+%attr(755,root,root) %{_bindir}/qemu-system-ppc64
+%attr(755,root,root) %{_bindir}/qemu-system-ppcemb
+
+%files system-s390x
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-s390x
+
+%files system-sh4
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-sh4
+%attr(755,root,root) %{_bindir}/qemu-system-sh4eb
+
+%files system-sparc
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-sparc
+%attr(755,root,root) %{_bindir}/qemu-system-sparc64
+
+%files system-x86
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-i386
+%attr(755,root,root) %{_bindir}/qemu-system-x86_64
+
+%files system-xtensa
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-xtensa
+%attr(755,root,root) %{_bindir}/qemu-system-xtensaeb
