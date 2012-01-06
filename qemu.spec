@@ -66,7 +66,7 @@ ExclusiveArch:	%{ix86} %{x8664} %{?with_userspace:ppc}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # some PPC/SPARC boot image in ELF format
-%define		_noautostrip	.*%{_datadir}/qemu/.*-.*
+%define		_noautostrip	.*%{_datadir}/qemu/.*-.* .*%{_datadir}/qemu/bios.bin
 
 %description
 QEMU is a FAST! processor emulator. By using dynamic translation it
