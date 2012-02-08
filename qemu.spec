@@ -16,7 +16,7 @@ Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
 Version:	1.0
-Release:	5
+Release:	6
 License:	GPL
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu.org/download/%{name}-%{version}.tar.gz
@@ -44,6 +44,7 @@ BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
 BuildRequires:	sed >= 4.0
 BuildRequires:	texi2html
+BuildRequires:	texinfo
 BuildRequires:	which
 BuildRequires:	xorg-lib-libX11-devel
 Requires:	%{name}-img = %{version}-%{release}
@@ -66,7 +67,7 @@ ExclusiveArch:	%{ix86} %{x8664} %{?with_userspace:ppc}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # some PPC/SPARC boot image in ELF format
-%define		_noautostrip	.*%{_datadir}/qemu/.*-.* .*%{_datadir}/qemu/bios.bin
+%define		_noautostrip	.*%{_datadir}/qemu/.*-.*
 
 %description
 QEMU is a FAST! processor emulator. By using dynamic translation it
