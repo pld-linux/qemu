@@ -9,29 +9,20 @@
 #
 # Conditional build:
 %bcond_with	cflags_passing		# with passing rpmcflags to Makefiles
-%bcond_with	dosguest		# add special patch when use with DOS as guest os
 %bcond_with	nosdlgui		# do not use SDL gui (use X11 instead)
 
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
 Version:	1.0
-Release:	7
+Release:	8
 License:	GPL
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu.org/download/%{name}-%{version}.tar.gz
 # Source0-md5:	a64b36067a191451323b0d34ebb44954
-Patch0:		%{name}-ncurses.patch
 Patch6:		%{name}-nosdlgui.patch
 # Proof of concept, for reference, do not remove
 Patch8:		%{name}-kde_virtual_workspaces_hack.patch
-#Patch12: %{name}-0.7.2-dyngen-check-stack-clobbers.patch
-Patch13:	%{name}-dosguest.patch
-Patch14:	%{name}-ppc_old_binutils.patch
-Patch15:	%{name}-isa-bios-ram.patch
-# below one fixes problems with passing ram size to bios/bootloader
-# which affects coreboot/linuxbios
-Patch16:	%{name}-piix-ram-size.patch
 Patch17:	%{name}-whitelist.patch
 URL:		http://wiki.qemu.org/Index.html
 BuildRequires:	SDL-devel >= 1.2.1
@@ -278,7 +269,6 @@ This package provides the system emulator for xtensa.
 
 %prep
 %setup -q
-%patch0 -p1
 %{?with_nosdlgui:%patch6 -p1}
 #patch8 -p1
 %patch17 -p0
