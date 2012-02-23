@@ -8,7 +8,6 @@
 #   qemu-0.11.1-*.x86_64.rpm - OK
 #
 # Conditional build:
-%bcond_with	cflags_passing		# with passing rpmcflags to Makefiles
 %bcond_with	nosdlgui		# do not use SDL gui (use X11 instead)
 
 Summary:	QEMU CPU Emulator
@@ -20,6 +19,7 @@ License:	GPL
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu.org/download/%{name}-%{version}.tar.gz
 # Source0-md5:	a64b36067a191451323b0d34ebb44954
+Patch0:		qemu-cflags.patch
 Patch6:		%{name}-nosdlgui.patch
 # Proof of concept, for reference, do not remove
 Patch8:		%{name}-kde_virtual_workspaces_hack.patch
@@ -269,27 +269,18 @@ This package provides the system emulator for xtensa.
 
 %prep
 %setup -q
+%patch0 -p1
 %{?with_nosdlgui:%patch6 -p1}
 #patch8 -p1
 %patch17 -p0
-
-%{__sed} -i -e 's/sdl_static=yes/sdl_static=no/' configure
-%{__sed} -i 's/.*MAKE) -C kqemu$//' Makefile
-
-# cannot use optflags on x86 - they cause "no register to spill" errors
-%if %{with cflags_passing}
-%{__sed} -i -e 's/-g $CFLAGS/-Wall %{rpmcflags}/' configure
-%else
-%{__sed} -i 's/-g $CFLAGS/-Wall -fno-var-tracking-assignments/' configure
-%endif
 
 # workaround for conflict with alsa/error.h
 ln -s ../error.h qapi/error.h
 
 %build
-# --extra-cflags don't work (overridden by CFLAGS in Makefile*)
-# they can be passed if the cflags_passing bcond is used
 ./configure \
+	--extra-cflags="%{rpmcflags} -I/usr/include/ncurses" \
+	--extra-ldflags="%{rpmldflags}" \
 	--sysconfdir=%{_sysconfdir} \
 	--prefix=%{_prefix} \
 	--cc="%{__cc}" \
