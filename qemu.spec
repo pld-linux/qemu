@@ -16,7 +16,7 @@ Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
 Version:	1.0
-Release:	6
+Release:	7
 License:	GPL
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu.org/download/%{name}-%{version}.tar.gz
@@ -256,7 +256,6 @@ This package provides the system emulator for sparc/sparc64.
 Summary:	QEMU system emulator for x86
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
-Obsoletes:	qemu-kvm
 
 %description system-x86
 QEMU is a generic and open source processor emulator which achieves a
