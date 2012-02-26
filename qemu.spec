@@ -13,12 +13,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	1.0
-Release:	8
+Version:	1.0.1
+Release:	1
 License:	GPL
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu.org/download/%{name}-%{version}.tar.gz
-# Source0-md5:	a64b36067a191451323b0d34ebb44954
+# Source0-md5:	5efd1091f01e3bc31bfdec27b8edeb00
 Patch0:		qemu-cflags.patch
 Patch6:		%{name}-nosdlgui.patch
 # Proof of concept, for reference, do not remove
