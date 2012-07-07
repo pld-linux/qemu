@@ -1,4 +1,5 @@
 # TODO:
+# - package virtfs-proxy-helper, qemu-bridge-helper.
 # - update patches
 # - qemu-system-ppc -hda ac-ppc.img says:
 #   qemu: could not open disk image ac-ppc.img: error "Success"
@@ -13,12 +14,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	1.0.1
+Version:	1.1.0
 Release:	1
 License:	GPL
 Group:		Applications/Emulators
-Source0:	http://wiki.qemu.org/download/%{name}-%{version}.tar.gz
-# Source0-md5:	5efd1091f01e3bc31bfdec27b8edeb00
+Source0:	http://wiki.qemu.org/download/%{name}-%{version}-1.tar.bz2
+# Source0-md5:	f5c85c229b780bc39268845b6f365fc1
 Patch0:		qemu-cflags.patch
 Patch6:		%{name}-nosdlgui.patch
 # Proof of concept, for reference, do not remove
@@ -37,6 +38,7 @@ BuildRequires:	sed >= 4.0
 BuildRequires:	texi2html
 BuildRequires:	texinfo
 BuildRequires:	which
+BuildRequires:	xen-devel
 BuildRequires:	xorg-lib-libX11-devel
 Requires:	%{name}-img = %{version}-%{release}
 Requires:	%{name}-system-alpha = %{version}-%{release}
@@ -322,6 +324,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/qemu-nbd.8*
 
 %dir %{_datadir}/qemu
+%{_datadir}/%{name}/cpus-*.conf
 %{_datadir}/%{name}/keymaps
 # various bios images
 %{_datadir}/%{name}/*.bin
