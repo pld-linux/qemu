@@ -22,6 +22,7 @@ Group:		Applications/Emulators
 Source0:	http://wiki.qemu.org/download/%{name}-%{version}.tar.bz2
 # Source0-md5:	78eb1e984f4532aa9f2bdd3c127b5b61
 Patch0:		%{name}-cflags.patch
+Patch1:		vgabios-widescreens.patch
 Patch6:		%{name}-nosdlgui.patch
 # Proof of concept, for reference, do not remove
 Patch8:		%{name}-kde_virtual_workspaces_hack.patch
@@ -273,6 +274,7 @@ This package provides the system emulator for xtensa.
 %prep
 %setup -q
 %patch0 -p1
+%patch1 -p1
 %{?with_nosdlgui:%patch6 -p1}
 #patch8 -p1
 %patch17 -p0
@@ -294,6 +296,9 @@ ln -s ../error.h qapi/error.h
 	--interp-prefix=%{_libdir}/%{name}
 %{__make} V=1
 
+# rebuild patched vesa tables with additional widescreen modes.
+%{__make} -C roms/vgabios stdvga-bios
+
 %install
 rm -rf $RPM_BUILD_ROOT
 
@@ -308,6 +313,9 @@ EOF
 
 # already packaged
 rm -rf $RPM_BUILD_ROOT%{_docdir}/qemu/qemu-{doc,tech}.html
+
+# install patched vesa tables with additional widescreen modes.
+install -m 644 roms/vgabios/VGABIOS-lgpl-latest.stdvga.bin $RPM_BUILD_ROOT%{_datadir}/%{name}/vgabios-stdvga.bin
 
 %clean
 rm -rf $RPM_BUILD_ROOT
