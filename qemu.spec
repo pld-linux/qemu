@@ -21,6 +21,7 @@ License:	GPL
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu.org/download/%{name}-%{version}.tar.bz2
 # Source0-md5:	78eb1e984f4532aa9f2bdd3c127b5b61
+Patch0:		%{name}-cflags.patch
 Patch6:		%{name}-nosdlgui.patch
 # Proof of concept, for reference, do not remove
 Patch8:		%{name}-kde_virtual_workspaces_hack.patch
