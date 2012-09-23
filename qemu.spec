@@ -54,6 +54,7 @@ Requires:	%{name}-system-ppc = %{version}-%{release}
 Requires:	%{name}-system-s390x = %{version}-%{release}
 Requires:	%{name}-system-sh4 = %{version}-%{release}
 Requires:	%{name}-system-sparc = %{version}-%{release}
+Requires:	%{name}-system-unicore32 = %{version}-%{release}
 Requires:	%{name}-system-x86 = %{version}-%{release}
 Requires:	%{name}-system-xtensa = %{version}-%{release}
 Requires:	%{name}-user = %{version}-%{release}
@@ -247,6 +248,17 @@ good emulation speed by using dynamic translation.
 
 This package provides the system emulator for sparc/sparc64.
 
+%package system-unicore32
+Summary:	QEMU system emulator for unicore32
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description system-unicore32
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator for unicore32.
+
 %package system-x86
 Summary:	QEMU system emulator for x86
 Group:		Development/Tools
@@ -426,6 +438,10 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-sparc
 %attr(755,root,root) %{_bindir}/qemu-system-sparc64
+
+%files system-unicore32
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-unicore32
 
 %files system-x86
 %defattr(644,root,root,755)
