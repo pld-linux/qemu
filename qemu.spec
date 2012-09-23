@@ -1,5 +1,6 @@
 # TODO:
 # - package virtfs-proxy-helper, qemu-bridge-helper.
+# - package qemu-system-or32
 # - update patches
 # - qemu-system-ppc -hda ac-ppc.img says:
 #   qemu: could not open disk image ac-ppc.img: error "Success"
@@ -14,13 +15,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	1.1.0
+Version:	1.2.0
 Release:	1
 License:	GPL
 Group:		Applications/Emulators
-Source0:	http://wiki.qemu.org/download/%{name}-%{version}-1.tar.bz2
-# Source0-md5:	f5c85c229b780bc39268845b6f365fc1
-Patch0:		qemu-cflags.patch
+Source0:	http://wiki.qemu.org/download/%{name}-%{version}.tar.bz2
+# Source0-md5:	78eb1e984f4532aa9f2bdd3c127b5b61
 Patch6:		%{name}-nosdlgui.patch
 # Proof of concept, for reference, do not remove
 Patch8:		%{name}-kde_virtual_workspaces_hack.patch
@@ -283,6 +283,7 @@ ln -s ../error.h qapi/error.h
 ./configure \
 	--extra-cflags="%{rpmcflags} -I/usr/include/ncurses" \
 	--extra-ldflags="%{rpmldflags}" \
+	--disable-strip \
 	--sysconfdir=%{_sysconfdir} \
 	--prefix=%{_prefix} \
 	--cc="%{__cc}" \
