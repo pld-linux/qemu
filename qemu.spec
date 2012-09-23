@@ -1,6 +1,5 @@
 # TODO:
 # - package virtfs-proxy-helper, qemu-bridge-helper.
-# - package qemu-system-or32
 # - update patches
 # - qemu-system-ppc -hda ac-ppc.img says:
 #   qemu: could not open disk image ac-ppc.img: error "Success"
@@ -51,6 +50,7 @@ Requires:	%{name}-system-m68k = %{version}-%{release}
 Requires:	%{name}-system-microblaze = %{version}-%{release}
 Requires:	%{name}-system-mips = %{version}-%{release}
 Requires:	%{name}-system-ppc = %{version}-%{release}
+Requires:	%{name}-system-or32 = %{version}-%{release}
 Requires:	%{name}-system-s390x = %{version}-%{release}
 Requires:	%{name}-system-sh4 = %{version}-%{release}
 Requires:	%{name}-system-sparc = %{version}-%{release}
@@ -203,6 +203,17 @@ QEMU is a generic and open source processor emulator which achieves a
 good emulation speed by using dynamic translation.
 
 This package provides the system emulator for mips.
+
+%package system-or32
+Summary:	QEMU system emulator for or32
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description system-or32
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator for or32.
 
 %package system-ppc
 Summary:	QEMU system emulator for ppc
@@ -376,6 +387,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/qemu-microblazeel
 %attr(755,root,root) %{_bindir}/qemu-mips
 %attr(755,root,root) %{_bindir}/qemu-mipsel
+%attr(755,root,root) %{_bindir}/qemu-or32
 %attr(755,root,root) %{_bindir}/qemu-ppc
 %attr(755,root,root) %{_bindir}/qemu-ppc64
 %attr(755,root,root) %{_bindir}/qemu-ppc64abi32
@@ -418,6 +430,10 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/qemu-system-mipsel
 %attr(755,root,root) %{_bindir}/qemu-system-mips64
 %attr(755,root,root) %{_bindir}/qemu-system-mips64el
+
+%files system-or32
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-or32
 
 %files system-ppc
 %defattr(644,root,root,755)
