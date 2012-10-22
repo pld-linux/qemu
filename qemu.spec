@@ -1,5 +1,4 @@
 # TODO:
-# - package virtfs-proxy-helper, qemu-bridge-helper.
 # - update patches
 # - qemu-system-ppc -hda ac-ppc.img says:
 #   qemu: could not open disk image ac-ppc.img: error "Success"
@@ -309,15 +308,19 @@ ln -s ../error.h qapi/error.h
 ./configure \
 	--extra-cflags="%{rpmcflags} -I/usr/include/ncurses" \
 	--extra-ldflags="%{rpmldflags}" \
-	--disable-strip \
 	--sysconfdir=%{_sysconfdir} \
 	--prefix=%{_prefix} \
 	--cc="%{__cc}" \
 	--host-cc="%{__cc}" \
+	--disable-strip \
 	--enable-mixemu \
 	--audio-drv-list="alsa" \
 	--interp-prefix=%{_libdir}/%{name}
-%{__make} V=1
+# note: CONFIG_QEMU_HELPERDIR is used when compiling, libexecdir when installing;
+# --libexecdir in configure is nop
+%{__make} \
+	V=1 \
+	CONFIG_QEMU_HELPERDIR="%{_libdir}"
 
 # rebuild patched vesa tables with additional widescreen modes.
 %{__make} -C roms/vgabios stdvga-bios
@@ -326,7 +329,8 @@ ln -s ../error.h qapi/error.h
 rm -rf $RPM_BUILD_ROOT
 
 %{__make} install \
-	DESTDIR=$RPM_BUILD_ROOT
+	DESTDIR=$RPM_BUILD_ROOT \
+	libexecdir=%{_libdir}
 
 install -d $RPM_BUILD_ROOT%{_sysconfdir}
 cat <<'EOF' > $RPM_BUILD_ROOT%{_sysconfdir}/qemu-ifup
@@ -335,7 +339,8 @@ cat <<'EOF' > $RPM_BUILD_ROOT%{_sysconfdir}/qemu-ifup
 EOF
 
 # already packaged
-rm -rf $RPM_BUILD_ROOT%{_docdir}/qemu/qemu-{doc,tech}.html
+%{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qemu-{doc,tech}.html
+%{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qmp-commands.txt
 
 # install patched vesa tables with additional widescreen modes.
 install -m 644 roms/vgabios/VGABIOS-lgpl-latest.stdvga.bin $RPM_BUILD_ROOT%{_datadir}/%{name}/vgabios-stdvga.bin
@@ -348,17 +353,22 @@ rm -rf $RPM_BUILD_ROOT
 
 %files common
 %defattr(644,root,root,755)
-%doc README qemu-doc.html qemu-tech.html
+%doc README qemu-doc.html qemu-tech.html QMP/qmp-commands.txt
 %attr(755,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu-ifup
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu/target-*.conf
 %dir %{_sysconfdir}/qemu
+%attr(755,root,root) %{_bindir}/virtfs-proxy-helper
+%attr(755,root,root) %{_bindir}/vscclient
 %attr(755,root,root) %{_bindir}/qemu-nbd
+%attr(755,root,root) %{_libdir}/qemu-bridge-helper
 %{_mandir}/man1/qemu.1*
+%{_mandir}/man1/virtfs-proxy-helper.1*
 %{_mandir}/man8/qemu-nbd.8*
 
 %dir %{_datadir}/qemu
 %{_datadir}/%{name}/cpus-*.conf
 %{_datadir}/%{name}/keymaps
+%{_datadir}/%{name}/qemu-icon.bmp
 # various bios images
 %{_datadir}/%{name}/*.bin
 %{_datadir}/%{name}/*.rom
