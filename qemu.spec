@@ -8,8 +8,7 @@
 #   qemu-0.11.1-*.x86_64.rpm - OK
 #
 # Conditional build:
-%bcond_with	nosdlgui		# do not use SDL gui (use X11 instead)
-
+#
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
@@ -21,7 +20,6 @@ Source0:	http://wiki.qemu.org/download/%{name}-%{version}.tar.bz2
 # Source0-md5:	78eb1e984f4532aa9f2bdd3c127b5b61
 Patch0:		%{name}-cflags.patch
 Patch1:		vgabios-widescreens.patch
-Patch6:		%{name}-nosdlgui.patch
 # Proof of concept, for reference, do not remove
 Patch8:		%{name}-kde_virtual_workspaces_hack.patch
 Patch17:	%{name}-whitelist.patch
@@ -425,7 +423,6 @@ Ten pakiet zawiera emulator systemu z procesorem Xtensa.
 %setup -q
 %patch0 -p1
 %patch1 -p1
-%{?with_nosdlgui:%patch6 -p1}
 #patch8 -p1
 %patch17 -p0
 
