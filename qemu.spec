@@ -1,5 +1,4 @@
 # TODO:
-# - update patches
 # - qemu-system-ppc -hda ac-ppc.img says:
 #   qemu: could not open disk image ac-ppc.img: error "Success"
 #   qemu-0.12.2-2.x86_64.rpm - broken
@@ -8,36 +7,67 @@
 #   qemu-0.11.1-*.x86_64.rpm - OK
 #
 # Conditional build:
+%bcond_without	sdl		# SDL UI and audio support
+%bcond_without	opengl		# OpenGL support
+%bcond_without	ceph		# Ceph/RBD support
+%bcond_with	esd		# EsounD audio support
+%bcond_without	oss		# OSS audio support
+%bcond_without	pulseaudio	# PulseAudio audio support
+%bcond_without	xen		# Xen backend driver support
 #
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
 Version:	1.2.0
 Release:	4
-License:	GPL
+License:	GPL v2+
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu.org/download/%{name}-%{version}.tar.bz2
 # Source0-md5:	78eb1e984f4532aa9f2bdd3c127b5b61
 Patch0:		%{name}-cflags.patch
 Patch1:		vgabios-widescreens.patch
+Patch2:		%{name}-usbredir.patch
 # Proof of concept, for reference, do not remove
 Patch8:		%{name}-kde_virtual_workspaces_hack.patch
 Patch17:	%{name}-whitelist.patch
 URL:		http://wiki.qemu.org/Index.html
-BuildRequires:	SDL-devel >= 1.2.1
+%{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
+%{?with_sdl:BuildRequires:	SDL-devel >= 1.2.1}
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bluez-libs-devel
+BuildRequires:	brlapi-devel
+%{?with_ceph:BuildRequires:	ceph-devel}
+BuildRequires:	curl-devel
+BuildRequires:	cyrus-sasl-devel >= 2
+%{?with_esd:BuildRequires:	esound-devel}
+BuildRequires:	glib2-devel >= 1:2.12
 BuildRequires:	gnutls-devel
+BuildRequires:	libcap-devel
+BuildRequires:	libcap-ng-devel
+BuildRequires:	libfdt-devel
+BuildRequires:	libiscsi-devel
+BuildRequires:	libjpeg-devel
+BuildRequires:	libpng-devel
+BuildRequires:	libseccomp-devel
+BuildRequires:	libuuid-devel
 BuildRequires:	ncurses-devel
+BuildRequires:	nss-devel >= 3.12.8
 BuildRequires:	perl-Encode
 BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
+%{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 BuildRequires:	sed >= 4.0
+BuildRequires:	spice-protocol >= 0.8.0
+BuildRequires:	spice-server-devel >= 0.8.2
 BuildRequires:	texi2html
 BuildRequires:	texinfo
+BuildRequires:	usbredir-devel >= 0.3.4
+BuildRequires:	vde2-devel
 BuildRequires:	which
-BuildRequires:	xen-devel
+%{?with_xen:BuildRequires:	xen-devel >= 3.4}
+BuildRequires:	xfsprogs-devel
 BuildRequires:	xorg-lib-libX11-devel
+BuildRequires:	zlib-devel
 Requires:	%{name}-img = %{version}-%{release}
 Requires:	%{name}-system-alpha = %{version}-%{release}
 Requires:	%{name}-system-arm = %{version}-%{release}
@@ -58,6 +88,9 @@ Requires:	%{name}-user = %{version}-%{release}
 # sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
 ExclusiveArch:	%{ix86} %{x8664} %{?with_userspace:ppc}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+
+%define	systempkg_req \
+Requires:	SDL >= 1.2.1
 
 # some PPC/SPARC boot image in ELF format
 %define		_noautostrip	.*%{_datadir}/qemu/.*-.*
@@ -97,7 +130,7 @@ aby działał na kolejnych procesorach. QEMU ma dwa tryby pracy:
 Summary:	QEMU common files needed by all QEMU targets
 Summary(pl.UTF-8):	Wspólne pliki QEMU wymagane przez wszystkie środowiska QEMU
 Group:		Development/Tools
-Requires:	SDL >= 1.2.1
+Requires:	glib2 >= 1:2.12
 Conflicts:	qemu < 1.0-2
 
 %description common
@@ -150,6 +183,7 @@ Summary:	QEMU system emulator for Alpha
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Alpha
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
 
 %description system-alpha
 QEMU is a generic and open source processor emulator which achieves a
@@ -168,6 +202,7 @@ Summary:	QEMU system emulator for ARM
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem ARM
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
 
 %description system-arm
 QEMU is a generic and open source processor emulator which achieves a
@@ -186,6 +221,7 @@ Summary:	QEMU system emulator for cris
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem CRIS
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
 
 %description system-cris
 QEMU is a generic and open source processor emulator which achieves a
@@ -204,6 +240,7 @@ Summary:	QEMU system emulator for LM32
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem LM32
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
 
 %description system-lm32
 QEMU is a generic and open source processor emulator which achieves a
@@ -222,6 +259,7 @@ Summary:	QEMU system emulator for m68k
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem m68k
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
 
 %description system-m68k
 QEMU is a generic and open source processor emulator which achieves a
@@ -240,6 +278,7 @@ Summary:	QEMU system emulator for MicroBlaze
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem MicroBlaze
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
 
 %description system-microblaze
 QEMU is a generic and open source processor emulator which achieves a
@@ -258,6 +297,7 @@ Summary:	QEMU system emulator for MIPS
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem MIPS
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
 
 %description system-mips
 QEMU is a generic and open source processor emulator which achieves a
@@ -276,6 +316,7 @@ Summary:	QEMU system emulator for OpenRISC
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem OpenRISC
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
 
 %description system-or32
 QEMU is a generic and open source processor emulator which achieves a
@@ -294,6 +335,7 @@ Summary:	QEMU system emulator for PowerPC
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem PowerPC
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
 
 %description system-ppc
 QEMU is a generic and open source processor emulator which achieves a
@@ -312,6 +354,7 @@ Summary:	QEMU system emulator for S390
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem S390
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
 
 %description system-s390x
 QEMU is a generic and open source processor emulator which achieves a
@@ -330,6 +373,7 @@ Summary:	QEMU system emulator for SH4
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem SH4
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
 
 %description system-sh4
 QEMU is a generic and open source processor emulator which achieves a
@@ -348,6 +392,7 @@ Summary:	QEMU system emulator for SPARC
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem SPARC
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
 
 %description system-sparc
 QEMU is a generic and open source processor emulator which achieves a
@@ -366,6 +411,7 @@ Summary:	QEMU system emulator for UniCore32
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem UniCore32
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
 
 %description system-unicore32
 QEMU is a generic and open source processor emulator which achieves a
@@ -384,6 +430,7 @@ Summary:	QEMU system emulator for x86
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem x86
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
 
 %description system-x86
 QEMU is a generic and open source processor emulator which achieves a
@@ -406,6 +453,7 @@ Summary:	QEMU system emulator for Xtensa
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Xtensa
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
 
 %description system-xtensa
 QEMU is a generic and open source processor emulator which achieves a
@@ -423,6 +471,7 @@ Ten pakiet zawiera emulator systemu z procesorem Xtensa.
 %setup -q
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 #patch8 -p1
 %patch17 -p0
 
@@ -438,8 +487,30 @@ ln -s ../error.h qapi/error.h
 	--cc="%{__cc}" \
 	--host-cc="%{__cc}" \
 	--disable-strip \
+	--enable-attr \
+	--enable-bluez \
+	--enable-brlapi \
+	--enable-cap-ng \
+	--enable-curl \
+	--enable-curses \
+	--enable-fdt \
+	--enable-libiscsi \
 	--enable-mixemu \
-	--audio-drv-list="alsa" \
+	%{__enable_disable opengl} \
+	%{__enable_disable ceph rbd} \
+	%{__enable_disable sdl} \
+	--enable-seccomp \
+	--enable-smartcard \
+	--enable-smartcard-nss \
+	--enable-usb-redir \
+	--enable-uuid \
+	--enable-vde \
+	--enable-virtfs \
+	--enable-vnc-jpeg \
+	--enable-vnc-sasl \
+	--enable-vnc-tls \
+	%{__enable_disable xen} \
+	--audio-drv-list="alsa oss%{?with_sdl: sdl}%{?with_esd: esd}%{?with_pulseaudio: pa}" \
 	--interp-prefix=%{_libdir}/%{name}
 # note: CONFIG_QEMU_HELPERDIR is used when compiling, libexecdir when installing;
 # --libexecdir in configure is nop
