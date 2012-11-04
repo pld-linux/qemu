@@ -10,6 +10,7 @@
 %bcond_without	sdl		# SDL UI and audio support
 %bcond_without	opengl		# OpenGL support
 %bcond_without	ceph		# Ceph/RBD support
+%bcond_without	spice		# SPICE support
 %bcond_with	esd		# EsounD audio support
 %bcond_without	oss		# OSS audio support
 %bcond_without	pulseaudio	# PulseAudio audio support
@@ -57,8 +58,10 @@ BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 BuildRequires:	sed >= 4.0
+%if %{with spice}
 BuildRequires:	spice-protocol >= 0.8.0
 BuildRequires:	spice-server-devel >= 0.8.2
+%endif
 BuildRequires:	texi2html
 BuildRequires:	texinfo
 BuildRequires:	usbredir-devel >= 0.3.4
@@ -217,7 +220,7 @@ dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 Ten pakiet zawiera emulator systemu z procesorem ARM.
 
 %package system-cris
-Summary:	QEMU system emulator for cris
+Summary:	QEMU system emulator for CRIS
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem CRIS
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
@@ -500,6 +503,7 @@ ln -s ../error.h qapi/error.h
 	%{__enable_disable ceph rbd} \
 	%{__enable_disable sdl} \
 	--enable-seccomp \
+	%{__enable_disable spice} \
 	--enable-smartcard \
 	--enable-smartcard-nss \
 	--enable-usb-redir \
@@ -580,13 +584,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files user
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/qemu-x86_64
-%attr(755,root,root) %{_bindir}/qemu-i386
 %attr(755,root,root) %{_bindir}/qemu-alpha
 %attr(755,root,root) %{_bindir}/qemu-arm
 %attr(755,root,root) %{_bindir}/qemu-armeb
 %attr(755,root,root) %{_bindir}/qemu-cris
 %attr(755,root,root) %{_bindir}/qemu-ga
+%attr(755,root,root) %{_bindir}/qemu-i386
 %attr(755,root,root) %{_bindir}/qemu-io
 %attr(755,root,root) %{_bindir}/qemu-m68k
 %attr(755,root,root) %{_bindir}/qemu-microblaze
@@ -604,6 +607,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/qemu-sparc32plus
 %attr(755,root,root) %{_bindir}/qemu-sparc64
 %attr(755,root,root) %{_bindir}/qemu-unicore32
+%attr(755,root,root) %{_bindir}/qemu-x86_64
 
 %files system-alpha
 %defattr(644,root,root,755)
