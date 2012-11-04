@@ -439,17 +439,9 @@ Requires:	%{name}-common = %{version}-%{release}
 QEMU is a generic and open source processor emulator which achieves a
 good emulation speed by using dynamic translation.
 
-This package provides the system emulator with x86 CPU. When being run
-in a x86 machine that supports it, this package also provides the KVM
-virtualization platform.
-
 %description system-x86 -l pl.UTF-8
 QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
-
-Ten pakiet zawiera emulator systemu z procesorem x86. W przypadku
-uruchomienia na maszynie x86 pozwalającej na to, ten pakiet udostępnia
-także platformę wirtualizacji KVM.
 
 %package system-xtensa
 Summary:	QEMU system emulator for Xtensa
