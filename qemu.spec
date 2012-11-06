@@ -43,6 +43,7 @@ BuildRequires:	cyrus-sasl-devel >= 2
 %{?with_esd:BuildRequires:	esound-devel}
 BuildRequires:	glib2-devel >= 1:2.12
 BuildRequires:	gnutls-devel
+BuildRequires:	libaio-devel
 BuildRequires:	libcap-devel
 BuildRequires:	libcap-ng-devel
 BuildRequires:	libfdt-devel
@@ -88,8 +89,6 @@ Requires:	%{name}-system-unicore32 = %{version}-%{release}
 Requires:	%{name}-system-x86 = %{version}-%{release}
 Requires:	%{name}-system-xtensa = %{version}-%{release}
 Requires:	%{name}-user = %{version}-%{release}
-# sparc is currently unsupported (missing cpu_get_real_ticks() impl in vl.c)
-ExclusiveArch:	%{ix86} %{x8664} %{?with_userspace:ppc}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define	systempkg_req \
@@ -477,8 +476,8 @@ ln -s ../error.h qapi/error.h
 ./configure \
 	--extra-cflags="%{rpmcflags} -I/usr/include/ncurses" \
 	--extra-ldflags="%{rpmldflags}" \
-	--sysconfdir=%{_sysconfdir} \
 	--prefix=%{_prefix} \
+	--sysconfdir=%{_sysconfdir} \
 	--cc="%{__cc}" \
 	--host-cc="%{__cc}" \
 	--disable-strip \
@@ -488,6 +487,7 @@ ln -s ../error.h qapi/error.h
 	--enable-cap-ng \
 	--enable-curl \
 	--enable-curses \
+	--enable-docs \
 	--enable-fdt \
 	--enable-libiscsi \
 	--enable-mixemu \
@@ -503,11 +503,13 @@ ln -s ../error.h qapi/error.h
 	--enable-vde \
 	--enable-virtfs \
 	--enable-vnc-jpeg \
+	--enable-vnc-png \
 	--enable-vnc-sasl \
 	--enable-vnc-tls \
 	%{__enable_disable xen} \
-	--audio-drv-list="alsa oss%{?with_sdl: sdl}%{?with_esd: esd}%{?with_pulseaudio: pa}" \
-	--interp-prefix=%{_libdir}/%{name}
+	--audio-card-list="ac97,es1370,sb16,cs4231a,adlib,gus,hda" \
+	--audio-drv-list="alsa%{?with_iss:,oss}%{?with_sdl:,sdl}%{?with_esd:,esd}%{?with_pulseaudio:,pa}" \
+	--interp-prefix=%{_libdir}/qemu/lib-%%M
 # note: CONFIG_QEMU_HELPERDIR is used when compiling, libexecdir when installing;
 # --libexecdir in configure is nop
 %{__make} \
