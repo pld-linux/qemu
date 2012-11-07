@@ -15,7 +15,7 @@
 %bcond_without	oss		# OSS audio support
 %bcond_without	pulseaudio	# PulseAudio audio support
 %bcond_without	xen		# Xen backend driver support
-#
+
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
@@ -31,7 +31,7 @@ Patch2:		%{name}-usbredir.patch
 Patch3:		%{name}-whitelist.patch
 # Proof of concept, for reference, do not remove
 Patch4:		%{name}-kde_virtual_workspaces_hack.patch
-URL:		http://wiki.qemu.org/Index.html
+URL:		http://www.qemu-project.org/
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
 %{?with_sdl:BuildRequires:	SDL-devel >= 1.2.1}
 BuildRequires:	alsa-lib-devel
@@ -80,8 +80,8 @@ Requires:	%{name}-system-lm32 = %{version}-%{release}
 Requires:	%{name}-system-m68k = %{version}-%{release}
 Requires:	%{name}-system-microblaze = %{version}-%{release}
 Requires:	%{name}-system-mips = %{version}-%{release}
-Requires:	%{name}-system-ppc = %{version}-%{release}
 Requires:	%{name}-system-or32 = %{version}-%{release}
+Requires:	%{name}-system-ppc = %{version}-%{release}
 Requires:	%{name}-system-s390x = %{version}-%{release}
 Requires:	%{name}-system-sh4 = %{version}-%{release}
 Requires:	%{name}-system-sparc = %{version}-%{release}
@@ -537,7 +537,7 @@ EOF
 %{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qmp-commands.txt
 
 # install patched vesa tables with additional widescreen modes.
-install -m 644 roms/vgabios/VGABIOS-lgpl-latest.stdvga.bin $RPM_BUILD_ROOT%{_datadir}/%{name}/vgabios-stdvga.bin
+cp -p roms/vgabios/VGABIOS-lgpl-latest.stdvga.bin $RPM_BUILD_ROOT%{_datadir}/%{name}/vgabios-stdvga.bin
 
 %clean
 rm -rf $RPM_BUILD_ROOT
