@@ -29,8 +29,9 @@ Patch0:		%{name}-cflags.patch
 Patch1:		vgabios-widescreens.patch
 Patch2:		%{name}-usbredir.patch
 Patch3:		%{name}-whitelist.patch
+Patch4:		%{name}-system-libcacard.patch
 # Proof of concept, for reference, do not remove
-Patch4:		%{name}-kde_virtual_workspaces_hack.patch
+Patch5:		%{name}-kde_virtual_workspaces_hack.patch
 URL:		http://www.qemu-project.org/
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
 %{?with_sdl:BuildRequires:	SDL-devel >= 1.2.1}
@@ -44,6 +45,7 @@ BuildRequires:	cyrus-sasl-devel >= 2
 BuildRequires:	glib2-devel >= 1:2.12
 BuildRequires:	gnutls-devel
 BuildRequires:	libaio-devel
+BuildRequires:	libcacard-devel
 BuildRequires:	libcap-devel
 BuildRequires:	libcap-ng-devel
 BuildRequires:	libfdt-devel
@@ -467,7 +469,9 @@ Ten pakiet zawiera emulator systemu z procesorem Xtensa.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p0
-#patch4 -p1
+%patch4 -p1
+
+%{__mv} libcacard libcacard-use-system-lib
 
 # workaround for conflict with alsa/error.h
 ln -s ../error.h qapi/error.h
@@ -552,7 +556,6 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu/target-*.conf
 %dir %{_sysconfdir}/qemu
 %attr(755,root,root) %{_bindir}/virtfs-proxy-helper
-%attr(755,root,root) %{_bindir}/vscclient
 %attr(755,root,root) %{_bindir}/qemu-nbd
 %attr(755,root,root) %{_libdir}/qemu-bridge-helper
 %{_mandir}/man1/qemu.1*
