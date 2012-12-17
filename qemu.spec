@@ -1,4 +1,5 @@
 # TODO:
+# - --enable-glusterfs
 # - qemu-system-ppc -hda ac-ppc.img says:
 #   qemu: could not open disk image ac-ppc.img: error "Success"
 #   qemu-0.12.2-2.x86_64.rpm - broken
@@ -10,6 +11,7 @@
 %bcond_without	sdl		# SDL UI and audio support
 %bcond_without	opengl		# OpenGL support
 %bcond_without	ceph		# Ceph/RBD support
+%bcond_with	glusterfs	# GlusterFS backend
 %bcond_without	spice		# SPICE support
 %bcond_with	esd		# EsounD audio support
 %bcond_without	oss		# OSS audio support
@@ -27,11 +29,10 @@ Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
 # Source0-md5:	a4030ddd2ba324152a97d65d3c0b247d
 Patch0:		%{name}-cflags.patch
 Patch1:		vgabios-widescreens.patch
-Patch2:		%{name}-usbredir.patch
-Patch3:		%{name}-whitelist.patch
-Patch4:		%{name}-system-libcacard.patch
+Patch2:		%{name}-whitelist.patch
+Patch3:		%{name}-system-libcacard.patch
 # Proof of concept, for reference, do not remove
-Patch5:		%{name}-kde_virtual_workspaces_hack.patch
+Patch4:		%{name}-kde_virtual_workspaces_hack.patch
 URL:		http://www.qemu-project.org/
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
 %{?with_sdl:BuildRequires:	SDL-devel >= 1.2.1}
@@ -67,7 +68,7 @@ BuildRequires:	spice-server-devel >= 0.8.2
 %endif
 BuildRequires:	texi2html
 BuildRequires:	texinfo
-BuildRequires:	usbredir-devel >= 0.3.4
+BuildRequires:	usbredir-devel >= 0.5.3
 BuildRequires:	vde2-devel
 BuildRequires:	which
 %{?with_xen:BuildRequires:	xen-devel >= 3.4}
@@ -94,7 +95,8 @@ Requires:	%{name}-user = %{version}-%{release}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define	systempkg_req \
-Requires:	SDL >= 1.2.1
+Requires:	SDL >= 1.2.1 \
+Requires:	usbredir >= 0.5.3
 
 # some PPC/SPARC boot image in ELF format
 %define		_noautostrip	.*%{_datadir}/qemu/.*-.*
@@ -467,9 +469,8 @@ Ten pakiet zawiera emulator systemu z procesorem Xtensa.
 %setup -q
 %patch0 -p1
 %patch1 -p1
-%patch2 -p1
-%patch3 -p0
-%patch4 -p1
+%patch2 -p0
+%patch3 -p1
 
 %{__mv} libcacard libcacard-use-system-lib
 
@@ -493,6 +494,7 @@ ln -s ../error.h qapi/error.h
 	--enable-curses \
 	--enable-docs \
 	--enable-fdt \
+	%{__enable_disable glusterfs} \
 	--enable-libiscsi \
 	--enable-mixemu \
 	%{__enable_disable opengl} \
