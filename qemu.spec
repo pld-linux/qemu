@@ -1,5 +1,5 @@
 # TODO:
-# - --enable-glusterfs
+# - --enable-glusterfs when glusterfs 3.4 is out
 # - qemu-system-ppc -hda ac-ppc.img says:
 #   qemu: could not open disk image ac-ppc.img: error "Success"
 #   qemu-0.12.2-2.x86_64.rpm - broken
@@ -44,6 +44,7 @@ BuildRequires:	curl-devel
 BuildRequires:	cyrus-sasl-devel >= 2
 %{?with_esd:BuildRequires:	esound-devel}
 BuildRequires:	glib2-devel >= 1:2.12
+%{?with_glusterfs:BuildRequires:	glusterfs-devel >= 3.4}
 BuildRequires:	gnutls-devel
 BuildRequires:	libaio-devel
 BuildRequires:	libcacard-devel
