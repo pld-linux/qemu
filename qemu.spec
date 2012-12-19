@@ -37,6 +37,7 @@ URL:		http://www.qemu-project.org/
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
 %{?with_sdl:BuildRequires:	SDL-devel >= 1.2.1}
 BuildRequires:	alsa-lib-devel
+BuildRequires:  bcc
 BuildRequires:	bluez-libs-devel
 BuildRequires:	brlapi-devel
 %{?with_ceph:BuildRequires:	ceph-devel}
@@ -64,8 +65,8 @@ BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 BuildRequires:	sed >= 4.0
 %if %{with spice}
-BuildRequires:	spice-protocol >= 0.8.0
-BuildRequires:	spice-server-devel >= 0.8.2
+BuildRequires:	spice-protocol >= 0.12.0
+BuildRequires:	spice-server-devel >= 0.12.0
 %endif
 BuildRequires:	texi2html
 BuildRequires:	texinfo
