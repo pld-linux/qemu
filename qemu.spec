@@ -64,6 +64,7 @@ BuildRequires:	perl-Encode
 BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
+BuildRequires:	rpmbuild(macros) >= 1.202
 BuildRequires:	sed >= 4.0
 %if %{with spice}
 BuildRequires:	spice-protocol >= 0.12.0
@@ -140,6 +141,14 @@ Summary:	QEMU common files needed by all QEMU targets
 Summary(pl.UTF-8):	Wspólne pliki QEMU wymagane przez wszystkie środowiska QEMU
 Group:		Development/Tools
 Requires:	glib2 >= 1:2.12
+Requires(postun):	/usr/sbin/groupdel
+Requires(postun):	/usr/sbin/userdel
+Requires(pre):	/bin/id
+Requires(pre):	/usr/bin/getgid
+Requires(pre):	/usr/sbin/groupadd
+Requires(pre):	/usr/sbin/useradd
+Provides:	group(qemu)
+Provides:	user(qemu)
 Conflicts:	qemu < 1.0-2
 
 %description common
