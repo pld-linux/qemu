@@ -1,4 +1,5 @@
 # TODO:
+# - merge missing bits from qemu-kvm
 # - --enable-glusterfs when glusterfs 3.4 is out
 # - qemu-system-ppc -hda ac-ppc.img says:
 #   qemu: could not open disk image ac-ppc.img: error "Success"
@@ -549,6 +550,16 @@ cp -p roms/vgabios/VGABIOS-lgpl-latest.stdvga.bin $RPM_BUILD_ROOT%{_datadir}/%{n
 
 %clean
 rm -rf $RPM_BUILD_ROOT
+
+%pre common
+%groupadd -g 276 qemu
+%useradd -u 276 -g qemu -c "QEMU User" qemu
+
+%postun common
+if [ "$1" = "0" ]; then
+	%userremove qemu
+	%groupremove qemu
+fi
 
 %files
 %defattr(644,root,root,755)
