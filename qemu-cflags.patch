@@ -3,7 +3,7 @@
 @@ -281,10 +281,6 @@
  QEMU_CFLAGS="-Wstrict-prototypes -Wredundant-decls $QEMU_CFLAGS"
  QEMU_CFLAGS="-D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE $QEMU_CFLAGS"
- QEMU_INCLUDES="-I. -I\$(SRC_PATH) -I\$(SRC_PATH)/fpu"
+ QEMU_INCLUDES="-I. -I\$(SRC_PATH) -I\$(SRC_PATH)/include"
 -if test "$debug_info" = "yes"; then
 -    CFLAGS="-g $CFLAGS"
 -    LDFLAGS="-g $LDFLAGS"
@@ -11,14 +11,12 @@
  
  # make source path absolute
  source_path=`cd "$source_path"; pwd`
-@@ -2995,10 +2991,6 @@
- # End of CC checks
- # After here, no more $cc or $ld runs
- 
--if test "$debug" = "no" ; then
+@@ -2995,8 +2991,6 @@
+ if test "$gcov" = "yes" ; then
+   CFLAGS="-fprofile-arcs -ftest-coverage -g $CFLAGS"
+   LDFLAGS="-fprofile-arcs -ftest-coverage $LDFLAGS"
+-elif test "$debug" = "no" ; then
 -  CFLAGS="-O2 -D_FORTIFY_SOURCE=2 $CFLAGS"
--fi
--
- # Disable zero malloc errors for official releases unless explicitly told to
- # enable/disable
- if test -z "$zero_malloc" ; then
+ fi
+ 
+

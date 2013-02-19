@@ -22,12 +22,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	1.3.1
-Release:	1
+Version:	1.4.0
+Release:	0.1
 License:	GPL v2+
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
-# Source0-md5:	5dbc6c22f47efca71dfaae0dd80dcf9e
+# Source0-md5:	78f13b774814b6b7ebcaf4f9b9204318
 Patch0:		%{name}-cflags.patch
 Patch1:		vgabios-widescreens.patch
 Patch2:		%{name}-whitelist.patch
@@ -514,7 +514,6 @@ ln -s ../error.h qapi/error.h
 	%{__enable_disable sdl} \
 	--enable-seccomp \
 	%{__enable_disable spice} \
-	--enable-smartcard \
 	--enable-smartcard-nss \
 	--enable-usb-redir \
 	--enable-uuid \
@@ -590,6 +589,7 @@ fi
 %{_datadir}/%{name}/keymaps
 %{_datadir}/%{name}/qemu-icon.bmp
 # various bios images
+%{_datadir}/%{name}/*.aml
 %{_datadir}/%{name}/*.bin
 %{_datadir}/%{name}/*.rom
 %{_datadir}/%{name}/*.dtb
