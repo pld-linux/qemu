@@ -72,7 +72,7 @@ BuildRequires:	spice-server-devel >= 0.12.0
 %endif
 BuildRequires:	texi2html
 BuildRequires:	texinfo
-BuildRequires:	usbredir-devel >= 0.5.3
+BuildRequires:	usbredir-devel >= 0.6
 BuildRequires:	vde2-devel
 BuildRequires:	which
 %{?with_xen:BuildRequires:	xen-devel >= 3.4}
@@ -100,7 +100,7 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define	systempkg_req \
 Requires:	SDL >= 1.2.1 \
-Requires:	usbredir >= 0.5.3
+Requires:	usbredir >= 0.6
 
 # some PPC/SPARC boot image in ELF format
 %define		_noautostrip	.*%{_datadir}/qemu/.*-.*
