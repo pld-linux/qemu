@@ -10,7 +10,7 @@
 #
 # Conditional build:
 %bcond_without	sdl		# SDL UI and audio support
-%bcond_without	opengl		# OpenGL support
+%bcond_without	glx		# OpenGL support
 %bcond_without	ceph		# Ceph/RBD support
 %bcond_with	glusterfs	# GlusterFS backend
 %bcond_without	spice		# SPICE support
@@ -22,12 +22,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	1.4.1
-Release:	1
+Version:	1.5.0
+Release:	0.1
 License:	GPL v2+
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
-# Source0-md5:	eb2d696956324722b5ecfa46e41f9a75
+# Source0-md5:	b6f3265b8ed39d77e8f354f35cc26e16
 Patch0:		%{name}-cflags.patch
 Patch1:		vgabios-widescreens.patch
 Patch2:		%{name}-whitelist.patch
@@ -509,7 +509,7 @@ ln -s ../error.h qapi/error.h
 	%{__enable_disable glusterfs} \
 	--enable-libiscsi \
 	--enable-mixemu \
-	%{__enable_disable opengl} \
+	%{__enable_disable glx} \
 	%{__enable_disable ceph rbd} \
 	%{__enable_disable sdl} \
 	--enable-seccomp \
@@ -524,7 +524,6 @@ ln -s ../error.h qapi/error.h
 	--enable-vnc-sasl \
 	--enable-vnc-tls \
 	%{__enable_disable xen} \
-	--audio-card-list="ac97,es1370,sb16,cs4231a,adlib,gus,hda" \
 	--audio-drv-list="alsa%{?with_iss:,oss}%{?with_sdl:,sdl}%{?with_esd:,esd}%{?with_pulseaudio:,pa}" \
 	--interp-prefix=%{_libdir}/qemu/lib-%%M
 # note: CONFIG_QEMU_HELPERDIR is used when compiling, libexecdir when installing;

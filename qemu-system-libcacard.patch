@@ -38,18 +38,6 @@
  fi
  
  if test "$usb_redir" = "yes" ; then
-diff -ur qemu-kvm-1.2.0/hw/ccid-card-passthru.c qemu-kvm-1.2.0-system-libcacard/hw/ccid-card-passthru.c
---- qemu-kvm-1.2.0/hw/ccid-card-passthru.c	2012-09-06 10:31:27.000000000 +0200
-+++ qemu-kvm-1.2.0-system-libcacard/hw/ccid-card-passthru.c	2012-11-09 07:44:11.286748135 +0100
-@@ -12,7 +12,7 @@
- #include "qemu_socket.h"
- #include "monitor.h"
- #include "hw/ccid.h"
--#include "libcacard/vscard_common.h"
-+#include <cacard/vscard_common.h>
- 
- #define DPRINTF(card, lvl, fmt, ...)                    \
- do {                                                    \
 --- qemu-1.3.0/Makefile.orig	2012-12-03 20:37:05.000000000 +0100
 +++ qemu-1.3.0/Makefile	2012-12-16 11:08:58.001201236 +0100
 @@ -111,9 +111,6 @@
@@ -61,32 +49,4 @@ diff -ur qemu-kvm-1.2.0/hw/ccid-card-passthru.c qemu-kvm-1.2.0-system-libcacard/
 -endif
  
  all: $(DOCS) $(TOOLS) $(HELPERS-y) recurse-all
- 
-diff -ur qemu-kvm-1.2.0/Makefile.objs qemu-kvm-1.2.0-system-libcacard/Makefile.objs
---- qemu-kvm-1.2.0/Makefile.objs	2012-09-06 10:31:27.000000000 +0200
-+++ qemu-kvm-1.2.0-system-libcacard/Makefile.objs	2012-11-09 07:45:10.880079366 +0100
-@@ -34,15 +34,6 @@
- endif
- 
- ######################################################################
--# smartcard
--
--libcacard-y += libcacard/cac.o libcacard/event.o
--libcacard-y += libcacard/vcard.o libcacard/vreader.o
--libcacard-y += libcacard/vcard_emul_nss.o
--libcacard-y += libcacard/vcard_emul_type.o
--libcacard-y += libcacard/card_7816.o
--
--######################################################################
- # Target independent part of system emulation. The long term path is to
- # suppress *all* target specific code in case of system emulation, i.e. a
- # single QEMU executable should support all CPUs and machines.
-@@ -81,8 +72,6 @@
- 
- common-obj-$(CONFIG_SECCOMP) += qemu-seccomp.o
- 
--common-obj-$(CONFIG_SMARTCARD_NSS) += $(libcacard-y)
--
- ######################################################################
- # qapi
  
