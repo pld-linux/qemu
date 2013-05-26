@@ -50,3 +50,25 @@
  
  all: $(DOCS) $(TOOLS) $(HELPERS-y) recurse-all
  
+--- qemu-1.5.0/Makefile.objs.orig	2013-05-20 17:34:39.000000000 +0200
++++ qemu-1.5.0/Makefile.objs	2013-05-26 17:46:51.190865264 +0200
+@@ -74,8 +74,6 @@
+ 
+ common-obj-$(CONFIG_SECCOMP) += qemu-seccomp.o
+ 
+-common-obj-$(CONFIG_SMARTCARD_NSS) += $(libcacard-y)
+-
+ ######################################################################
+ # qapi
+ 
+--- qemu-1.5.0/hw/usb/ccid-card-passthru.c.orig	2013-05-20 17:34:39.000000000 +0200
++++ qemu-1.5.0/hw/usb/ccid-card-passthru.c	2013-05-26 17:58:20.660836330 +0200
+@@ -12,7 +12,7 @@
+ #include "qemu/sockets.h"
+ #include "monitor/monitor.h"
+ #include "ccid.h"
+-#include "libcacard/vscard_common.h"
++#include <cacard/vscard_common.h>
+ 
+ #define DPRINTF(card, lvl, fmt, ...)                    \
+ do {                                                    \
