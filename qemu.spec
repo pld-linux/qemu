@@ -87,6 +87,7 @@ Requires:	%{name}-system-lm32 = %{version}-%{release}
 Requires:	%{name}-system-m68k = %{version}-%{release}
 Requires:	%{name}-system-microblaze = %{version}-%{release}
 Requires:	%{name}-system-mips = %{version}-%{release}
+Requires:	%{name}-system-moxie = %{version}-%{release}
 Requires:	%{name}-system-or32 = %{version}-%{release}
 Requires:	%{name}-system-ppc = %{version}-%{release}
 Requires:	%{name}-system-s390x = %{version}-%{release}
@@ -329,6 +330,25 @@ dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
 Ten pakiet zawiera emulator systemu z procesorem MIPS.
 
+%package system-moxie
+Summary:	QEMU system emulator for Moxie
+Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Moxie
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
+
+%description system-moxie
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator with Moxie CPU.
+
+%description system-moxie -l pl.UTF-8
+QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
+dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
+
+Ten pakiet zawiera emulator systemu z procesorem Moxie.
+
 %package system-or32
 Summary:	QEMU system emulator for OpenRISC
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem OpenRISC
@@ -555,6 +575,10 @@ EOF
 # install patched vesa tables with additional widescreen modes.
 cp -p roms/vgabios/VGABIOS-lgpl-latest.stdvga.bin $RPM_BUILD_ROOT%{_datadir}/%{name}/vgabios-stdvga.bin
 
+%{__mv} $RPM_BUILD_ROOT%{_datadir}/locale/{de_DE,de}
+%{__mv} $RPM_BUILD_ROOT%{_datadir}/locale/{fr_FR,fr}
+%find_lang %{name}
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -571,7 +595,7 @@ fi
 %files
 %defattr(644,root,root,755)
 
-%files common
+%files common -f %{name}.lang
 %defattr(644,root,root,755)
 %doc README qemu-doc.html qemu-tech.html QMP/qmp-commands.txt
 %attr(755,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu-ifup
@@ -595,6 +619,7 @@ fi
 %{_datadir}/%{name}/openbios-ppc
 %{_datadir}/%{name}/openbios-sparc*
 %{_datadir}/%{name}/palcode-clipper
+%{_datadir}/%{name}/s390-ccw.img
 
 %files img
 %defattr(644,root,root,755)
@@ -615,6 +640,10 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-microblazeel
 %attr(755,root,root) %{_bindir}/qemu-mips
 %attr(755,root,root) %{_bindir}/qemu-mipsel
+%attr(755,root,root) %{_bindir}/qemu-mips64
+%attr(755,root,root) %{_bindir}/qemu-mips64el
+%attr(755,root,root) %{_bindir}/qemu-mipsn32
+%attr(755,root,root) %{_bindir}/qemu-mipsn32el
 %attr(755,root,root) %{_bindir}/qemu-or32
 %attr(755,root,root) %{_bindir}/qemu-ppc
 %attr(755,root,root) %{_bindir}/qemu-ppc64
@@ -659,6 +688,10 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-system-mipsel
 %attr(755,root,root) %{_bindir}/qemu-system-mips64
 %attr(755,root,root) %{_bindir}/qemu-system-mips64el
+
+%files system-moxie
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-moxie
 
 %files system-or32
 %defattr(644,root,root,755)
