@@ -10,9 +10,10 @@
 #
 # Conditional build:
 %bcond_without	sdl		# SDL UI and audio support
-%bcond_without	glx		# OpenGL support
+%bcond_without	glx		# OpenGL/GLX support
 %bcond_without	ceph		# Ceph/RBD support
 %bcond_with	glusterfs	# GlusterFS backend
+%bcond_with	gtk2		# GTK+ 2.x instead of 3.x
 %bcond_without	spice		# SPICE support
 %bcond_with	esd		# EsounD audio support
 %bcond_without	oss		# OSS audio support
@@ -57,6 +58,9 @@ BuildRequires:	libiscsi-devel
 BuildRequires:	libjpeg-devel
 BuildRequires:	libpng-devel
 BuildRequires:	libseccomp-devel
+BuildRequires:	libssh2-devel >= 1.2.8
+# for usb passthrough, when available
+#BuildRequires:	libusb-devel >= 1.0.13
 BuildRequires:	libuuid-devel
 BuildRequires:	ncurses-devel
 BuildRequires:	nss-devel >= 3.12.8
@@ -79,6 +83,13 @@ BuildRequires:	which
 BuildRequires:	xfsprogs-devel
 BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	zlib-devel
+%if %{with gtk2}
+BuildRequires:	gtk+2-devel >= 2:2.18.0
+BuildRequires:	vte0-devel >= 0.24.0
+%else
+BuildRequires:	gtk+3-devel >= 3.0.0
+BuildRequires:	vte-devel >= 0.32.0
+%endif
 Requires:	%{name}-img = %{version}-%{release}
 Requires:	%{name}-system-alpha = %{version}-%{release}
 Requires:	%{name}-system-arm = %{version}-%{release}
@@ -101,7 +112,14 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define	systempkg_req \
 Requires:	SDL >= 1.2.1 \
-Requires:	usbredir >= 0.6
+Requires:	usbredir >= 0.6 \
+%if %{with gtk2} \
+Requires:	gtk+2 >= 2:2.18.0 \
+Requires:	vte0 >= 0.24.0 \
+%else \
+Requires:	gtk+3 >= 3.0.0 \
+Requires:	vte >= 0.32.0 \
+%endif
 
 # some PPC/SPARC boot image in ELF format
 %define		_noautostrip	.*%{_datadir}/qemu/.*-.*
@@ -141,13 +159,14 @@ aby działał na kolejnych procesorach. QEMU ma dwa tryby pracy:
 Summary:	QEMU common files needed by all QEMU targets
 Summary(pl.UTF-8):	Wspólne pliki QEMU wymagane przez wszystkie środowiska QEMU
 Group:		Development/Tools
-Requires:	glib2 >= 1:2.12
 Requires(postun):	/usr/sbin/groupdel
 Requires(postun):	/usr/sbin/userdel
 Requires(pre):	/bin/id
 Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
+Requires:	glib2 >= 1:2.12
+Requires:	libssh2 >= 1.2.8
 Provides:	group(qemu)
 Provides:	user(qemu)
 Conflicts:	qemu < 1.0-2
@@ -535,6 +554,7 @@ ln -s ../error.h qapi/error.h
 	--enable-seccomp \
 	%{__enable_disable spice} \
 	--enable-smartcard-nss \
+	--enable-tpm \
 	--enable-usb-redir \
 	--enable-uuid \
 	--enable-vde \
@@ -545,7 +565,9 @@ ln -s ../error.h qapi/error.h
 	--enable-vnc-tls \
 	%{__enable_disable xen} \
 	--audio-drv-list="alsa%{?with_iss:,oss}%{?with_sdl:,sdl}%{?with_esd:,esd}%{?with_pulseaudio:,pa}" \
-	--interp-prefix=%{_libdir}/qemu/lib-%%M
+	--interp-prefix=%{_libdir}/qemu/lib-%%M \
+	--with-gtkabi="%{?with_gtk2:2.0}%{!?with_gtk2:3.0}"
+
 # note: CONFIG_QEMU_HELPERDIR is used when compiling, libexecdir when installing;
 # --libexecdir in configure is nop
 %{__make} \
