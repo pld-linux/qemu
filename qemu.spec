@@ -1,6 +1,5 @@
 # TODO:
 # - merge missing bits from qemu-kvm
-# - --enable-glusterfs when glusterfs 3.4 is out
 # - qemu-system-ppc -hda ac-ppc.img says:
 #   qemu: could not open disk image ac-ppc.img: error "Success"
 #   qemu-0.12.2-2.x86_64.rpm - broken
@@ -12,7 +11,8 @@
 %bcond_without	sdl		# SDL UI and audio support
 %bcond_without	glx		# OpenGL/GLX support
 %bcond_without	ceph		# Ceph/RBD support
-%bcond_with	glusterfs	# GlusterFS backend
+%bcond_without	glusterfs	# GlusterFS backend
+%bcond_without	rdma		# RDMA-based migration support
 %bcond_with	gtk2		# GTK+ 2.x instead of 3.x
 %bcond_without	spice		# SPICE support
 %bcond_with	esd		# EsounD audio support
@@ -54,9 +54,11 @@ BuildRequires:	libcacard-devel
 BuildRequires:	libcap-devel
 BuildRequires:	libcap-ng-devel
 BuildRequires:	libfdt-devel
+%{?with_rdma:BuildRequires:	libibverbs-devel}
 BuildRequires:	libiscsi-devel
 BuildRequires:	libjpeg-devel
 BuildRequires:	libpng-devel
+%{?with_rdma:BuildRequires:	librdmacm-devel}
 BuildRequires:	libseccomp-devel
 BuildRequires:	libssh2-devel >= 1.2.8
 # for usb passthrough, when available
@@ -550,6 +552,7 @@ ln -s ../error.h qapi/error.h
 	--enable-mixemu \
 	%{__enable_disable glx} \
 	%{__enable_disable ceph rbd} \
+	%{__enable_disable rdma} \
 	%{__enable_disable sdl} \
 	--enable-seccomp \
 	%{__enable_disable spice} \
