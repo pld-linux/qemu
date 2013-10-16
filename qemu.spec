@@ -23,12 +23,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	1.6.0
+Version:	1.6.1
 Release:	1
 License:	GPL v2+
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
-# Source0-md5:	f3f39308472d629aca57a255a0c91ba9
+# Source0-md5:	3a897d722457c5a895cd6ac79a28fda0
 Patch0:		%{name}-cflags.patch
 Patch1:		vgabios-widescreens.patch
 Patch2:		%{name}-whitelist.patch
