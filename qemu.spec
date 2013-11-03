@@ -610,6 +610,7 @@ ln -s ../error.h qapi/error.h
 	--enable-vnc-png \
 	--enable-vnc-sasl \
 	--enable-vnc-tls \
+	--enable-kvm \
 	%{__enable_disable xen} \
 	--audio-drv-list="alsa%{?with_iss:,oss}%{?with_sdl:,sdl}%{?with_esd:,esd}%{?with_pulseaudio:,pa}" \
 	--interp-prefix=%{_libdir}/qemu/lib-%%M \
@@ -626,6 +627,9 @@ ln -s ../error.h qapi/error.h
 
 %install
 rm -rf $RPM_BUILD_ROOT
+install -d $RPM_BUILD_ROOT{%{systemdunitdir},/usr/lib/binfmt.d} \
+	$RPM_BUILD_ROOT/etc/{sysconfig,udev/rules.d,modules-load.d} \
+	$RPM_BUILD_ROOT{%{_sysconfdir}/sasl,%{_sbindir}}
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT \
