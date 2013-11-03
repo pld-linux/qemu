@@ -110,6 +110,7 @@ Requires:	%{name}-system-unicore32 = %{version}-%{release}
 Requires:	%{name}-system-x86 = %{version}-%{release}
 Requires:	%{name}-system-xtensa = %{version}-%{release}
 Requires:	%{name}-user = %{version}-%{release}
+Obsoletes:	qemu-kvm
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define	systempkg_req \
@@ -171,6 +172,7 @@ Requires:	glib2 >= 1:2.12
 Requires:	libssh2 >= 1.2.8
 Provides:	group(qemu)
 Provides:	user(qemu)
+Obsoletes:	qemu-kvm-common
 Conflicts:	qemu < 1.0-2
 
 %description common
@@ -191,6 +193,7 @@ Summary:	QEMU command line tool for manipulating disk images
 Summary(pl.UTF-8):	Narzędzie QEMU do operacji na obrazach dysków
 Group:		Development/Tools
 Conflicts:	qemu < 1.0-2
+Obsoletes:	qemu-kvm-img
 
 %description img
 This package provides a command line tool for manipulating disk
@@ -205,6 +208,7 @@ Summary:	QEMU user mode emulation of qemu targets
 Summary(pl.UTF-8):	QEMU - emulacja trybu użytkownika środowisk qemu
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+Obsoletes:	qemu-kvm-user
 
 %description user
 QEMU is a generic and open source processor emulator which achieves a
@@ -224,6 +228,7 @@ Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Alpha
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
+Obsoletes:	qemu-kvm-system-alpha
 
 %description system-alpha
 QEMU is a generic and open source processor emulator which achieves a
@@ -243,6 +248,7 @@ Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem ARM
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
+Obsoletes:	qemu-kvm-system-arm
 
 %description system-arm
 QEMU is a generic and open source processor emulator which achieves a
@@ -262,6 +268,7 @@ Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem CRIS
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
+Obsoletes:	qemu-kvm-system-cris
 
 %description system-cris
 QEMU is a generic and open source processor emulator which achieves a
@@ -281,6 +288,7 @@ Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem LM32
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
+Obsoletes:	qemu-kvm-system-lm32
 
 %description system-lm32
 QEMU is a generic and open source processor emulator which achieves a
@@ -300,6 +308,7 @@ Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem m68k
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
+Obsoletes:	qemu-kvm-system-m68k
 
 %description system-m68k
 QEMU is a generic and open source processor emulator which achieves a
@@ -319,6 +328,7 @@ Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem MicroBlaze
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
+Obsoletes:	qemu-kvm-system-microblaze
 
 %description system-microblaze
 QEMU is a generic and open source processor emulator which achieves a
@@ -338,6 +348,7 @@ Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem MIPS
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
+Obsoletes:	qemu-kvm-system-mips
 
 %description system-mips
 QEMU is a generic and open source processor emulator which achieves a
@@ -376,6 +387,7 @@ Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem OpenRISC
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
+Obsoletes:	qemu-kvm-system-or32
 
 %description system-or32
 QEMU is a generic and open source processor emulator which achieves a
@@ -395,6 +407,7 @@ Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem PowerPC
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
+Obsoletes:	qemu-kvm-system-ppc
 
 %description system-ppc
 QEMU is a generic and open source processor emulator which achieves a
@@ -414,6 +427,7 @@ Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem S390
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
+Obsoletes:	qemu-kvm-system-s390x
 
 %description system-s390x
 QEMU is a generic and open source processor emulator which achieves a
@@ -433,6 +447,7 @@ Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem SH4
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
+Obsoletes:	qemu-kvm-system-sh4
 
 %description system-sh4
 QEMU is a generic and open source processor emulator which achieves a
@@ -452,6 +467,7 @@ Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem SPARC
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
+Obsoletes:	qemu-kvm-system-sparc
 
 %description system-sparc
 QEMU is a generic and open source processor emulator which achieves a
@@ -471,6 +487,7 @@ Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem UniCore32
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
+Obsoletes:	qemu-kvm-system-unicore32
 
 %description system-unicore32
 QEMU is a generic and open source processor emulator which achieves a
@@ -490,6 +507,7 @@ Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem x86
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
+Obsoletes:	qemu-kvm-system-x86
 
 %description system-x86
 QEMU is a generic and open source processor emulator which achieves a
@@ -505,6 +523,7 @@ Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Xtensa
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
+Obsoletes:	qemu-kvm-system-xtensa
 
 %description system-xtensa
 QEMU is a generic and open source processor emulator which achieves a
