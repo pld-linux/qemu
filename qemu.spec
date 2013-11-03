@@ -29,6 +29,8 @@ License:	GPL v2+
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
 # Source0-md5:	3a897d722457c5a895cd6ac79a28fda0
+Source11:	qemu-guest-agent.service
+Source12:	99-qemu-guest-agent.rules
 Patch0:		%{name}-cflags.patch
 Patch1:		vgabios-widescreens.patch
 Patch2:		%{name}-whitelist.patch
@@ -537,6 +539,35 @@ dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
 Ten pakiet zawiera emulator systemu z procesorem Xtensa.
 
+%package guest-agent
+Summary:	QEMU guest agent
+Summary(pl.UTF-8):	Agent gościa QEMU
+Group:		Daemons
+Requires(post,preun,postun):	systemd-units >= 38
+Requires:	glib2 >= 1:2.12
+Requires:	systemd-units >= 38
+Obsoletes:	qemu-kvm-guest-agent
+
+%description guest-agent
+QEMU is a generic and open source processor emulator which achieves
+a good emulation speed by using dynamic translation.
+
+This package provides an agent to run inside guests, which
+communicates with the host over a virtio-serial channel named
+"org.qemu.guest_agent.0".
+
+This package does not need to be installed on the host OS.
+
+%description guest-agent -l pl.UTF-8
+QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
+dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
+
+Ten pakiet udostępnia agenta przeznaczonego do uruchomienia w
+systemach-gościach, komunikującego się kanałem virtio-serial o nazwie
+"org.qemu.guest_agent.0".
+
+Ten pakiet nie musi być zainstalowany w systemie hosta.
+
 %prep
 %setup -q
 %patch0 -p1
@@ -612,6 +643,11 @@ cat <<'EOF' > $RPM_BUILD_ROOT%{_sysconfdir}/qemu-ifup
 
 EOF
 
+# For the qemu-guest-agent subpackage install the systemd
+# service and udev rules.
+install -p %{SOURCE11} $RPM_BUILD_ROOT%{systemdunitdir}
+install -p %{SOURCE12} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d
+
 # already packaged
 %{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qemu-{doc,tech}.html
 %{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qmp-commands.txt
@@ -635,6 +671,15 @@ if [ "$1" = "0" ]; then
 	%userremove qemu
 	%groupremove qemu
 fi
+
+%post guest-agent
+%systemd_reload
+
+%preun guest-agent
+%systemd_preun qemu-guest-agent.service
+
+%postun guest-agent
+%systemd_reload
 
 %files
 %defattr(644,root,root,755)
@@ -677,7 +722,6 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-arm
 %attr(755,root,root) %{_bindir}/qemu-armeb
 %attr(755,root,root) %{_bindir}/qemu-cris
-%attr(755,root,root) %{_bindir}/qemu-ga
 %attr(755,root,root) %{_bindir}/qemu-i386
 %attr(755,root,root) %{_bindir}/qemu-io
 %attr(755,root,root) %{_bindir}/qemu-m68k
@@ -775,3 +819,8 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-xtensa
 %attr(755,root,root) %{_bindir}/qemu-system-xtensaeb
+
+%files guest-agent
+%config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/99-qemu-guest-agent.rules
+%{systemdunitdir}/qemu-guest-agent.service
+%attr(755,root,root) %{_bindir}/qemu-ga
