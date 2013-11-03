@@ -23,6 +23,7 @@ License:	GPL v2+
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
 # Source0-md5:	3a897d722457c5a895cd6ac79a28fda0
+Source2:	qemu.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
 # Creates /dev/kvm
@@ -675,6 +676,27 @@ install -p %{SOURCE10} $RPM_BUILD_ROOT%{_sysconfdir}/ksmtuned.conf
 install -p %{SOURCE11} $RPM_BUILD_ROOT%{systemdunitdir}
 install -p %{SOURCE12} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d
 
+for i in dummy \
+%ifnarch %{ix86} %{x8664}
+    qemu-i386 \
+%endif
+%ifnarch arm
+    qemu-arm \
+%endif
+%ifnarch ppc ppc64
+    qemu-ppc \
+%endif
+%ifnarch sparc sparc64
+    qemu-sparc \
+%endif
+%ifnarch sh4
+    qemu-sh4 \
+%endif
+; do
+	test $i = dummy && continue
+	grep /$i:\$ %{SOURCE2} > $RPM_BUILD_ROOT/usr/lib/binfmt.d/$i.conf
+done < %{SOURCE2}
+
 # already packaged
 %{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qemu-{doc,tech}.html
 %{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qmp-commands.txt
@@ -711,6 +733,12 @@ fi
 %triggerpostun common -- qemu-common < 1.6.1-4
 %systemd_trigger ksm.service
 %systemd_trigger ksmtuned.service
+
+%post user
+%systemd_service_restart systemd-binfmt.service
+
+%postun user
+%systemd_service_restart systemd-binfmt.service
 
 %post guest-agent
 %systemd_reload
@@ -764,6 +792,7 @@ fi
 
 %files user
 %defattr(644,root,root,755)
+/usr/lib/binfmt.d/qemu-*.conf
 %attr(755,root,root) %{_bindir}/qemu-alpha
 %attr(755,root,root) %{_bindir}/qemu-arm
 %attr(755,root,root) %{_bindir}/qemu-armeb
