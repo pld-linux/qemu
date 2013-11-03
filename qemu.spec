@@ -78,7 +78,7 @@ BuildRequires:	perl-Encode
 BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
-BuildRequires:	rpmbuild(macros) >= 1.202
+BuildRequires:	rpmbuild(macros) >= 1.644
 BuildRequires:	sed >= 4.0
 %if %{with spice}
 BuildRequires:	spice-protocol >= 0.12.0
@@ -218,6 +218,8 @@ Summary:	QEMU user mode emulation of qemu targets
 Summary(pl.UTF-8):	QEMU - emulacja trybu użytkownika środowisk qemu
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+Requires(post,postun):	systemd-units >= 38
+Requires:	systemd-units >= 38
 Obsoletes:	qemu-kvm-user
 
 %description user
@@ -517,6 +519,7 @@ Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem x86
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
+Obsoletes:	kvm
 Obsoletes:	qemu-kvm-system-x86
 
 %description system-x86
