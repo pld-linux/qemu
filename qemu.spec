@@ -23,6 +23,10 @@ License:	GPL v2+
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
 # Source0-md5:	3a897d722457c5a895cd6ac79a28fda0
+# Loads kvm kernel modules at boot
+Source3:	kvm-modules-load.conf
+# Creates /dev/kvm
+Source4:	80-kvm.rules
 # KSM control scripts
 Source5:	ksm.service
 Source6:	ksm.sysconfig
@@ -652,6 +656,12 @@ cat <<'EOF' > $RPM_BUILD_ROOT%{_sysconfdir}/qemu-ifup
 
 EOF
 
+%ifarch %{ix86} %{x8664}
+install scripts/kvm/kvm_stat $RPM_BUILD_ROOT%{_bindir}
+install -p %{SOURCE3} $RPM_BUILD_ROOT/etc/modules-load.d/kvm.conf
+install -p %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d
+%endif
+
 install -p %{SOURCE5} $RPM_BUILD_ROOT%{systemdunitdir}/ksm.service
 install -p %{SOURCE6} $RPM_BUILD_ROOT/etc/sysconfig/ksm
 install -p ksmctl $RPM_BUILD_ROOT%{_sbindir}
@@ -850,6 +860,11 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-i386
 %attr(755,root,root) %{_bindir}/qemu-system-x86_64
+%ifarch %{ix86} %{x8664}
+%config(noreplace) %verify(not md5 mtime size) /etc/modules-load.d/kvm.conf
+%config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/80-kvm.rules
+%attr(755,root,root) %{_bindir}/kvm_stat
+%endif
 
 %files system-xtensa
 %defattr(644,root,root,755)
