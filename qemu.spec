@@ -1,11 +1,5 @@
 # TODO:
 # - merge missing bits from qemu-kvm
-# - qemu-system-ppc -hda ac-ppc.img says:
-#   qemu: could not open disk image ac-ppc.img: error "Success"
-#   qemu-0.12.2-2.x86_64.rpm - broken
-#   qemu-0.12.3-3.x86_64/qemu-0.12.4-1.x86_64 - stops on "returning from prom_init"
-#   qemu-0.15.0-2.x86_64.rpm - qemu-system-sparc/ppc booting with -kernel, -initrd options stalls in openbios prompt
-#   qemu-0.11.1-*.x86_64.rpm - OK
 #
 # Conditional build:
 %bcond_without	sdl		# SDL UI and audio support
