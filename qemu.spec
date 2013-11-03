@@ -165,6 +165,7 @@ aby działał na kolejnych procesorach. QEMU ma dwa tryby pracy:
 Summary:	QEMU common files needed by all QEMU targets
 Summary(pl.UTF-8):	Wspólne pliki QEMU wymagane przez wszystkie środowiska QEMU
 Group:		Development/Tools
+Requires(post,preun,postun):	systemd-units >= 38
 Requires(postun):	/usr/sbin/groupdel
 Requires(postun):	/usr/sbin/userdel
 Requires(pre):	/bin/id
@@ -173,6 +174,7 @@ Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
 Requires:	glib2 >= 1:2.12
 Requires:	libssh2 >= 1.2.8
+Requires:	systemd-units >= 38
 Provides:	group(qemu)
 Provides:	user(qemu)
 Obsoletes:	qemu-kvm-common
@@ -717,10 +719,16 @@ fi
 %doc README qemu-doc.html qemu-tech.html QMP/qmp-commands.txt
 %attr(755,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu-ifup
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu/target-*.conf
+%config(noreplace) %verify(not md5 mtime size) /etc/ksmtuned.conf
+%config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/ksm
+%{systemdunitdir}/ksm.service
+%{systemdunitdir}/ksmtuned.service
 %dir %{_sysconfdir}/qemu
 %attr(755,root,root) %{_bindir}/virtfs-proxy-helper
 %attr(755,root,root) %{_bindir}/qemu-nbd
 %attr(755,root,root) %{_libdir}/qemu-bridge-helper
+%attr(755,root,root) %{_sbindir}/ksmctl
+%attr(755,root,root) %{_sbindir}/ksmtuned
 %{_mandir}/man1/qemu.1*
 %{_mandir}/man1/virtfs-proxy-helper.1*
 %{_mandir}/man8/qemu-nbd.8*
