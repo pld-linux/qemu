@@ -717,8 +717,9 @@ cp -p roms/vgabios/VGABIOS-lgpl-latest.stdvga.bin $RPM_BUILD_ROOT%{_datadir}/%{n
 rm -rf $RPM_BUILD_ROOT
 
 %pre common
+%groupadd -g 160 kvm
 %groupadd -g 276 qemu
-%useradd -u 276 -g qemu -c "QEMU User" qemu
+%useradd -u 276 -g qemu -G kvm -c "QEMU User" qemu
 
 %post common
 %systemd_post ksm.service
@@ -732,6 +733,7 @@ rm -rf $RPM_BUILD_ROOT
 if [ "$1" = "0" ]; then
 	%userremove qemu
 	%groupremove qemu
+	%groupremove kvm
 fi
 %systemd_reload
 
