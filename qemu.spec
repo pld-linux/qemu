@@ -660,6 +660,8 @@ cat <<'EOF' > $RPM_BUILD_ROOT%{_sysconfdir}/qemu-ifup
 
 EOF
 
+install -p qemu.sasl $RPM_BUILD_ROOT%{_sysconfdir}/sasl/qemu.conf
+
 %ifarch %{ix86} %{x8664}
 install scripts/kvm/kvm_stat $RPM_BUILD_ROOT%{_bindir}
 install -p %{SOURCE3} $RPM_BUILD_ROOT/etc/modules-load.d/kvm.conf
@@ -761,6 +763,7 @@ fi
 %attr(755,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu-ifup
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu/target-*.conf
 %config(noreplace) %verify(not md5 mtime size) /etc/ksmtuned.conf
+%config(noreplace) %verify(not md5 mtime size) /etc/sasl/qemu.conf
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/ksm
 %{systemdunitdir}/ksm.service
 %{systemdunitdir}/ksmtuned.service
