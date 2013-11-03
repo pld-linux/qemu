@@ -23,6 +23,13 @@ License:	GPL v2+
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
 # Source0-md5:	3a897d722457c5a895cd6ac79a28fda0
+# KSM control scripts
+Source5:	ksm.service
+Source6:	ksm.sysconfig
+Source7:	ksmctl.c
+Source8:	ksmtuned.service
+Source9:	ksmtuned
+Source10:	ksmtuned.conf
 Source11:	qemu-guest-agent.service
 Source12:	99-qemu-guest-agent.rules
 Patch0:		%{name}-cflags.patch
@@ -625,6 +632,8 @@ ln -s ../error.h qapi/error.h
 # rebuild patched vesa tables with additional widescreen modes.
 %{__make} -C roms/vgabios stdvga-bios
 
+%{__cc} %{SOURCE7} %{rpmcflags} -o ksmctl
+
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{systemdunitdir},/usr/lib/binfmt.d} \
@@ -640,6 +649,14 @@ cat <<'EOF' > $RPM_BUILD_ROOT%{_sysconfdir}/qemu-ifup
 #!/bin/sh
 
 EOF
+
+install -p %{SOURCE5} $RPM_BUILD_ROOT%{systemdunitdir}/ksm.service
+install -p %{SOURCE6} $RPM_BUILD_ROOT/etc/sysconfig/ksm
+install -p ksmctl $RPM_BUILD_ROOT%{_sbindir}
+
+install -p %{SOURCE8} $RPM_BUILD_ROOT%{systemdunitdir}/ksmtuned.service
+install -p %{SOURCE9} $RPM_BUILD_ROOT%{_sbindir}/ksmtuned
+install -p %{SOURCE10} $RPM_BUILD_ROOT%{_sysconfdir}/ksmtuned.conf
 
 # For the qemu-guest-agent subpackage install the systemd
 # service and udev rules.
@@ -664,11 +681,24 @@ rm -rf $RPM_BUILD_ROOT
 %groupadd -g 276 qemu
 %useradd -u 276 -g qemu -c "QEMU User" qemu
 
+%post common
+%systemd_post ksm.service
+%systemd_post ksmtuned.service
+
+%preun common
+%systemd_preun ksm.service
+%systemd_preun ksmtuned.service
+
 %postun common
 if [ "$1" = "0" ]; then
 	%userremove qemu
 	%groupremove qemu
 fi
+%systemd_reload
+
+%triggerpostun common -- qemu-common < 1.6.1-4
+%systemd_trigger ksm.service
+%systemd_trigger ksmtuned.service
 
 %post guest-agent
 %systemd_reload
