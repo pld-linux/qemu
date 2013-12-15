@@ -15,12 +15,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	1.6.1
-Release:	4
+Version:	1.7.0
+Release:	1
 License:	GPL v2+
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
-# Source0-md5:	3a897d722457c5a895cd6ac79a28fda0
+# Source0-md5:	32893941d40d052a5e649efcf06aca06
 Source2:	qemu.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -608,7 +608,6 @@ ln -s ../error.h qapi/error.h
 	--enable-fdt \
 	%{__enable_disable glusterfs} \
 	--enable-libiscsi \
-	--enable-mixemu \
 	%{__enable_disable glx} \
 	%{__enable_disable ceph rbd} \
 	%{__enable_disable rdma} \
@@ -700,7 +699,7 @@ for i in dummy \
 	grep /$i:\$ %{SOURCE2} > $RPM_BUILD_ROOT/usr/lib/binfmt.d/$i.conf
 done < %{SOURCE2}
 
-# already packaged
+# packaged as %doc
 %{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qemu-{doc,tech}.html
 %{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qmp-commands.txt
 
@@ -759,7 +758,7 @@ fi
 
 %files common -f %{name}.lang
 %defattr(644,root,root,755)
-%doc README qemu-doc.html qemu-tech.html QMP/qmp-commands.txt
+%doc README qemu-doc.html qemu-tech.html qmp-commands.txt
 %attr(755,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu-ifup
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu/target-*.conf
 %config(noreplace) %verify(not md5 mtime size) /etc/ksmtuned.conf
