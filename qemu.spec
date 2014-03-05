@@ -16,12 +16,12 @@ Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
 Version:	1.7.0
-Release:	2
+Release:	3
 License:	GPL v2+
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
 # Source0-md5:	32893941d40d052a5e649efcf06aca06
-Source2:	qemu.binfmt
+Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
 # Creates /dev/kvm
@@ -33,19 +33,20 @@ Source7:	ksmctl.c
 Source8:	ksmtuned.service
 Source9:	ksmtuned
 Source10:	ksmtuned.conf
-Source11:	qemu-guest-agent.service
-Source12:	99-qemu-guest-agent.rules
+Source11:	%{name}-guest-agent.service
+Source12:	99-%{name}-guest-agent.rules
 Patch0:		%{name}-cflags.patch
 Patch1:		vgabios-widescreens.patch
 Patch2:		%{name}-whitelist.patch
 Patch3:		%{name}-system-libcacard.patch
+Patch4:		vmdk3ro.patch
 # Proof of concept, for reference, do not remove
-Patch4:		%{name}-kde_virtual_workspaces_hack.patch
+Patch400:	%{name}-kde_virtual_workspaces_hack.patch
 URL:		http://www.qemu-project.org/
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
 %{?with_sdl:BuildRequires:	SDL-devel >= 1.2.1}
 BuildRequires:	alsa-lib-devel
-BuildRequires:  bcc
+BuildRequires:	bcc
 BuildRequires:	bluez-libs-devel
 BuildRequires:	brlapi-devel
 %{?with_ceph:BuildRequires:	ceph-devel}
@@ -200,8 +201,8 @@ Ten pakiet udostępnia wspólne pliki wymagane przez wszystkie
 Summary:	QEMU command line tool for manipulating disk images
 Summary(pl.UTF-8):	Narzędzie QEMU do operacji na obrazach dysków
 Group:		Development/Tools
-Conflicts:	qemu < 1.0-2
 Obsoletes:	qemu-kvm-img
+Conflicts:	qemu < 1.0-2
 
 %description img
 This package provides a command line tool for manipulating disk
@@ -558,8 +559,8 @@ Requires:	systemd-units >= 38
 Obsoletes:	qemu-kvm-guest-agent
 
 %description guest-agent
-QEMU is a generic and open source processor emulator which achieves
-a good emulation speed by using dynamic translation.
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
 
 This package provides an agent to run inside guests, which
 communicates with the host over a virtio-serial channel named
@@ -583,6 +584,7 @@ Ten pakiet nie musi być zainstalowany w systemie hosta.
 %patch1 -p1
 %patch2 -p0
 %patch3 -p1
+%patch4 -p1
 
 %{__mv} libcacard libcacard-use-system-lib
 
@@ -660,7 +662,7 @@ EOF
 install -p qemu.sasl $RPM_BUILD_ROOT%{_sysconfdir}/sasl/qemu.conf
 
 %ifarch %{ix86} %{x8664}
-install scripts/kvm/kvm_stat $RPM_BUILD_ROOT%{_bindir}
+install -p scripts/kvm/kvm_stat $RPM_BUILD_ROOT%{_bindir}
 install -p %{SOURCE3} $RPM_BUILD_ROOT/etc/modules-load.d/kvm.conf
 install -p %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d
 %endif
@@ -680,19 +682,19 @@ install -p %{SOURCE12} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d
 
 for i in dummy \
 %ifnarch %{ix86} %{x8664}
-    qemu-i386 \
+	qemu-i386 \
 %endif
 %ifnarch arm
-    qemu-arm \
+	qemu-arm \
 %endif
 %ifnarch ppc ppc64
-    qemu-ppc \
+	qemu-ppc \
 %endif
 %ifnarch sparc sparc64
-    qemu-sparc \
+	qemu-sparc \
 %endif
 %ifnarch sh4
-    qemu-sh4 \
+	qemu-sh4 \
 %endif
 ; do
 	test $i = dummy && continue
@@ -706,8 +708,8 @@ done < %{SOURCE2}
 # install patched vesa tables with additional widescreen modes.
 cp -p roms/vgabios/VGABIOS-lgpl-latest.stdvga.bin $RPM_BUILD_ROOT%{_datadir}/%{name}/vgabios-stdvga.bin
 
-%{__mv} $RPM_BUILD_ROOT%{_datadir}/locale/{de_DE,de}
-%{__mv} $RPM_BUILD_ROOT%{_datadir}/locale/{fr_FR,fr}
+%{__mv} $RPM_BUILD_ROOT%{_localedir}/{de_DE,de}
+%{__mv} $RPM_BUILD_ROOT%{_localedir}/{fr_FR,fr}
 %find_lang %{name}
 
 %clean
@@ -906,6 +908,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-system-xtensaeb
 
 %files guest-agent
+%defattr(644,root,root,755)
 %config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/99-qemu-guest-agent.rules
 %{systemdunitdir}/qemu-guest-agent.service
 %attr(755,root,root) %{_bindir}/qemu-ga
