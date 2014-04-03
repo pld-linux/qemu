@@ -1,0 +1,23 @@
+Workaround <linux/xattr.h> vs <sys/xattr.h> defines conflict:
+When including both, the latter must be included first.
+Move "qemu-xattr.h" (which includes <sys/xattr.h> to the front,
+before <sys/capability.h> (which includes <linux/xattr.h>.
+
+--- qemu-1.7.1/fsdev/virtfs-proxy-helper.c.orig	2014-03-25 15:01:10.000000000 +0100
++++ qemu-1.7.1/fsdev/virtfs-proxy-helper.c	2014-04-03 02:55:41.115547990 +0200
+@@ -9,6 +9,7 @@
+  * the COPYING file in the top-level directory.
+  */
+ 
++#include "qemu/xattr.h"
+ #include <sys/resource.h>
+ #include <getopt.h>
+ #include <syslog.h>
+@@ -22,7 +23,6 @@
+ #endif
+ #include "qemu-common.h"
+ #include "qemu/sockets.h"
+-#include "qemu/xattr.h"
+ #include "virtio-9p-marshal.h"
+ #include "hw/9pfs/virtio-9p-proxy.h"
+ #include "fsdev/virtio-9p-marshal.h"
