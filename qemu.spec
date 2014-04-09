@@ -41,6 +41,7 @@ Patch2:		%{name}-whitelist.patch
 Patch3:		%{name}-system-libcacard.patch
 Patch4:		vmdk3ro.patch
 Patch5:		%{name}-xattr.patch
+Patch6:		libjpeg-boolean.patch
 # Proof of concept, for reference, do not remove
 Patch400:	%{name}-kde_virtual_workspaces_hack.patch
 URL:		http://www.qemu-project.org/
@@ -587,6 +588,7 @@ Ten pakiet nie musi być zainstalowany w systemie hosta.
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
+%patch6 -p1
 
 %{__mv} libcacard libcacard-use-system-lib
 
