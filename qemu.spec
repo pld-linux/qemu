@@ -135,7 +135,9 @@ Obsoletes:	qemu-kvm
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define	systempkg_req \
+%if %{with sdl} \
 Requires:	SDL >= 1.2.1 \
+%endif \
 %if %{with usbredir} \
 Requires:	usbredir >= 0.6 \
 %endif \
