@@ -659,7 +659,8 @@ ln -s ../error.h qapi/error.h
 # --libexecdir in configure is nop
 %{__make} \
 	V=1 \
-	CONFIG_QEMU_HELPERDIR="%{_libdir}"
+	CONFIG_QEMU_HELPERDIR="%{_libdir}" \
+	%{!?with_smartcard:CONFIG_USB_SMARTCARD=n}
 
 # rebuild patched vesa tables with additional widescreen modes.
 %{__make} -C roms/vgabios stdvga-bios
@@ -673,6 +674,7 @@ install -d $RPM_BUILD_ROOT{%{systemdunitdir},/usr/lib/binfmt.d} \
 	$RPM_BUILD_ROOT{%{_sysconfdir}/sasl,%{_sbindir}}
 
 %{__make} install \
+	%{!?with_smartcard:CONFIG_USB_SMARTCARD=n} \
 	DESTDIR=$RPM_BUILD_ROOT \
 	libexecdir=%{_libdir}
 
