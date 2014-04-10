@@ -6,11 +6,22 @@
 %bcond_without	glusterfs	# GlusterFS backend
 %bcond_without	rdma		# RDMA-based migration support
 %bcond_with	gtk2		# GTK+ 2.x instead of 3.x
+%bcond_without	gtk3		# Do not build GTK UI
 %bcond_without	spice		# SPICE support
 %bcond_with	esd		# EsounD audio support
 %bcond_without	oss		# OSS audio support
 %bcond_without	pulseaudio	# PulseAudio audio support
 %bcond_without	xen		# Xen backend driver support
+%bcond_without	bluetooth	# bluetooth support
+%bcond_without	brlapi		# brlapi support
+%bcond_without	smartcard	# smartcard-nss support
+%bcond_without	iscsi		# iscsi support
+%bcond_without	seccomp		# seccomp support
+%bcond_without	usbredir	# usb network redirection support
+
+%if %{with gtk2}
+%undefine with_gtk3
+%endif
 
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
@@ -49,8 +60,8 @@ URL:		http://www.qemu-project.org/
 %{?with_sdl:BuildRequires:	SDL-devel >= 1.2.1}
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bcc
-BuildRequires:	bluez-libs-devel
-BuildRequires:	brlapi-devel
+%{?with_bluetooth:BuildRequires:	bluez-libs-devel}
+%{?with_brlapi:BuildRequires:	brlapi-devel}
 %{?with_ceph:BuildRequires:	ceph-devel}
 BuildRequires:	curl-devel
 BuildRequires:	cyrus-sasl-devel >= 2
@@ -59,22 +70,22 @@ BuildRequires:	glib2-devel >= 1:2.12
 %{?with_glusterfs:BuildRequires:	glusterfs-devel >= 3.4}
 BuildRequires:	gnutls-devel
 BuildRequires:	libaio-devel
-BuildRequires:	libcacard-devel
+%{?with_smartcard:BuildRequires:	libcacard-devel}
 BuildRequires:	libcap-devel
 BuildRequires:	libcap-ng-devel
 BuildRequires:	libfdt-devel
 %{?with_rdma:BuildRequires:	libibverbs-devel}
-BuildRequires:	libiscsi-devel
+%{?with_iscsi:BuildRequires:	libiscsi-devel}
 BuildRequires:	libjpeg-devel
 BuildRequires:	libpng-devel
 %{?with_rdma:BuildRequires:	librdmacm-devel}
-BuildRequires:	libseccomp-devel
+%{?with_seccomp:BuildRequires:	libseccomp-devel}
 BuildRequires:	libssh2-devel >= 1.2.8
 # for usb passthrough, when available
 #BuildRequires:	libusb-devel >= 1.0.13
 BuildRequires:	libuuid-devel
 BuildRequires:	ncurses-devel
-BuildRequires:	nss-devel >= 3.12.8
+%{?with_smartcard:BuildRequires:	nss-devel >= 3.12.8}
 BuildRequires:	perl-Encode
 BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
@@ -87,7 +98,7 @@ BuildRequires:	spice-server-devel >= 0.12.0
 %endif
 BuildRequires:	texi2html
 BuildRequires:	texinfo
-BuildRequires:	usbredir-devel >= 0.6
+%{?with_usbredir:BuildRequires:	usbredir-devel >= 0.6}
 BuildRequires:	vde2-devel
 BuildRequires:	which
 %{?with_xen:BuildRequires:	xen-devel >= 3.4}
@@ -97,7 +108,8 @@ BuildRequires:	zlib-devel
 %if %{with gtk2}
 BuildRequires:	gtk+2-devel >= 2:2.18.0
 BuildRequires:	vte0-devel >= 0.24.0
-%else
+%endif
+%if %{with gtk3}
 BuildRequires:	gtk+3-devel >= 3.0.0
 BuildRequires:	vte-devel >= 0.32.0
 %endif
@@ -124,11 +136,14 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define	systempkg_req \
 Requires:	SDL >= 1.2.1 \
+%if %{with usbredir} \
 Requires:	usbredir >= 0.6 \
+%endif \
 %if %{with gtk2} \
 Requires:	gtk+2 >= 2:2.18.0 \
 Requires:	vte0 >= 0.24.0 \
-%else \
+%endif \
+%if %{with gtk3} \
 Requires:	gtk+3 >= 3.0.0 \
 Requires:	vte >= 0.32.0 \
 %endif
@@ -605,24 +620,24 @@ ln -s ../error.h qapi/error.h
 	--host-cc="%{__cc}" \
 	--disable-strip \
 	--enable-attr \
-	--enable-bluez \
-	--enable-brlapi \
+	%{__enable_disable bluetooth bluez} \
+	%{__enable_disable brlapi} \
 	--enable-cap-ng \
 	--enable-curl \
 	--enable-curses \
 	--enable-docs \
 	--enable-fdt \
 	%{__enable_disable glusterfs} \
-	--enable-libiscsi \
+	%{__enable_disable iscsi libiscsi} \
 	%{__enable_disable glx} \
 	%{__enable_disable ceph rbd} \
 	%{__enable_disable rdma} \
 	%{__enable_disable sdl} \
-	--enable-seccomp \
+	%{__enable_disable seccomp} \
 	%{__enable_disable spice} \
-	--enable-smartcard-nss \
+	%{__enable_disable smartcard smartcard-nss} \
 	--enable-tpm \
-	--enable-usb-redir \
+	%{__enable_disable usbredir usb-redir} \
 	--enable-uuid \
 	--enable-vde \
 	--enable-virtfs \
@@ -634,7 +649,11 @@ ln -s ../error.h qapi/error.h
 	%{__enable_disable xen} \
 	--audio-drv-list="alsa%{?with_iss:,oss}%{?with_sdl:,sdl}%{?with_esd:,esd}%{?with_pulseaudio:,pa}" \
 	--interp-prefix=%{_libdir}/qemu/lib-%%M \
+%if %{without gtk2} && %{without gtk3}
+	--disable-gtk
+%else
 	--with-gtkabi="%{?with_gtk2:2.0}%{!?with_gtk2:3.0}"
+%endif
 
 # note: CONFIG_QEMU_HELPERDIR is used when compiling, libexecdir when installing;
 # --libexecdir in configure is nop
@@ -712,9 +731,13 @@ done < %{SOURCE2}
 # install patched vesa tables with additional widescreen modes.
 cp -p roms/vgabios/VGABIOS-lgpl-latest.stdvga.bin $RPM_BUILD_ROOT%{_datadir}/%{name}/vgabios-stdvga.bin
 
+%if %{with gtk2} || %{with gtk3}
 %{__mv} $RPM_BUILD_ROOT%{_localedir}/{de_DE,de}
 %{__mv} $RPM_BUILD_ROOT%{_localedir}/{fr_FR,fr}
 %find_lang %{name}
+%else
+: > qemu.lang
+%endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
