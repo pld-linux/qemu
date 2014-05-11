@@ -18,6 +18,7 @@
 %bcond_without	iscsi		# iscsi support
 %bcond_without	seccomp		# seccomp support
 %bcond_without	usbredir	# usb network redirection support
+%bcond_without	system_seabios	# system seabios binary
 
 %if %{with gtk2}
 %undefine with_gtk3
@@ -27,7 +28,7 @@ Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
 Version:	1.7.1
-Release:	1
+Release:	2
 License:	GPL v2+
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
@@ -91,6 +92,7 @@ BuildRequires:	perl-tools-pod
 BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 BuildRequires:	rpmbuild(macros) >= 1.644
+%{?with_system_seabios:BuildRequires:	seabios}
 BuildRequires:	sed >= 4.0
 %if %{with spice}
 BuildRequires:	spice-protocol >= 0.12.0
@@ -536,6 +538,7 @@ Summary:	QEMU system emulator for x86
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem x86
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+%{?with_system_seabios:Requires:	seabios}
 %systempkg_req
 Obsoletes:	kvm
 Obsoletes:	qemu-kvm-system-x86
@@ -735,6 +738,16 @@ done < %{SOURCE2}
 # install patched vesa tables with additional widescreen modes.
 cp -p roms/vgabios/VGABIOS-lgpl-latest.stdvga.bin $RPM_BUILD_ROOT%{_datadir}/%{name}/vgabios-stdvga.bin
 
+%if %{with system_seabios}
+ln -sf /usr/share/seabios/bios.bin $RPM_BUILD_ROOT%{_datadir}/%{name}/bios.bin
+for f in $RPM_BUILD_ROOT%{_datadir}/%{name}/*.aml ; do
+	bn="$(basename $f)"
+	if [ -e "/usr/share/seabios/$bn" ] ; then
+		ln -sf "/usr/share/seabios/$bn" "$f"
+	fi
+done
+%endif
+
 %if %{with gtk2} || %{with gtk3}
 %{__mv} $RPM_BUILD_ROOT%{_localedir}/{de_DE,de}
 %{__mv} $RPM_BUILD_ROOT%{_localedir}/{fr_FR,fr}
@@ -812,16 +825,43 @@ fi
 %dir %{_datadir}/qemu
 %{_datadir}/%{name}/keymaps
 %{_datadir}/%{name}/qemu-icon.bmp
+
 # various bios images
-%{_datadir}/%{name}/*.aml
-%{_datadir}/%{name}/*.bin
-%{_datadir}/%{name}/*.rom
-%{_datadir}/%{name}/*.dtb
-%{_datadir}/%{name}/qemu_logo_no_text.svg
+# all should be probably moved to the right system subpackage
+%{_datadir}/%{name}/QEMU,tcx.bin
+%{_datadir}/%{name}/bamboo.dtb
+%{_datadir}/%{name}/efi-e1000.rom
+%{_datadir}/%{name}/efi-eepro100.rom
+%{_datadir}/%{name}/efi-ne2k_pci.rom
+%{_datadir}/%{name}/efi-pcnet.rom
+%{_datadir}/%{name}/efi-rtl8139.rom
+%{_datadir}/%{name}/efi-virtio.rom
+%{_datadir}/%{name}/kvmvapic.bin
+%{_datadir}/%{name}/linuxboot.bin
+%{_datadir}/%{name}/multiboot.bin
 %{_datadir}/%{name}/openbios-ppc
 %{_datadir}/%{name}/openbios-sparc*
 %{_datadir}/%{name}/palcode-clipper
+%{_datadir}/%{name}/petalogix-ml605.dtb
+%{_datadir}/%{name}/petalogix-s3adsp1800.dtb
+%{_datadir}/%{name}/ppc_rom.bin
+%{_datadir}/%{name}/pxe-e1000.rom
+%{_datadir}/%{name}/pxe-eepro100.rom
+%{_datadir}/%{name}/pxe-ne2k_pci.rom
+%{_datadir}/%{name}/pxe-pcnet.rom
+%{_datadir}/%{name}/pxe-rtl8139.rom
+%{_datadir}/%{name}/pxe-virtio.rom
+%{_datadir}/%{name}/qemu_logo_no_text.svg
 %{_datadir}/%{name}/s390-ccw.img
+%{_datadir}/%{name}/s390-zipl.rom
+%{_datadir}/%{name}/sgabios.bin
+%{_datadir}/%{name}/slof.bin
+%{_datadir}/%{name}/spapr-rtas.bin
+%{_datadir}/%{name}/vgabios-cirrus.bin
+%{_datadir}/%{name}/vgabios-qxl.bin
+%{_datadir}/%{name}/vgabios-stdvga.bin
+%{_datadir}/%{name}/vgabios-vmware.bin
+%{_datadir}/%{name}/vgabios.bin
 
 %files img
 %defattr(644,root,root,755)
@@ -932,6 +972,9 @@ fi
 %config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/80-kvm.rules
 %attr(755,root,root) %{_bindir}/kvm_stat
 %endif
+%{_datadir}/%{name}/bios.bin
+%{_datadir}/%{name}/acpi-dsdt.aml
+%{_datadir}/%{name}/q35-acpi-dsdt.aml
 
 %files system-xtensa
 %defattr(644,root,root,755)
