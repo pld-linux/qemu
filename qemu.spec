@@ -19,6 +19,7 @@
 %bcond_without	seccomp		# seccomp support
 %bcond_without	usbredir	# usb network redirection support
 %bcond_without	system_seabios	# system seabios binary
+%bcond_without	snappy		# snappy compression library
 
 %if %{with gtk2}
 %undefine with_gtk3
@@ -27,12 +28,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	1.7.1
-Release:	2
+Version:	2.0.0
+Release:	1
 License:	GPL v2+
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
-# Source0-md5:	9541063d999cf9659ed7fdce71314f31
+# Source0-md5:	2790f44fd76da5de5024b4aafeb594c2
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -51,14 +52,13 @@ Patch0:		%{name}-cflags.patch
 Patch1:		vgabios-widescreens.patch
 Patch2:		%{name}-whitelist.patch
 Patch3:		%{name}-system-libcacard.patch
-Patch4:		vmdk3ro.patch
-Patch5:		%{name}-xattr.patch
-Patch6:		libjpeg-boolean.patch
+Patch4:		%{name}-xattr.patch
+Patch5:		libjpeg-boolean.patch
 # Proof of concept, for reference, do not remove
 Patch400:	%{name}-kde_virtual_workspaces_hack.patch
 URL:		http://www.qemu-project.org/
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
-%{?with_sdl:BuildRequires:	SDL-devel >= 1.2.1}
+%{?with_sdl:BuildRequires:	SDL2-devel}
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bcc
 %{?with_bluetooth:BuildRequires:	bluez-libs-devel}
@@ -69,7 +69,7 @@ BuildRequires:	cyrus-sasl-devel >= 2
 %{?with_esd:BuildRequires:	esound-devel}
 BuildRequires:	glib2-devel >= 1:2.12
 %{?with_glusterfs:BuildRequires:	glusterfs-devel >= 3.4}
-BuildRequires:	gnutls-devel
+BuildRequires:	gnutls-devel > 2.10.0
 BuildRequires:	libaio-devel
 %{?with_smartcard:BuildRequires:	libcacard-devel}
 BuildRequires:	libcap-devel
@@ -85,6 +85,7 @@ BuildRequires:	libssh2-devel >= 1.2.8
 # for usb passthrough, when available
 #BuildRequires:	libusb-devel >= 1.0.13
 BuildRequires:	libuuid-devel
+BuildRequires:	lzo-devel
 BuildRequires:	ncurses-devel
 %{?with_smartcard:BuildRequires:	nss-devel >= 3.12.8}
 BuildRequires:	perl-Encode
@@ -94,6 +95,7 @@ BuildRequires:	pkgconfig
 BuildRequires:	rpmbuild(macros) >= 1.644
 %{?with_system_seabios:BuildRequires:	seabios}
 BuildRequires:	sed >= 4.0
+%{?with_snappy:BuildRequires:	snappy}
 %if %{with spice}
 BuildRequires:	spice-protocol >= 0.12.0
 BuildRequires:	spice-server-devel >= 0.12.0
@@ -116,6 +118,7 @@ BuildRequires:	gtk+3-devel >= 3.0.0
 BuildRequires:	vte-devel >= 0.32.0
 %endif
 Requires:	%{name}-img = %{version}-%{release}
+Requires:	%{name}-system-aarch64 = %{version}-%{release}
 Requires:	%{name}-system-alpha = %{version}-%{release}
 Requires:	%{name}-system-arm = %{version}-%{release}
 Requires:	%{name}-system-cris = %{version}-%{release}
@@ -138,7 +141,7 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define	systempkg_req \
 %if %{with sdl} \
-Requires:	SDL >= 1.2.1 \
+Requires:	SDL2 \
 %endif \
 %if %{with usbredir} \
 Requires:	usbredir >= 0.6 \
@@ -253,6 +256,26 @@ QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
 Ten pakiet udostępnia emulację trybu użytkownika środowisk QEMU.
+
+%package system-aarch64
+Summary:	QEMU system emulator for Alpha
+Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Alpha
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
+Obsoletes:	qemu-kvm-system-aarch64
+
+%description system-aarch64
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator with Alpha CPU.
+
+%description system-aarch64 -l pl.UTF-8
+QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
+dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
+
+Ten pakiet zawiera emulator systemu z procesorem Alpha.
 
 %package system-alpha
 Summary:	QEMU system emulator for Alpha
@@ -600,6 +623,66 @@ systemach-gościach, komunikującego się kanałem virtio-serial o nazwie
 
 Ten pakiet nie musi być zainstalowany w systemie hosta.
 
+%package module-block-curl
+Summary:	QEMU module for 'curl' block devices
+Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'curl'
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description module-block-curl
+'curl' block device support for QEMU.
+
+%description module-block-curl -l pl.UTF-8
+Moduł QEMU dla urządeń blokowych typu 'curl'.
+
+%package module-block-gluster
+Summary:	QEMU module for 'gluster' block devices
+Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'gluster'
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description module-block-gluster
+'gluster' block device support for QEMU.
+
+%description module-block-gluster -l pl.UTF-8
+Moduł QEMU dla urządeń blokowych typu 'gluster'.
+
+%package module-block-iscsi
+Summary:	QEMU module for 'iscsi' block devices
+Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'iscsi'
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description module-block-iscsi
+'iscsi' block device support for QEMU.
+
+%description module-block-iscsi -l pl.UTF-8
+Moduł QEMU dla urządeń blokowych typu 'iscsi'.
+
+%package module-block-rbd
+Summary:	QEMU module for 'rbd' block devices
+Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'rbd'
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description module-block-rbd
+'rbd' block device support for QEMU.
+
+%description module-block-rbd -l pl.UTF-8
+Moduł QEMU dla urządeń blokowych typu 'rbd'.
+
+%package module-block-ssh
+Summary:	QEMU module for 'ssh' block devices
+Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'ssh'
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description module-block-ssh
+'ssh' block device support for QEMU.
+
+%description module-block-ssh -l pl.UTF-8
+Moduł QEMU dla urządeń blokowych typu 'ssh'.
+
 %prep
 %setup -q
 %patch0 -p1
@@ -608,7 +691,6 @@ Ten pakiet nie musi być zainstalowany w systemie hosta.
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
-%patch6 -p1
 
 %{__mv} libcacard libcacard-use-system-lib
 
@@ -620,6 +702,8 @@ ln -s ../error.h qapi/error.h
 	--extra-cflags="%{rpmcflags} -I/usr/include/ncurses" \
 	--extra-ldflags="%{rpmldflags}" \
 	--prefix=%{_prefix} \
+	--libdir=%{_libdir} \
+	--libexecdir=%{_libexecdir} \
 	--sysconfdir=%{_sysconfdir} \
 	--cc="%{__cc}" \
 	--host-cc="%{__cc}" \
@@ -638,6 +722,7 @@ ln -s ../error.h qapi/error.h
 	%{__enable_disable ceph rbd} \
 	%{__enable_disable rdma} \
 	%{__enable_disable sdl} \
+	--with-sdlabi=2.0 \
 	%{__enable_disable seccomp} \
 	%{__enable_disable spice} \
 	%{__enable_disable smartcard smartcard-nss} \
@@ -652,6 +737,12 @@ ln -s ../error.h qapi/error.h
 	--enable-vnc-tls \
 	--enable-kvm \
 	%{__enable_disable xen} \
+	--enable-modules \
+	--disable-netmap \
+	--disable-libnfs \
+	--enable-lzo \
+	%{__enable_disable snappy} \
+	--enable-quorum \
 	--audio-drv-list="alsa%{?with_iss:,oss}%{?with_sdl:,sdl}%{?with_esd:,esd}%{?with_pulseaudio:,pa}" \
 	--interp-prefix=%{_libdir}/qemu/lib-%%M \
 %if %{without gtk2} && %{without gtk3}
@@ -660,11 +751,8 @@ ln -s ../error.h qapi/error.h
 	--with-gtkabi="%{?with_gtk2:2.0}%{!?with_gtk2:3.0}"
 %endif
 
-# note: CONFIG_QEMU_HELPERDIR is used when compiling, libexecdir when installing;
-# --libexecdir in configure is nop
 %{__make} \
 	V=1 \
-	CONFIG_QEMU_HELPERDIR="%{_libdir}" \
 	%{!?with_smartcard:CONFIG_USB_SMARTCARD=n}
 
 # rebuild patched vesa tables with additional widescreen modes.
@@ -680,8 +768,7 @@ install -d $RPM_BUILD_ROOT{%{systemdunitdir},/usr/lib/binfmt.d} \
 
 %{__make} install \
 	%{!?with_smartcard:CONFIG_USB_SMARTCARD=n} \
-	DESTDIR=$RPM_BUILD_ROOT \
-	libexecdir=%{_libdir}
+	DESTDIR=$RPM_BUILD_ROOT
 
 install -d $RPM_BUILD_ROOT%{_sysconfdir}
 cat <<'EOF' > $RPM_BUILD_ROOT%{_sysconfdir}/qemu-ifup
@@ -739,7 +826,8 @@ done < %{SOURCE2}
 cp -p roms/vgabios/VGABIOS-lgpl-latest.stdvga.bin $RPM_BUILD_ROOT%{_datadir}/%{name}/vgabios-stdvga.bin
 
 %if %{with system_seabios}
-ln -sf /usr/share/seabios/bios.bin $RPM_BUILD_ROOT%{_datadir}/%{name}/bios.bin
+ln -sf /usr/share/seabios/bios.bin $RPM_BUILD_ROOT%{_datadir}/%{name}/bios-256k.bin
+# bios.bin provided by qemu is stripped to 128k, with no Xen support, keep it
 for f in $RPM_BUILD_ROOT%{_datadir}/%{name}/*.aml ; do
 	bn="$(basename $f)"
 	if [ -e "/usr/share/seabios/$bn" ] ; then
@@ -828,6 +916,7 @@ fi
 
 # various bios images
 # all should be probably moved to the right system subpackage
+%{_datadir}/%{name}/QEMU,cgthree.bin
 %{_datadir}/%{name}/QEMU,tcx.bin
 %{_datadir}/%{name}/bamboo.dtb
 %{_datadir}/%{name}/efi-e1000.rom
@@ -863,6 +952,8 @@ fi
 %{_datadir}/%{name}/vgabios-vmware.bin
 %{_datadir}/%{name}/vgabios.bin
 
+%dir %{_libdir}/%{name}
+
 %files img
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-img
@@ -871,6 +962,7 @@ fi
 %files user
 %defattr(644,root,root,755)
 /usr/lib/binfmt.d/qemu-*.conf
+%attr(755,root,root) %{_bindir}/qemu-aarch64
 %attr(755,root,root) %{_bindir}/qemu-alpha
 %attr(755,root,root) %{_bindir}/qemu-arm
 %attr(755,root,root) %{_bindir}/qemu-armeb
@@ -898,6 +990,10 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-sparc64
 %attr(755,root,root) %{_bindir}/qemu-unicore32
 %attr(755,root,root) %{_bindir}/qemu-x86_64
+
+%files system-aarch64
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-aarch64
 
 %files system-alpha
 %defattr(644,root,root,755)
@@ -973,6 +1069,7 @@ fi
 %attr(755,root,root) %{_bindir}/kvm_stat
 %endif
 %{_datadir}/%{name}/bios.bin
+%{_datadir}/%{name}/bios-256k.bin
 %{_datadir}/%{name}/acpi-dsdt.aml
 %{_datadir}/%{name}/q35-acpi-dsdt.aml
 
@@ -986,3 +1083,23 @@ fi
 %config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/99-qemu-guest-agent.rules
 %{systemdunitdir}/qemu-guest-agent.service
 %attr(755,root,root) %{_bindir}/qemu-ga
+
+%files module-block-curl
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/%{name}/block-curl.so
+
+%files module-block-gluster
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/%{name}/block-gluster.so
+
+%files module-block-iscsi
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/%{name}/block-iscsi.so
+
+%files module-block-rbd
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/%{name}/block-rbd.so
+
+%files module-block-ssh
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/%{name}/block-ssh.so
