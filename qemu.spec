@@ -1,3 +1,4 @@
+# TODO: libnfs >= 1.9.3
 #
 # Conditional build:
 %bcond_without	sdl		# SDL UI and audio support
@@ -76,16 +77,15 @@ BuildRequires:	libcap-devel
 BuildRequires:	libcap-ng-devel
 BuildRequires:	libfdt-devel
 %{?with_rdma:BuildRequires:	libibverbs-devel}
-%{?with_iscsi:BuildRequires:	libiscsi-devel}
+%{?with_iscsi:BuildRequires:	libiscsi-devel >= 1.4.0}
 BuildRequires:	libjpeg-devel
 BuildRequires:	libpng-devel
 %{?with_rdma:BuildRequires:	librdmacm-devel}
-%{?with_seccomp:BuildRequires:	libseccomp-devel}
+%{?with_seccomp:BuildRequires:	libseccomp-devel >= 2.1.0}
 BuildRequires:	libssh2-devel >= 1.2.8
-# for usb passthrough, when available
-#BuildRequires:	libusb-devel >= 1.0.13
+BuildRequires:	libusb-devel >= 1.0.13
 BuildRequires:	libuuid-devel
-BuildRequires:	lzo-devel
+BuildRequires:	lzo-devel >= 2
 BuildRequires:	ncurses-devel
 %{?with_smartcard:BuildRequires:	nss-devel >= 3.12.8}
 BuildRequires:	perl-Encode
@@ -95,9 +95,9 @@ BuildRequires:	pkgconfig
 BuildRequires:	rpmbuild(macros) >= 1.644
 %{?with_system_seabios:BuildRequires:	seabios}
 BuildRequires:	sed >= 4.0
-%{?with_snappy:BuildRequires:	snappy}
+%{?with_snappy:BuildRequires:	snappy-devel}
 %if %{with spice}
-BuildRequires:	spice-protocol >= 0.12.0
+BuildRequires:	spice-protocol >= 0.12.3
 BuildRequires:	spice-server-devel >= 0.12.0
 %endif
 BuildRequires:	texi2html
@@ -143,6 +143,10 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %if %{with sdl} \
 Requires:	SDL2 \
 %endif \
+%if %{with seccomp} \
+Requires:	libseccomp >= 2.1.0 \
+%endif \
+Requires:	libusb >= 1.0.13 \
 %if %{with usbredir} \
 Requires:	usbredir >= 0.6 \
 %endif \
@@ -258,8 +262,8 @@ dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 Ten pakiet udostępnia emulację trybu użytkownika środowisk QEMU.
 
 %package system-aarch64
-Summary:	QEMU system emulator for Alpha
-Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Alpha
+Summary:	QEMU system emulator for AArch64
+Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem AArch64
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
@@ -269,13 +273,13 @@ Obsoletes:	qemu-kvm-system-aarch64
 QEMU is a generic and open source processor emulator which achieves a
 good emulation speed by using dynamic translation.
 
-This package provides the system emulator with Alpha CPU.
+This package provides the system emulator with AArch64 CPU.
 
 %description system-aarch64 -l pl.UTF-8
 QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
-Ten pakiet zawiera emulator systemu z procesorem Alpha.
+Ten pakiet zawiera emulator systemu z procesorem AArch64.
 
 %package system-alpha
 Summary:	QEMU system emulator for Alpha
@@ -640,6 +644,7 @@ Summary:	QEMU module for 'gluster' block devices
 Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'gluster'
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+Requires:	glusterfs-libs >= 3.4
 
 %description module-block-gluster
 'gluster' block device support for QEMU.
@@ -652,6 +657,7 @@ Summary:	QEMU module for 'iscsi' block devices
 Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'iscsi'
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+Requires:	libiscsi >= 1.4.0
 
 %description module-block-iscsi
 'iscsi' block device support for QEMU.
@@ -1088,17 +1094,23 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/%{name}/block-curl.so
 
+%if %{with glusterfs}
 %files module-block-gluster
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/%{name}/block-gluster.so
+%endif
 
+%if %{with iscsi}
 %files module-block-iscsi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/%{name}/block-iscsi.so
+%endif
 
+%if %{with ceph}
 %files module-block-rbd
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/%{name}/block-rbd.so
+%endif
 
 %files module-block-ssh
 %defattr(644,root,root,755)
