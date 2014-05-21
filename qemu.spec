@@ -1,4 +1,3 @@
-# TODO: libnfs >= 1.9.3
 #
 # Conditional build:
 %bcond_without	sdl		# SDL UI and audio support
@@ -17,6 +16,7 @@
 %bcond_without	brlapi		# brlapi support
 %bcond_without	smartcard	# smartcard-nss support
 %bcond_without	iscsi		# iscsi support
+%bcond_without	libnfs		# NFS support
 %bcond_without	seccomp		# seccomp support
 %bcond_without	usbredir	# usb network redirection support
 %bcond_without	system_seabios	# system seabios binary
@@ -79,6 +79,7 @@ BuildRequires:	libfdt-devel
 %{?with_rdma:BuildRequires:	libibverbs-devel}
 %{?with_iscsi:BuildRequires:	libiscsi-devel >= 1.4.0}
 BuildRequires:	libjpeg-devel
+%{?with_nfs:BuildRequires:	libnfs-devel >= 1.9.3}
 BuildRequires:	libpng-devel
 %{?with_rdma:BuildRequires:	librdmacm-devel}
 %{?with_seccomp:BuildRequires:	libseccomp-devel >= 2.1.0}
@@ -205,6 +206,7 @@ Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
 Requires:	glib2 >= 1:2.12
+%{?with_nfs:Requires:	libnfs >= 1.9.3}
 Requires:	libssh2 >= 1.2.8
 Requires:	systemd-units >= 38
 Provides:	group(qemu)
@@ -745,7 +747,7 @@ ln -s ../error.h qapi/error.h
 	%{__enable_disable xen} \
 	--enable-modules \
 	--disable-netmap \
-	--disable-libnfs \
+	%{__enable_disable libnfs} \
 	--enable-lzo \
 	%{__enable_disable snappy} \
 	--enable-quorum \
