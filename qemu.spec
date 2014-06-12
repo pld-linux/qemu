@@ -30,7 +30,7 @@ Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
 Version:	2.0.0
-Release:	1
+Release:	2
 License:	GPL v2+
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
@@ -79,7 +79,7 @@ BuildRequires:	libfdt-devel
 %{?with_rdma:BuildRequires:	libibverbs-devel}
 %{?with_iscsi:BuildRequires:	libiscsi-devel >= 1.4.0}
 BuildRequires:	libjpeg-devel
-%{?with_nfs:BuildRequires:	libnfs-devel >= 1.9.3}
+%{?with_libnfs:BuildRequires:	libnfs-devel >= 1.9.3}
 BuildRequires:	libpng-devel
 %{?with_rdma:BuildRequires:	librdmacm-devel}
 %{?with_seccomp:BuildRequires:	libseccomp-devel >= 2.1.0}
@@ -206,7 +206,7 @@ Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
 Requires:	glib2 >= 1:2.12
-%{?with_nfs:Requires:	libnfs >= 1.9.3}
+%{?with_libnfs:Requires:	libnfs >= 1.9.3}
 Requires:	libssh2 >= 1.2.8
 Requires:	systemd-units >= 38
 Provides:	group(qemu)
