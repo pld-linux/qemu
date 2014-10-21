@@ -29,12 +29,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	2.0.0
-Release:	2
+Version:	2.0.2
+Release:	1
 License:	GPL v2+
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
-# Source0-md5:	2790f44fd76da5de5024b4aafeb594c2
+# Source0-md5:	6d7379054b17d8fd3c47955d0a018851
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -59,7 +59,7 @@ Patch5:		libjpeg-boolean.patch
 Patch400:	%{name}-kde_virtual_workspaces_hack.patch
 URL:		http://www.qemu-project.org/
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
-%{?with_sdl:BuildRequires:	SDL2-devel}
+%{?with_sdl:BuildRequires:	SDL2-devel >= 2.0}
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bcc
 %{?with_bluetooth:BuildRequires:	bluez-libs-devel}
