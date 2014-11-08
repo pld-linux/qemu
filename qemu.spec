@@ -29,12 +29,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	2.0.2
+Version:	2.1.2
 Release:	1
 License:	GPL v2+
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
-# Source0-md5:	6d7379054b17d8fd3c47955d0a018851
+# Source0-md5:	0ff197c4ed4b695620bc4734e77c888f
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -707,8 +707,8 @@ ln -s ../error.h qapi/error.h
 
 %build
 ./configure \
-	--extra-cflags="%{rpmcflags} -I/usr/include/ncurses" \
-	--extra-ldflags="%{rpmldflags}" \
+	--extra-cflags="%{rpmcflags} %{rpmcppflags} -fPIE -DPIE" \
+	--extra-ldflags="%{rpmldflags} -pie -Wl,-z,relro -Wl,-z,now" \
 	--prefix=%{_prefix} \
 	--libdir=%{_libdir} \
 	--libexecdir=%{_libexecdir} \
@@ -990,6 +990,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-ppc
 %attr(755,root,root) %{_bindir}/qemu-ppc64
 %attr(755,root,root) %{_bindir}/qemu-ppc64abi32
+%attr(755,root,root) %{_bindir}/qemu-ppc64le
 %attr(755,root,root) %{_bindir}/qemu-s390x
 %attr(755,root,root) %{_bindir}/qemu-sh4
 %attr(755,root,root) %{_bindir}/qemu-sh4eb
@@ -1047,7 +1048,9 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-ppc
 %attr(755,root,root) %{_bindir}/qemu-system-ppc64
+#%attr(755,root,root) %{_bindir}/qemu-system-ppc64le
 %attr(755,root,root) %{_bindir}/qemu-system-ppcemb
+%{_datadir}/%{name}/u-boot.e500
 
 %files system-s390x
 %defattr(644,root,root,755)

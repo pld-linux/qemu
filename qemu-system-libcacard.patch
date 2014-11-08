@@ -1,58 +1,71 @@
---- qemu-1.7.0/configure.orig	2013-12-15 08:38:07.584329114 +0100
-+++ qemu-1.7.0/configure	2013-12-15 08:54:19.730954984 +0100
-@@ -3123,9 +3123,10 @@
+diff -urN qemu-2.1.2.org/configure qemu-2.1.2/configure
+--- qemu-2.1.2.org/configure	2014-09-25 21:54:52.000000000 +0200
++++ qemu-2.1.2/configure	2014-11-08 13:52:27.205351822 +0100
+@@ -3546,9 +3546,10 @@
  #include <pk11pub.h>
  int main(void) { PK11_FreeSlot(0); return 0; }
  EOF
--    smartcard_includes="-I\$(SRC_PATH)/libcacard"
--    libcacard_libs="$($pkg_config --libs nss 2>/dev/null) $glib_libs"
--    libcacard_cflags="$($pkg_config --cflags nss 2>/dev/null) $glib_cflags"
+-    # FIXME: do not include $glib_* in here
+-    nss_libs="$($pkg_config --libs nss 2>/dev/null) $glib_libs"
+-    nss_cflags="$($pkg_config --cflags nss 2>/dev/null) $glib_cflags"
 +    libcacard_libs="$($pkg_config --libs libcacard 2>/dev/null)"
 +    libcacard_cflags="$($pkg_config --cflags libcacard 2>/dev/null)"
-+    nss_libs="$($pkg_config --libs nss 2>/dev/null) $glib_libs"
-+    nss_cflags="$($pkg_config --cflags nss 2>/dev/null) $glib_cflags"
-     test_cflags="$libcacard_cflags"
++    nss_libs="$($pkg_config --libs nss 2>/dev/null)"
++    nss_cflags="$($pkg_config --cflags nss 2>/dev/null)"
+     test_cflags="$nss_cflags"
      # The header files in nss < 3.13.3 have a bug which causes them to
      # emit a warning. If we're going to compile QEMU with -Werror, then
-@@ -3136,11 +3137,10 @@
-     fi
-     if test -n "$libtool" &&
-        $pkg_config --atleast-version=3.12.8 nss && \
--      compile_prog "$test_cflags" "$libcacard_libs"; then
-+      compile_prog "$test_cflags" "$nss_libs"; then
-         smartcard_nss="yes"
--        QEMU_CFLAGS="$QEMU_CFLAGS $libcacard_cflags"
--        QEMU_INCLUDES="$QEMU_INCLUDES $smartcard_includes"
--        libs_softmmu="$libcacard_libs $libs_softmmu"
-+        QEMU_CFLAGS="$QEMU_CFLAGS $libcacard_cflags $nss_cflags"
-+        libs_softmmu="$libcacard_libs $nss_libs $libs_softmmu"
-     else
-         if test "$smartcard_nss" = "yes"; then
-             feature_not_found "nss"
-@@ -4082,6 +4082,8 @@
+@@ -4582,6 +4583,8 @@
    echo "CONFIG_SMARTCARD_NSS=y" >> $config_host_mak
-   echo "libcacard_libs=$libcacard_libs" >> $config_host_mak
-   echo "libcacard_cflags=$libcacard_cflags" >> $config_host_mak
-+  echo "nss_libs=$nss_libs" >> $config_host_mak
-+  echo "nss_cflags=$nss_cflags" >> $config_host_mak
+   echo "NSS_LIBS=$nss_libs" >> $config_host_mak
+   echo "NSS_CFLAGS=$nss_cflags" >> $config_host_mak
++  echo "LIBCACARD_LIBS=$libcacard_libs" >> $config_host_mak
++  echo "LIBCACARD_CFLAGS=$libcacard_cflags" >> $config_host_mak
  fi
  
  if test "$libusb" = "yes" ; then
---- qemu-1.3.0/Makefile.orig	2012-12-03 20:37:05.000000000 +0100
-+++ qemu-1.3.0/Makefile	2012-12-16 11:08:58.001201236 +0100
-@@ -111,9 +111,6 @@
- include $(SRC_PATH)/Makefile.objs
+diff -urN qemu-2.1.2.org/hw/usb/ccid-card-passthru.c qemu-2.1.2/hw/usb/ccid-card-passthru.c
+--- qemu-2.1.2.org/hw/usb/ccid-card-passthru.c	2014-09-25 21:54:52.000000000 +0200
++++ qemu-2.1.2/hw/usb/ccid-card-passthru.c	2014-11-08 13:52:56.156055395 +0100
+@@ -12,7 +12,7 @@
+ #include "qemu/sockets.h"
+ #include "monitor/monitor.h"
+ #include "ccid.h"
+-#include "libcacard/vscard_common.h"
++#include "cacard/vscard_common.h"
+ 
+ #define DPRINTF(card, lvl, fmt, ...)                    \
+ do {                                                    \
+diff -urN qemu-2.1.2.org/hw/usb/Makefile.objs qemu-2.1.2/hw/usb/Makefile.objs
+--- qemu-2.1.2.org/hw/usb/Makefile.objs	2014-09-25 21:54:52.000000000 +0200
++++ qemu-2.1.2/hw/usb/Makefile.objs	2014-11-08 13:55:50.056948226 +0100
+@@ -24,7 +24,8 @@
+ common-obj-y                          += dev-smartcard-reader.o
+ common-obj-y                          += ccid-card-passthru.o
+ common-obj-$(CONFIG_SMARTCARD_NSS)    += ccid-card-emulated.o
+-ccid-card-emulated.o-cflags := -I$(SRC_PATH)/libcacard
++ccid-card-emulated.o-cflags := $(LIBCACARD_CFLAGS)
++ccid-card-emulated.o-libs := $(LIBCACARD_LIBS)
+ endif
+ 
+ ifeq ($(CONFIG_POSIX),y)
+diff -urN qemu-2.1.2.org/Makefile qemu-2.1.2/Makefile
+--- qemu-2.1.2.org/Makefile	2014-09-25 21:54:52.000000000 +0200
++++ qemu-2.1.2/Makefile	2014-11-08 13:48:43.709920110 +0100
+@@ -142,9 +142,6 @@
+ ifneq ($(wildcard config-host.mak),)
  include $(SRC_PATH)/tests/Makefile
  endif
 -ifeq ($(CONFIG_SMARTCARD_NSS),y)
 -include $(SRC_PATH)/libcacard/Makefile
 -endif
  
- all: $(DOCS) $(TOOLS) $(HELPERS-y) recurse-all
+ all: $(DOCS) $(TOOLS) $(HELPERS-y) recurse-all modules
  
---- qemu-1.5.0/Makefile.objs.orig	2013-05-20 17:34:39.000000000 +0200
-+++ qemu-1.5.0/Makefile.objs	2013-05-26 17:46:51.190865264 +0200
-@@ -74,8 +74,6 @@
+diff -urN qemu-2.1.2.org/Makefile.objs qemu-2.1.2/Makefile.objs
+--- qemu-2.1.2.org/Makefile.objs	2014-09-25 21:54:52.000000000 +0200
++++ qemu-2.1.2/Makefile.objs	2014-11-08 13:49:29.161024919 +0100
+@@ -79,8 +79,6 @@
  
  common-obj-$(CONFIG_SECCOMP) += qemu-seccomp.o
  
@@ -61,14 +74,3 @@
  ######################################################################
  # qapi
  
---- qemu-1.5.0/hw/usb/ccid-card-passthru.c.orig	2013-05-20 17:34:39.000000000 +0200
-+++ qemu-1.5.0/hw/usb/ccid-card-passthru.c	2013-05-26 17:58:20.660836330 +0200
-@@ -12,7 +12,7 @@
- #include "qemu/sockets.h"
- #include "monitor/monitor.h"
- #include "ccid.h"
--#include "libcacard/vscard_common.h"
-+#include <cacard/vscard_common.h>
- 
- #define DPRINTF(card, lvl, fmt, ...)                    \
- do {                                                    \
