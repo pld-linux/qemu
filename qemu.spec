@@ -29,12 +29,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	2.1.2
-Release:	2
+Version:	2.2.0
+Release:	1
 License:	GPL v2+
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
-# Source0-md5:	0ff197c4ed4b695620bc4734e77c888f
+# Source0-md5:	f7a5e2da22d057eb838a91da7aff43c8
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -133,6 +133,7 @@ Requires:	%{name}-system-ppc = %{version}-%{release}
 Requires:	%{name}-system-s390x = %{version}-%{release}
 Requires:	%{name}-system-sh4 = %{version}-%{release}
 Requires:	%{name}-system-sparc = %{version}-%{release}
+Requires:	%{name}-system-tricore = %{version}-%{release}
 Requires:	%{name}-system-unicore32 = %{version}-%{release}
 Requires:	%{name}-system-x86 = %{version}-%{release}
 Requires:	%{name}-system-xtensa = %{version}-%{release}
@@ -542,6 +543,26 @@ dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
 Ten pakiet zawiera emulator systemu z procesorem SPARC/SPARC64.
 
+%package system-tricore
+Summary:	QEMU system emulator for Tricore
+Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Tricore
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
+
+%description system-tricore
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator with Tricore CPU.
+
+%description system-sparc -l pl.UTF-8
+QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
+dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
+
+Ten pakiet zawiera emulator systemu z procesorem SPARC/SPARC64.
+
+
 %package system-unicore32
 Summary:	QEMU system emulator for UniCore32
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem UniCore32
@@ -921,6 +942,7 @@ fi
 %dir %{_datadir}/qemu
 %{_datadir}/%{name}/keymaps
 %{_datadir}/%{name}/qemu-icon.bmp
+%{_datadir}/%{name}/trace-events
 
 # various bios images
 # all should be probably moved to the right system subpackage
@@ -1065,6 +1087,10 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-sparc
 %attr(755,root,root) %{_bindir}/qemu-system-sparc64
+
+%files system-tricore
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-tricore
 
 %files system-unicore32
 %defattr(644,root,root,755)
