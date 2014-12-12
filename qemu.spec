@@ -6,7 +6,8 @@
 %bcond_without	glusterfs	# GlusterFS backend
 %bcond_without	rdma		# RDMA-based migration support
 %bcond_with	gtk2		# GTK+ 2.x instead of 3.x
-%bcond_without	gtk3		# Do not build GTK UI
+%bcond_without	gtk3		# Do not build GTK+ UI
+%bcond_without	vte		# VTE support in GTK+ UI
 %bcond_without	spice		# SPICE support
 %bcond_with	esd		# EsounD audio support
 %bcond_without	oss		# OSS audio support
@@ -21,6 +22,8 @@
 %bcond_without	usbredir	# usb network redirection support
 %bcond_without	system_seabios	# system seabios binary
 %bcond_without	snappy		# snappy compression library
+%bcond_with	lttng		# lttng-ust trace backend support
+%bcond_with	systemtap	# SystemTap/dtrace trace backend support
 
 %if %{with gtk2}
 %undefine with_gtk3
@@ -77,15 +80,16 @@ BuildRequires:	libcap-devel
 BuildRequires:	libcap-ng-devel
 BuildRequires:	libfdt-devel
 %{?with_rdma:BuildRequires:	libibverbs-devel}
-%{?with_iscsi:BuildRequires:	libiscsi-devel >= 1.4.0}
+%{?with_iscsi:BuildRequires:	libiscsi-devel >= 1.9.0}
 BuildRequires:	libjpeg-devel
 %{?with_libnfs:BuildRequires:	libnfs-devel >= 1.9.3}
 BuildRequires:	libpng-devel
 %{?with_rdma:BuildRequires:	librdmacm-devel}
-%{?with_seccomp:BuildRequires:	libseccomp-devel >= 2.1.0}
+%{?with_seccomp:BuildRequires:	libseccomp-devel >= 2.1.1}
 BuildRequires:	libssh2-devel >= 1.2.8
 BuildRequires:	libusb-devel >= 1.0.13
 BuildRequires:	libuuid-devel
+%{?with_lttng:BuildRequires:	lttng-ust-devel}
 BuildRequires:	lzo-devel >= 2
 BuildRequires:	ncurses-devel
 %{?with_smartcard:BuildRequires:	nss-devel >= 3.12.8}
@@ -101,9 +105,11 @@ BuildRequires:	sed >= 4.0
 BuildRequires:	spice-protocol >= 0.12.3
 BuildRequires:	spice-server-devel >= 0.12.0
 %endif
+%{?with_systemtap:BuildRequires:	systemtap-sdt-devel}
 BuildRequires:	texi2html
 BuildRequires:	texinfo
 %{?with_usbredir:BuildRequires:	usbredir-devel >= 0.6}
+%{?with_lttng:BuildRequires:	userspace-rcu-devel}
 BuildRequires:	vde2-devel
 BuildRequires:	which
 %{?with_xen:BuildRequires:	xen-devel >= 3.4}
@@ -112,11 +118,11 @@ BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	zlib-devel
 %if %{with gtk2}
 BuildRequires:	gtk+2-devel >= 2:2.18.0
-BuildRequires:	vte0-devel >= 0.24.0
+%{?with_vte:BuildRequires:	vte0-devel >= 0.24.0}
 %endif
 %if %{with gtk3}
 BuildRequires:	gtk+3-devel >= 3.0.0
-BuildRequires:	vte-devel >= 0.32.0
+%{?with_vte:BuildRequires:	vte2.90-devel >= 0.32.0}
 %endif
 Requires:	%{name}-img = %{version}-%{release}
 Requires:	%{name}-system-aarch64 = %{version}-%{release}
@@ -154,11 +160,11 @@ Requires:	usbredir >= 0.6 \
 %endif \
 %if %{with gtk2} \
 Requires:	gtk+2 >= 2:2.18.0 \
-Requires:	vte0 >= 0.24.0 \
+%{?with_vte:Requires:	vte0 >= 0.24.0} \
 %endif \
 %if %{with gtk3} \
 Requires:	gtk+3 >= 3.0.0 \
-Requires:	vte >= 0.32.0 \
+%{?with_vte:Requires:	vte2.90 >= 0.32.0} \
 %endif
 
 # some PPC/SPARC boot image in ELF format
@@ -544,8 +550,8 @@ dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 Ten pakiet zawiera emulator systemu z procesorem SPARC/SPARC64.
 
 %package system-tricore
-Summary:	QEMU system emulator for Tricore
-Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Tricore
+Summary:	QEMU system emulator for TriCore
+Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem TriCore
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
@@ -554,14 +560,13 @@ Requires:	%{name}-common = %{version}-%{release}
 QEMU is a generic and open source processor emulator which achieves a
 good emulation speed by using dynamic translation.
 
-This package provides the system emulator with Tricore CPU.
+This package provides the system emulator with TriCore CPU.
 
 %description system-sparc -l pl.UTF-8
 QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
-Ten pakiet zawiera emulator systemu z procesorem SPARC/SPARC64.
-
+Ten pakiet zawiera emulator systemu z procesorem TriCore.
 
 %package system-unicore32
 Summary:	QEMU system emulator for UniCore32
@@ -680,7 +685,7 @@ Summary:	QEMU module for 'iscsi' block devices
 Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'iscsi'
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
-Requires:	libiscsi >= 1.4.0
+Requires:	libiscsi >= 1.9.0
 
 %description module-block-iscsi
 'iscsi' block device support for QEMU.
@@ -756,6 +761,7 @@ ln -s ../error.h qapi/error.h
 	%{__enable_disable spice} \
 	%{__enable_disable smartcard smartcard-nss} \
 	--enable-tpm \
+	--enable-trace-backends="nop%{?with_systemtap:,dtrace}%{?with_lttng:,ust}"
 	%{__enable_disable usbredir usb-redir} \
 	--enable-uuid \
 	--enable-vde \
@@ -764,6 +770,7 @@ ln -s ../error.h qapi/error.h
 	--enable-vnc-png \
 	--enable-vnc-sasl \
 	--enable-vnc-tls \
+	%{!?with_vte:--disable-vte} \
 	--enable-kvm \
 	%{__enable_disable xen} \
 	--enable-modules \
