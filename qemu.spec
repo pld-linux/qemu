@@ -761,7 +761,7 @@ ln -s ../error.h qapi/error.h
 	%{__enable_disable spice} \
 	%{__enable_disable smartcard smartcard-nss} \
 	--enable-tpm \
-	--enable-trace-backends="nop%{?with_systemtap:,dtrace}%{?with_lttng:,ust}"
+	--enable-trace-backends="nop%{?with_systemtap:,dtrace}%{?with_lttng:,ust}" \
 	%{__enable_disable usbredir usb-redir} \
 	--enable-uuid \
 	--enable-vde \
