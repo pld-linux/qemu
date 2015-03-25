@@ -29,6 +29,10 @@
 %undefine with_gtk3
 %endif
 
+%ifarch x32
+%undefine	with_xen
+%endif
+
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
@@ -58,6 +62,7 @@ Patch2:		%{name}-whitelist.patch
 Patch3:		%{name}-system-libcacard.patch
 Patch4:		%{name}-xattr.patch
 Patch5:		libjpeg-boolean.patch
+Patch6:		kvm-on-x32.patch
 # Proof of concept, for reference, do not remove
 Patch400:	%{name}-kde_virtual_workspaces_hack.patch
 URL:		http://www.qemu-project.org/
@@ -725,6 +730,7 @@ Moduł QEMU dla urządeń blokowych typu 'ssh'.
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
+%patch6 -p1
 
 %{__mv} libcacard libcacard-use-system-lib
 
