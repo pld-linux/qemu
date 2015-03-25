@@ -820,7 +820,7 @@ EOF
 
 install -p qemu.sasl $RPM_BUILD_ROOT%{_sysconfdir}/sasl/qemu.conf
 
-%ifarch %{ix86} %{x8664}
+%ifarch %{ix86} %{x8664} x32
 install -p scripts/kvm/kvm_stat $RPM_BUILD_ROOT%{_bindir}
 install -p %{SOURCE3} $RPM_BUILD_ROOT/etc/modules-load.d/kvm.conf
 install -p %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d
@@ -840,7 +840,7 @@ install -p %{SOURCE11} $RPM_BUILD_ROOT%{systemdunitdir}
 install -p %{SOURCE12} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d
 
 for i in dummy \
-%ifnarch %{ix86} %{x8664}
+%ifnarch %{ix86} %{x8664} x32
 	qemu-i386 \
 %endif
 %ifnarch arm
@@ -1113,7 +1113,7 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-i386
 %attr(755,root,root) %{_bindir}/qemu-system-x86_64
-%ifarch %{ix86} %{x8664}
+%ifarch %{ix86} %{x8664} x32
 %config(noreplace) %verify(not md5 mtime size) /etc/modules-load.d/kvm.conf
 %config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/80-kvm.rules
 %attr(755,root,root) %{_bindir}/kvm_stat
