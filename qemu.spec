@@ -62,14 +62,14 @@ Patch2:		%{name}-whitelist.patch
 Patch3:		%{name}-system-libcacard.patch
 Patch4:		%{name}-xattr.patch
 Patch5:		libjpeg-boolean.patch
-Patch6:		kvm-on-x32.patch
+Patch6:		x32.patch
 # Proof of concept, for reference, do not remove
 Patch400:	%{name}-kde_virtual_workspaces_hack.patch
 URL:		http://www.qemu-project.org/
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
 %{?with_sdl:BuildRequires:	SDL2-devel >= 2.0}
 BuildRequires:	alsa-lib-devel
-BuildRequires:	bcc
+BuildRequires:	bcc >= 0.16.21-2
 %{?with_bluetooth:BuildRequires:	bluez-libs-devel}
 %{?with_brlapi:BuildRequires:	brlapi-devel}
 %{?with_ceph:BuildRequires:	ceph-devel}
