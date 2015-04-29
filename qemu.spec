@@ -1,7 +1,6 @@
 #
 # Conditional build:
 %bcond_without	sdl		# SDL UI and audio support
-%bcond_without	glx		# OpenGL/GLX support
 %bcond_without	ceph		# Ceph/RBD support
 %bcond_without	glusterfs	# GlusterFS backend
 %bcond_without	rdma		# RDMA-based migration support
@@ -36,12 +35,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	2.2.0
-Release:	2
+Version:	2.3.0
+Release:	1
 License:	GPL v2+
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
-# Source0-md5:	f7a5e2da22d057eb838a91da7aff43c8
+# Source0-md5:	2fab3ea4460de9b57192e5b8b311f221
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -172,8 +171,9 @@ Requires:	gtk+3 >= 3.0.0 \
 %{?with_vte:Requires:	vte2.90 >= 0.32.0} \
 %endif
 
-# some PPC/SPARC boot image in ELF format
-%define		_noautostrip	.*%{_datadir}/qemu/.*-.*
+# don't strip/chrpath anything in there; these are boot images, roms etc
+%define		_noautostrip	.*%{_datadir}/qemu/.*
+%define		_noautochrpath	.*%{_datadir}/qemu/.*
 
 %description
 QEMU is a FAST! processor emulator. By using dynamic translation it
@@ -758,7 +758,6 @@ ln -s ../error.h qapi/error.h
 	--enable-fdt \
 	%{__enable_disable glusterfs} \
 	%{__enable_disable iscsi libiscsi} \
-	%{__enable_disable glx} \
 	%{__enable_disable ceph rbd} \
 	%{__enable_disable rdma} \
 	%{__enable_disable sdl} \
