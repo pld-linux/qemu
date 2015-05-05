@@ -1,3 +1,4 @@
+# TODO: archipelago (libxseg) on bcond (GPL v3 vs v2-only conflict)
 #
 # Conditional build:
 %bcond_without	sdl		# SDL UI and audio support
@@ -37,7 +38,7 @@ Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
 Version:	2.3.0
 Release:	1
-License:	GPL v2+
+License:	GPL v2
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
 # Source0-md5:	2fab3ea4460de9b57192e5b8b311f221
@@ -65,12 +66,13 @@ Patch6:		x32.patch
 # Proof of concept, for reference, do not remove
 Patch400:	%{name}-kde_virtual_workspaces_hack.patch
 URL:		http://www.qemu-project.org/
-%{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
+BuildRequires:	OpenGL-GLX-devel
 %{?with_sdl:BuildRequires:	SDL2-devel >= 2.0}
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bcc >= 0.16.21-2
 %{?with_bluetooth:BuildRequires:	bluez-libs-devel}
 %{?with_brlapi:BuildRequires:	brlapi-devel}
+BuildRequires:	bzip2-devel
 %{?with_ceph:BuildRequires:	ceph-devel}
 BuildRequires:	curl-devel
 BuildRequires:	cyrus-sasl-devel >= 2
@@ -97,8 +99,10 @@ BuildRequires:	libuuid-devel
 BuildRequires:	lzo-devel >= 2
 BuildRequires:	ncurses-devel
 %{?with_smartcard:BuildRequires:	nss-devel >= 3.12.8}
+BuildRequires:	numactl-devel
 BuildRequires:	perl-Encode
 BuildRequires:	perl-tools-pod
+BuildRequires:	pixman-devel >= 0.21.8
 BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 BuildRequires:	rpmbuild(macros) >= 1.644
@@ -159,6 +163,7 @@ Requires:	SDL2 \
 Requires:	libseccomp >= 2.1.0 \
 %endif \
 Requires:	libusb >= 1.0.13 \
+Requires:	pixman >= 0.21.8 \
 %if %{with usbredir} \
 Requires:	usbredir >= 0.6 \
 %endif \
@@ -933,7 +938,7 @@ fi
 
 %files common -f %{name}.lang
 %defattr(644,root,root,755)
-%doc README qemu-doc.html qemu-tech.html qmp-commands.txt
+%doc LICENSE README qemu-doc.html qemu-tech.html qmp-commands.txt
 %attr(755,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu-ifup
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu/target-*.conf
 %config(noreplace) %verify(not md5 mtime size) /etc/ksmtuned.conf
