@@ -36,12 +36,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	2.3.0
-Release:	2
+Version:	2.3.1
+Release:	1
 License:	GPL v2
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
-# Source0-md5:	2fab3ea4460de9b57192e5b8b311f221
+# Source0-md5:	fb6bbdb32e6af5c2d2980a32ac4ea051
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -63,7 +63,6 @@ Patch3:		%{name}-system-libcacard.patch
 Patch4:		%{name}-xattr.patch
 Patch5:		libjpeg-boolean.patch
 Patch6:		x32.patch
-Patch7:		CVE-2015-3456.patch
 # Proof of concept, for reference, do not remove
 Patch400:	%{name}-kde_virtual_workspaces_hack.patch
 URL:		http://www.qemu-project.org/
@@ -737,7 +736,6 @@ Moduł QEMU dla urządeń blokowych typu 'ssh'.
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
-%patch7 -p1
 
 %{__mv} libcacard libcacard-use-system-lib
 
