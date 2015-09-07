@@ -36,12 +36,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	2.3.1
+Version:	2.4.0
 Release:	1
 License:	GPL v2
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
-# Source0-md5:	fb6bbdb32e6af5c2d2980a32ac4ea051
+# Source0-md5:	186ee8194140a484a455f8e3c74589f4
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -66,6 +66,7 @@ Patch6:		x32.patch
 # Proof of concept, for reference, do not remove
 Patch400:	%{name}-kde_virtual_workspaces_hack.patch
 URL:		http://www.qemu-project.org/
+BuildRequires:	OpenGL-devel
 BuildRequires:	OpenGL-GLX-devel
 %{?with_sdl:BuildRequires:	SDL2-devel >= 2.0}
 BuildRequires:	alsa-lib-devel
@@ -77,13 +78,14 @@ BuildRequires:	bzip2-devel
 BuildRequires:	curl-devel
 BuildRequires:	cyrus-sasl-devel >= 2
 %{?with_esd:BuildRequires:	esound-devel}
-BuildRequires:	glib2-devel >= 1:2.12
+BuildRequires:	glib2-devel >= 1:2.22
 %{?with_glusterfs:BuildRequires:	glusterfs-devel >= 3.4}
 BuildRequires:	gnutls-devel > 2.10.0
 BuildRequires:	libaio-devel
 %{?with_smartcard:BuildRequires:	libcacard-devel}
 BuildRequires:	libcap-devel
 BuildRequires:	libcap-ng-devel
+BuildRequires:	libepoxy-devel
 BuildRequires:	libfdt-devel
 %{?with_rdma:BuildRequires:	libibverbs-devel}
 %{?with_iscsi:BuildRequires:	libiscsi-devel >= 1.9.0}
@@ -222,7 +224,7 @@ Requires(pre):	/bin/id
 Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
-Requires:	glib2 >= 1:2.12
+Requires:	glib2 >= 1:2.22
 %{?with_libnfs:Requires:	libnfs >= 1.9.3}
 Requires:	libssh2 >= 1.2.8
 Requires:	systemd-units >= 38
@@ -641,7 +643,7 @@ Summary:	QEMU guest agent
 Summary(pl.UTF-8):	Agent gościa QEMU
 Group:		Daemons
 Requires(post,preun,postun):	systemd-units >= 38
-Requires:	glib2 >= 1:2.12
+Requires:	glib2 >= 1:2.22
 Requires:	systemd-units >= 38
 Obsoletes:	qemu-kvm-guest-agent
 
@@ -788,7 +790,6 @@ ln -s ../error.h qapi/error.h
 	%{__enable_disable libnfs} \
 	--enable-lzo \
 	%{__enable_disable snappy} \
-	--enable-quorum \
 	--audio-drv-list="alsa%{?with_iss:,oss}%{?with_sdl:,sdl}%{?with_esd:,esd}%{?with_pulseaudio:,pa}" \
 	--interp-prefix=%{_libdir}/qemu/lib-%%M \
 %if %{without gtk2} && %{without gtk3}
@@ -940,13 +941,11 @@ fi
 %defattr(644,root,root,755)
 %doc LICENSE README qemu-doc.html qemu-tech.html qmp-commands.txt
 %attr(755,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu-ifup
-%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu/target-*.conf
 %config(noreplace) %verify(not md5 mtime size) /etc/ksmtuned.conf
 %config(noreplace) %verify(not md5 mtime size) /etc/sasl/qemu.conf
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/ksm
 %{systemdunitdir}/ksm.service
 %{systemdunitdir}/ksmtuned.service
-%dir %{_sysconfdir}/qemu
 %attr(755,root,root) %{_bindir}/virtfs-proxy-helper
 %attr(755,root,root) %{_bindir}/qemu-nbd
 %attr(755,root,root) %{_libdir}/qemu-bridge-helper
@@ -996,10 +995,14 @@ fi
 %{_datadir}/%{name}/vgabios-cirrus.bin
 %{_datadir}/%{name}/vgabios-qxl.bin
 %{_datadir}/%{name}/vgabios-stdvga.bin
+%{_datadir}/%{name}/vgabios-virtio.bin
 %{_datadir}/%{name}/vgabios-vmware.bin
 %{_datadir}/%{name}/vgabios.bin
 
 %dir %{_libdir}/%{name}
+
+# modules without too many external dependencies
+%attr(755,root,root) %{_libdir}/%{name}/block-dmg.so
 
 %files img
 %defattr(644,root,root,755)

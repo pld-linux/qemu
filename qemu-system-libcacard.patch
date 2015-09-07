@@ -65,12 +65,13 @@ diff -urN qemu-2.1.2.org/Makefile qemu-2.1.2/Makefile
 diff -urN qemu-2.1.2.org/Makefile.objs qemu-2.1.2/Makefile.objs
 --- qemu-2.1.2.org/Makefile.objs	2014-09-25 21:54:52.000000000 +0200
 +++ qemu-2.1.2/Makefile.objs	2014-11-08 13:49:29.161024919 +0100
-@@ -79,8 +79,6 @@
+@@ -75,8 +75,6 @@ common-obj-y += backends/
  
  common-obj-$(CONFIG_SECCOMP) += qemu-seccomp.o
  
 -common-obj-$(CONFIG_SMARTCARD_NSS) += $(libcacard-y)
 -
- ######################################################################
- # qapi
+ common-obj-$(CONFIG_FDT) += device_tree.o
  
+ ######################################################################
+
