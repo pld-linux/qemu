@@ -100,7 +100,7 @@ BuildRequires:	libuuid-devel
 %{?with_lttng:BuildRequires:	lttng-ust-devel}
 BuildRequires:	lzo-devel >= 2
 BuildRequires:	ncurses-devel
-%{?with_smartcard:BuildRequires:	nss-devel >= 3.12.8}
+%{?with_smartcard:BuildRequires:	nss-devel >= 1:3.12.8}
 BuildRequires:	numactl-devel
 BuildRequires:	perl-Encode
 BuildRequires:	perl-tools-pod
