@@ -5,6 +5,7 @@
 %bcond_without	ceph		# Ceph/RBD support
 %bcond_without	glusterfs	# GlusterFS backend
 %bcond_without	rdma		# RDMA-based migration support
+%bcond_with	xseg		# Archipelago backend [non-distributable: GPLv3+ vs GPLv2-only]
 %bcond_with	gtk2		# GTK+ 2.x instead of 3.x
 %bcond_without	gtk3		# Do not build GTK+ UI
 %bcond_without	vte		# VTE support in GTK+ UI
@@ -98,6 +99,7 @@ BuildRequires:	libpng-devel
 BuildRequires:	libssh2-devel >= 1.2.8
 BuildRequires:	libusb-devel >= 1.0.13
 BuildRequires:	libuuid-devel
+%{?with_xseg:BuildRequires:	libxseg-devel}
 %{?with_lttng:BuildRequires:	lttng-ust-devel}
 BuildRequires:	lzo-devel >= 2
 BuildRequires:	ncurses-devel
@@ -668,6 +670,18 @@ systemach-gościach, komunikującego się kanałem virtio-serial o nazwie
 
 Ten pakiet nie musi być zainstalowany w systemie hosta.
 
+%package module-block-archipelago
+Summary:	QEMU module for Archipelago block devices
+Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych Archipelago
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+
+%description module-block-archipelago
+Archipelago block device support for QEMU.
+
+%description module-block-archipelago -l pl.UTF-8
+Moduł QEMU dla urządeń blokowych Archipelago.
+
 %package module-block-curl
 Summary:	QEMU module for 'curl' block devices
 Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'curl'
@@ -757,6 +771,7 @@ ln -s ../error.h qapi/error.h
 	--cc="%{__cc}" \
 	--host-cc="%{__cc}" \
 	--disable-strip \
+	%{__enable_disable xseg archipelago} \
 	--enable-attr \
 	%{__enable_disable bluetooth bluez} \
 	%{__enable_disable brlapi} \
@@ -1142,6 +1157,12 @@ fi
 %config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/99-qemu-guest-agent.rules
 %{systemdunitdir}/qemu-guest-agent.service
 %attr(755,root,root) %{_bindir}/qemu-ga
+
+%if %{with xseg}
+%files module-block-archipelago
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/%{name}/block-archipelago.so
+%endif
 
 %files module-block-curl
 %defattr(644,root,root,755)
