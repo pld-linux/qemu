@@ -1,0 +1,11 @@
+--- qemu-2.4.0.1/configure.orig	2015-10-05 21:43:29.245561041 +0200
++++ qemu-2.4.0.1/configure	2015-10-05 21:49:36.392212179 +0200
+@@ -4501,7 +4501,7 @@
+ echo "GNUTLS support    $gnutls"
+ echo "GNUTLS hash       $gnutls_hash"
+ echo "GNUTLS gcrypt     $gnutls_gcrypt"
+-echo "GNUTLS nettle     $gnutls_nettle ${gnutls_nettle+($nettle_version)}"
++echo "GNUTLS nettle     $gnutls_nettle ${gnutls_nettle:+\($nettle_version)}"
+ echo "VTE support       $vte"
+ echo "curses support    $curses"
+ echo "curl support      $curl"

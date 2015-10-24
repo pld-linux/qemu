@@ -63,6 +63,7 @@ Patch3:		%{name}-system-libcacard.patch
 Patch4:		%{name}-xattr.patch
 Patch5:		libjpeg-boolean.patch
 Patch6:		x32.patch
+Patch7:		%{name}-sh.patch
 # Proof of concept, for reference, do not remove
 Patch400:	%{name}-kde_virtual_workspaces_hack.patch
 URL:		http://www.qemu-project.org/
@@ -738,6 +739,7 @@ Moduł QEMU dla urządeń blokowych typu 'ssh'.
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
+%patch7 -p1
 
 %{__mv} libcacard libcacard-use-system-lib
 
