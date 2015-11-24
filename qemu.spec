@@ -1,4 +1,3 @@
-# TODO: archipelago (libxseg) on bcond (GPL v3 vs v2-only conflict)
 #
 # Conditional build:
 %bcond_without	sdl		# SDL UI and audio support
