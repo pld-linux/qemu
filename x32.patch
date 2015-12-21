@@ -1,14 +1,14 @@
 --- qemu-2.2.0/configure~	2015-03-26 19:52:14.000000000 +0100
 +++ qemu-2.2.0/configure	2015-03-26 19:56:34.255072716 +0100
-@@ -1819,7 +1819,7 @@
- # libseccomp check
+@@ -1904,7 +1904,7 @@
  
  if test "$seccomp" != "no" ; then
--    if test "$cpu" = "i386" || test "$cpu" = "x86_64" &&
-+    if test "$cpu" = "i386" || test "$cpu" = "x86_64" || test "$cpu" = "x32" &&
-         $pkg_config --atleast-version=2.1.1 libseccomp; then
-         libs_softmmu="$libs_softmmu `$pkg_config --libs libseccomp`"
-         QEMU_CFLAGS="$QEMU_CFLAGS `$pkg_config --cflags libseccomp`"
+     case "$cpu" in
+-    i386|x86_64)
++    i386|x86_64|x32)
+         libseccomp_minver="2.1.0"
+         ;;
+     arm|aarch64)
 @@ -2932,7 +2932,7 @@
  ##########################################
  # TPM passthrough is only on x86 Linux

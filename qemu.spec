@@ -36,12 +36,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	2.4.1
-Release:	1
+Version:	2.5.0
+Release:	0.1
 License:	GPL v2
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
-# Source0-md5:	a895e93ec1dafc34bc64ed676f0d55a6
+# Source0-md5:	f469f2330bbe76e3e39db10e9ac4f8db
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -59,7 +59,7 @@ Source12:	99-%{name}-guest-agent.rules
 Patch0:		%{name}-cflags.patch
 Patch1:		vgabios-widescreens.patch
 Patch2:		%{name}-whitelist.patch
-Patch3:		%{name}-system-libcacard.patch
+
 Patch4:		%{name}-xattr.patch
 Patch5:		libjpeg-boolean.patch
 Patch6:		x32.patch
@@ -748,13 +748,11 @@ Moduł QEMU dla urządeń blokowych typu 'ssh'.
 %patch0 -p1
 %patch1 -p1
 %patch2 -p0
-%patch3 -p1
+
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
 %patch7 -p1
-
-%{__mv} libcacard libcacard-use-system-lib
 
 # workaround for conflict with alsa/error.h
 ln -s ../error.h qapi/error.h
@@ -787,7 +785,7 @@ ln -s ../error.h qapi/error.h
 	--with-sdlabi=2.0 \
 	%{__enable_disable seccomp} \
 	%{__enable_disable spice} \
-	%{__enable_disable smartcard smartcard-nss} \
+	%{__enable_disable smartcard smartcard} \
 	--enable-tpm \
 	--enable-trace-backends="nop%{?with_systemtap:,dtrace}%{?with_lttng:,ust}" \
 	%{__enable_disable usbredir usb-redir} \
@@ -797,7 +795,6 @@ ln -s ../error.h qapi/error.h
 	--enable-vnc-jpeg \
 	--enable-vnc-png \
 	--enable-vnc-sasl \
-	--enable-vnc-tls \
 	%{!?with_vte:--disable-vte} \
 	--enable-kvm \
 	%{__enable_disable xen} \
