@@ -37,7 +37,7 @@ Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
 Version:	2.5.0
-Release:	0.1
+Release:	1
 License:	GPL v2
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
@@ -959,8 +959,11 @@ fi
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/ksm
 %{systemdunitdir}/ksm.service
 %{systemdunitdir}/ksmtuned.service
+%attr(755,root,root) %{_bindir}/ivshmem-client
+%attr(755,root,root) %{_bindir}/ivshmem-server
 %attr(755,root,root) %{_bindir}/virtfs-proxy-helper
 %attr(755,root,root) %{_bindir}/qemu-nbd
+%attr(755,root,root) %{_bindir}/qemu-tilegx
 %attr(755,root,root) %{_libdir}/qemu-bridge-helper
 %attr(755,root,root) %{_sbindir}/ksmctl
 %attr(755,root,root) %{_sbindir}/ksmtuned
@@ -1153,6 +1156,7 @@ fi
 %config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/99-qemu-guest-agent.rules
 %{systemdunitdir}/qemu-guest-agent.service
 %attr(755,root,root) %{_bindir}/qemu-ga
+%{_mandir}/man8/qemu-ga.8*
 
 %if %{with xseg}
 %files module-block-archipelago
