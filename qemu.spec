@@ -36,12 +36,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	2.5.1.1
+Version:	2.6.0
 Release:	1
 License:	GPL v2
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
-# Source0-md5:	f5ff0e71398b9e428b4f177001ba4285
+# Source0-md5:	ca3f70b43f093e33e9e014f144067f13
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -1004,7 +1004,6 @@ fi
 %{_datadir}/%{name}/pxe-virtio.rom
 %{_datadir}/%{name}/qemu_logo_no_text.svg
 %{_datadir}/%{name}/s390-ccw.img
-%{_datadir}/%{name}/s390-zipl.rom
 %{_datadir}/%{name}/sgabios.bin
 %{_datadir}/%{name}/slof.bin
 %{_datadir}/%{name}/spapr-rtas.bin
@@ -1144,7 +1143,6 @@ fi
 %{_datadir}/%{name}/bios.bin
 %{_datadir}/%{name}/bios-256k.bin
 %{_datadir}/%{name}/acpi-dsdt.aml
-%{_datadir}/%{name}/q35-acpi-dsdt.aml
 
 %files system-xtensa
 %defattr(644,root,root,755)

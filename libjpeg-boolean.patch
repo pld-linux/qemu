@@ -1,10 +1,9 @@
-diff -dur qemu-1.7.1.orig/ui/vnc-enc-tight.c qemu-1.7.1/ui/vnc-enc-tight.c
---- qemu-1.7.1.orig/ui/vnc-enc-tight.c	2014-03-25 15:01:10.000000000 +0100
-+++ qemu-1.7.1/ui/vnc-enc-tight.c	2014-04-09 11:36:05.000000000 +0200
-@@ -41,6 +41,8 @@
+--- qemu-2.6.0/ui/vnc-enc-tight.c~	2016-05-11 17:56:18.000000000 +0200
++++ qemu-2.6.0/ui/vnc-enc-tight.c	2016-05-12 12:15:06.418186314 +0200
+@@ -40,6 +40,8 @@
+ #include <png.h>
  #endif
  #ifdef CONFIG_VNC_JPEG
- #include <stdio.h>
 +#define HAVE_BOOLEAN
 +#define boolean int
  #include <jpeglib.h>
