@@ -1,6 +1,7 @@
 #
 # Conditional build:
 %bcond_without	sdl		# SDL UI and audio support
+%bcond_without  gl      # Don't require gl deps
 %bcond_without	ceph		# Ceph/RBD support
 %bcond_without	glusterfs	# GlusterFS backend
 %bcond_without	rdma		# RDMA-based migration support
@@ -65,8 +66,8 @@ Patch5:		libjpeg-boolean.patch
 Patch6:		x32.patch
 Patch7:		%{name}-sh.patch
 URL:		http://www.qemu-project.org/
-BuildRequires:	OpenGL-devel
-BuildRequires:	OpenGL-GLX-devel
+%{?with_gl:BuildRequires:	OpenGL-devel}
+%{?with_gl:BuildRequires:	OpenGL-GLX-devel}
 %{?with_sdl:BuildRequires:	SDL2-devel >= 2.0}
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bcc >= 0.16.21-2
@@ -84,7 +85,7 @@ BuildRequires:	libaio-devel
 %{?with_smartcard:BuildRequires:	libcacard-devel}
 BuildRequires:	libcap-devel
 BuildRequires:	libcap-ng-devel
-BuildRequires:	libepoxy-devel
+%{?with_gl:BuildRequires:	libepoxy-devel}
 BuildRequires:	libfdt-devel
 %{?with_rdma:BuildRequires:	libibverbs-devel}
 %{?with_iscsi:BuildRequires:	libiscsi-devel >= 1.9.0}
