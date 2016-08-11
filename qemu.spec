@@ -64,8 +64,6 @@ Patch4:		%{name}-xattr.patch
 Patch5:		libjpeg-boolean.patch
 Patch6:		x32.patch
 Patch7:		%{name}-sh.patch
-# Proof of concept, for reference, do not remove
-Patch400:	%{name}-kde_virtual_workspaces_hack.patch
 URL:		http://www.qemu-project.org/
 BuildRequires:	OpenGL-devel
 BuildRequires:	OpenGL-GLX-devel
