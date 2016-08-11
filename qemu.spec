@@ -822,12 +822,14 @@ ln -s ../error.h qapi/error.h
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{systemdunitdir},/usr/lib/binfmt.d} \
-	$RPM_BUILD_ROOT/etc/{sysconfig,udev/rules.d,modules-load.d} \
+	$RPM_BUILD_ROOT/etc/{qemu,sysconfig,udev/rules.d,modules-load.d} \
 	$RPM_BUILD_ROOT{%{_sysconfdir}/sasl,%{_sbindir}}
 
 %{__make} install \
 	%{!?with_smartcard:CONFIG_USB_SMARTCARD=n} \
 	DESTDIR=$RPM_BUILD_ROOT
+
+echo "#allow br0" > $RPM_BUILD_ROOT/etc/qemu/bridge.conf
 
 install -d $RPM_BUILD_ROOT%{_sysconfdir}
 cat <<'EOF' > $RPM_BUILD_ROOT%{_sysconfdir}/qemu-ifup
@@ -956,6 +958,8 @@ fi
 %config(noreplace) %verify(not md5 mtime size) /etc/ksmtuned.conf
 %config(noreplace) %verify(not md5 mtime size) /etc/sasl/qemu.conf
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/ksm
+%dir /etc/qemu
+%attr(640,root,qemu) %config(noreplace) %verify(not md5 mtime size) /etc/qemu/bridge.conf
 %{systemdunitdir}/ksm.service
 %{systemdunitdir}/ksmtuned.service
 %attr(755,root,root) %{_bindir}/ivshmem-client
