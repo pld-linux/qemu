@@ -855,22 +855,48 @@ install -p %{SOURCE10} $RPM_BUILD_ROOT%{_sysconfdir}/ksmtuned.conf
 install -p %{SOURCE11} $RPM_BUILD_ROOT%{systemdunitdir}
 install -p %{SOURCE12} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d
 
+# Install binfmt
 for i in dummy \
 %ifnarch %{ix86} %{x8664} x32
 	qemu-i386 \
 %endif
-%ifnarch arm
+%ifnarch alpha
+	qemu-alpha \
+%endif
+%ifnarch %{arm}
 	qemu-arm \
 %endif
-%ifnarch ppc ppc64
-	qemu-ppc \
+	qemu-armeb \
+	qemu-cris \
+	qemu-microblaze qemu-microblazeel \
+%ifnarch mips64
+	qemu-mips64 \
+%ifnarch mips
+	qemu-mips \
+%endif
+%endif
+%ifnarch mips64el
+	qemu-mips64el \
+%ifnarch mipsel
+	qemu-mipsel \
+%endif
+%endif
+%ifnarch m68k
+	qemu-m68k \
+%endif
+%ifnarch ppc ppc64 ppc64le
+	qemu-ppc qemu-ppc64abi32 qemu-ppc64 \
 %endif
 %ifnarch sparc sparc64
-	qemu-sparc \
+	qemu-sparc qemu-sparc32plus qemu-sparc64 \
+%endif
+%ifnarch s390 s390x
+	qemu-s390x \
 %endif
 %ifnarch sh4
 	qemu-sh4 \
 %endif
+	qemu-sh4eb \
 ; do
 	test $i = dummy && continue
 	grep /$i:\$ %{SOURCE2} > $RPM_BUILD_ROOT/usr/lib/binfmt.d/$i.conf
