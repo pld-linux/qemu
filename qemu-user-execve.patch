@@ -43,24 +43,16 @@ Reviewed-by: Laurent Vivier <laurent@vivier.eu>
 v3 changes:
 	- rebase the patchset against current code
 
-
- linux-user/main.c    |  36 ++++++++++++++++
- linux-user/qemu.h    |   1 +
- linux-user/syscall.c | 117 ++++++++++++++++++++++++++++++++++++++++++++++++++-
- 3 files changed, 153 insertions(+), 1 deletion(-)
-
-diff --git a/linux-user/main.c b/linux-user/main.c
-index e719a2d..0596e6e 100644
---- a/linux-user/main.c
-+++ b/linux-user/main.c
-@@ -17,6 +17,7 @@
-  *  along with this program; if not, see <http://www.gnu.org/licenses/>.
+--- qemu-2.7.0/linux-user/main.c~	2016-09-26 12:07:20.000000000 +0300
++++ qemu-2.7.0/linux-user/main.c	2016-09-26 12:09:24.258470304 +0300
+@@ -18,6 +18,7 @@
   */
  #include "qemu/osdep.h"
+ #include "qemu-version.h"
 +#include <sys/auxv.h>
- #include <sys/mman.h>
  #include <sys/syscall.h>
  #include <sys/resource.h>
+ 
 @@ -75,6 +76,7 @@ static void usage(int exitcode);
  
  static const char *interp_prefix = CONFIG_QEMU_INTERP_PREFIX;
@@ -129,18 +121,16 @@ index bd90cc3..0d9b058 100644
  extern unsigned long mmap_min_addr;
  
  /* ??? See if we can avoid exposing so much of the loader internals.  */
-diff --git a/linux-user/syscall.c b/linux-user/syscall.c
-index 54ce14a..61b7326 100644
---- a/linux-user/syscall.c
-+++ b/linux-user/syscall.c
-@@ -99,6 +99,7 @@ int __clone2(int (*fn)(void *), void *child_stack_base,
+--- qemu-2.7.0/linux-user/syscall.c~	2016-09-26 12:10:36.000000000 +0300
++++ qemu-2.7.0/linux-user/syscall.c	2016-09-26 12:13:54.312490312 +0300
+@@ -99,6 +99,7 @@
+ #include <linux/reboot.h>
  #include <linux/route.h>
  #include <linux/filter.h>
- #include <linux/blkpg.h>
 +#include <linux/binfmts.h>
- #include "linux_loop.h"
- #include "uname.h"
- 
+ #include <linux/blkpg.h>
+ #include <netpacket/packet.h>
+ #include <linux/netlink.h>
 @@ -5842,6 +5843,118 @@ static target_timer_t get_timer_id(abi_long arg)
      return timerid;
  }
@@ -254,20 +244,18 @@ index 54ce14a..61b7326 100644
 +        new_argp[2] = argv[0];
 +    }
 +
-+    return get_errno(execve(qemu_execve_path, new_argp, envp));
++    return get_errno(safe_execve(qemu_execve_path, new_argp, envp));
 +}
 +
  /* do_syscall() should always have a single exit point at the end so
     that actions, such as logging of syscall results, can be performed.
     All errnos that do_syscall() returns must be -TARGET_<errcode>. */
-@@ -6101,7 +6214,9 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
- 
-             if (!(p = lock_user_string(arg1)))
-                 goto execve_efault;
--            ret = get_errno(execve(p, argp, envp));
-+
+@@ -7703,7 +7703,7 @@
+              * before the execve completes and makes it the other
+              * program's problem.
+              */
+-            ret = get_errno(safe_execve(p, argp, envp));
 +            ret = qemu_execve(p, argp, envp);
-+
              unlock_user(p, arg1, 0);
  
              goto execve_end;
