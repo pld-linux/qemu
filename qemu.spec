@@ -60,7 +60,7 @@ Source12:	99-%{name}-guest-agent.rules
 Patch0:		%{name}-cflags.patch
 Patch1:		vgabios-widescreens.patch
 Patch2:		%{name}-whitelist.patch
-
+Patch3:		%{name}-user-execve.patch
 Patch4:		%{name}-xattr.patch
 Patch5:		libjpeg-boolean.patch
 Patch6:		x32.patch
@@ -746,7 +746,7 @@ Moduł QEMU dla urządeń blokowych typu 'ssh'.
 %patch0 -p1
 %patch1 -p1
 %patch2 -p0
-
+%patch3 -p1
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
