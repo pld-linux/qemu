@@ -1,10 +1,26 @@
 https://resin.io/blog/building-arm-containers-on-any-x86-machine-even-dockerhub/
 https://github.com/resin-io/qemu/commit/782e5bb77014ff136f7bb6133a911e5f53e914a7
 
-From 782e5bb77014ff136f7bb6133a911e5f53e914a7 Mon Sep 17 00:00:00 2001
+https://github.com/resin-io/qemu/commit/782e5bb77014ff136f7bb6133a911e5f53e914a7#commitcomment-17193923
+It has gone through review[1][2][3] and I'm waiting for the maintainer of the linux-user subsystem to accept it in his tree.
+
+[1] https://patchwork.ozlabs.org/patch/569452/
+[2] https://patchwork.ozlabs.org/patch/573877/
+[3] https://patchwork.ozlabs.org/patch/582756/
+
+From patchwork Mon Feb 15 05:51:47 2016
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Subject: [v3] linux-user: add option to intercept execve() syscalls
 From: Petros Angelatos <petrosagg@resin.io>
-Date: Thu, 24 Dec 2015 14:43:17 -0800
-Subject: [PATCH] linux-user: add option to intercept execve() syscalls
+X-Patchwork-Id: 582756
+Message-Id: <1455515507-26877-1-git-send-email-petrosagg@resin.io>
+To: qemu-devel@nongnu.org
+Cc: lucas.kaldstrom@hotmail.co.uk, peter.maydell@linaro.org,
+ riku.voipio@iki.fi, 
+ laurent@vivier.eu, Petros Angelatos <petrosagg@resin.io>
+Date: Sun, 14 Feb 2016 21:51:47 -0800
 
 In order for one to use QEMU user mode emulation under a chroot, it is
 required to use binfmt_misc. This can be avoided by QEMU never doing a
@@ -21,14 +37,20 @@ the kernel will try to run the interpreter of a script without QEMU and
 get an invalid exec format error.
 
 Signed-off-by: Petros Angelatos <petrosagg@resin.io>
+Tested-by: Laurent Vivier <laurent@vivier.eu>
+Reviewed-by: Laurent Vivier <laurent@vivier.eu>
 ---
+v3 changes:
+	- rebase the patchset against current code
+
+
  linux-user/main.c    |  36 ++++++++++++++++
  linux-user/qemu.h    |   1 +
  linux-user/syscall.c | 117 ++++++++++++++++++++++++++++++++++++++++++++++++++-
  3 files changed, 153 insertions(+), 1 deletion(-)
 
 diff --git a/linux-user/main.c b/linux-user/main.c
-index 700724e..16cce85 100644
+index e719a2d..0596e6e 100644
 --- a/linux-user/main.c
 +++ b/linux-user/main.c
 @@ -17,6 +17,7 @@
@@ -96,10 +118,10 @@ index 700724e..16cce85 100644
       "size",       "reserve 'size' bytes for guest virtual address space"},
      {"d",          "QEMU_LOG",         true,  handle_arg_log,
 diff --git a/linux-user/qemu.h b/linux-user/qemu.h
-index 26b0ba2..8270268 100644
+index bd90cc3..0d9b058 100644
 --- a/linux-user/qemu.h
 +++ b/linux-user/qemu.h
-@@ -137,6 +137,7 @@ void init_task_state(TaskState *ts);
+@@ -140,6 +140,7 @@ void init_task_state(TaskState *ts);
  void task_settid(TaskState *);
  void stop_all_tasks(void);
  extern const char *qemu_uname_release;
@@ -108,7 +130,7 @@ index 26b0ba2..8270268 100644
  
  /* ??? See if we can avoid exposing so much of the loader internals.  */
 diff --git a/linux-user/syscall.c b/linux-user/syscall.c
-index 9517531..66446f7 100644
+index 54ce14a..61b7326 100644
 --- a/linux-user/syscall.c
 +++ b/linux-user/syscall.c
 @@ -99,6 +99,7 @@ int __clone2(int (*fn)(void *), void *child_stack_base,
@@ -119,7 +141,7 @@ index 9517531..66446f7 100644
  #include "linux_loop.h"
  #include "uname.h"
  
-@@ -5845,6 +5846,118 @@ static target_timer_t get_timer_id(abi_long arg)
+@@ -5842,6 +5843,118 @@ static target_timer_t get_timer_id(abi_long arg)
      return timerid;
  }
  
@@ -238,7 +260,7 @@ index 9517531..66446f7 100644
  /* do_syscall() should always have a single exit point at the end so
     that actions, such as logging of syscall results, can be performed.
     All errnos that do_syscall() returns must be -TARGET_<errcode>. */
-@@ -6104,7 +6217,9 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
+@@ -6101,7 +6214,9 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
  
              if (!(p = lock_user_string(arg1)))
                  goto execve_efault;
