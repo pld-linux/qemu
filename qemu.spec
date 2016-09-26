@@ -37,12 +37,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	2.6.1
+Version:	2.7.0
 Release:	1
 License:	GPL v2
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
-# Source0-md5:	6a183b192018192943b6781e1bb9b72f
+# Source0-md5:	08d4d06d1cb598efecd796137f4844ab
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -64,7 +64,6 @@ Patch2:		%{name}-whitelist.patch
 Patch4:		%{name}-xattr.patch
 Patch5:		libjpeg-boolean.patch
 Patch6:		x32.patch
-Patch7:		%{name}-sh.patch
 URL:		http://www.qemu-project.org/
 %{?with_gl:BuildRequires:	OpenGL-GLX-devel}
 %{?with_gl:BuildRequires:	OpenGL-devel}
@@ -751,7 +750,6 @@ Moduł QEMU dla urządeń blokowych typu 'ssh'.
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
-%patch7 -p1
 
 # workaround for conflict with alsa/error.h
 ln -s ../error.h qapi/error.h
@@ -840,7 +838,6 @@ EOF
 install -p qemu.sasl $RPM_BUILD_ROOT%{_sysconfdir}/sasl/qemu.conf
 
 %ifarch %{ix86} %{x8664} x32
-install -p scripts/kvm/kvm_stat $RPM_BUILD_ROOT%{_bindir}
 install -p %{SOURCE3} $RPM_BUILD_ROOT/etc/modules-load.d/kvm.conf
 install -p %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d
 %endif
@@ -977,21 +974,22 @@ fi
 %dir %{_datadir}/qemu
 %{_datadir}/%{name}/keymaps
 %{_datadir}/%{name}/qemu-icon.bmp
-%{_datadir}/%{name}/trace-events
+%{_datadir}/%{name}/trace-events-all
 
 # various bios images
 # all should be probably moved to the right system subpackage
-%{_datadir}/%{name}/QEMU,cgthree.bin
-%{_datadir}/%{name}/QEMU,tcx.bin
 %{_datadir}/%{name}/bamboo.dtb
+%{_datadir}/%{name}/efi-e1000e.rom
 %{_datadir}/%{name}/efi-e1000.rom
 %{_datadir}/%{name}/efi-eepro100.rom
 %{_datadir}/%{name}/efi-ne2k_pci.rom
 %{_datadir}/%{name}/efi-pcnet.rom
 %{_datadir}/%{name}/efi-rtl8139.rom
 %{_datadir}/%{name}/efi-virtio.rom
+%{_datadir}/%{name}/efi-vmxnet3.rom
 %{_datadir}/%{name}/kvmvapic.bin
 %{_datadir}/%{name}/linuxboot.bin
+%{_datadir}/%{name}/linuxboot_dma.bin
 %{_datadir}/%{name}/multiboot.bin
 %{_datadir}/%{name}/openbios-ppc
 %{_datadir}/%{name}/openbios-sparc*
@@ -1005,17 +1003,19 @@ fi
 %{_datadir}/%{name}/pxe-pcnet.rom
 %{_datadir}/%{name}/pxe-rtl8139.rom
 %{_datadir}/%{name}/pxe-virtio.rom
+%{_datadir}/%{name}/QEMU,cgthree.bin
 %{_datadir}/%{name}/qemu_logo_no_text.svg
+%{_datadir}/%{name}/QEMU,tcx.bin
 %{_datadir}/%{name}/s390-ccw.img
 %{_datadir}/%{name}/sgabios.bin
 %{_datadir}/%{name}/slof.bin
 %{_datadir}/%{name}/spapr-rtas.bin
+%{_datadir}/%{name}/vgabios.bin
 %{_datadir}/%{name}/vgabios-cirrus.bin
 %{_datadir}/%{name}/vgabios-qxl.bin
 %{_datadir}/%{name}/vgabios-stdvga.bin
 %{_datadir}/%{name}/vgabios-virtio.bin
 %{_datadir}/%{name}/vgabios-vmware.bin
-%{_datadir}/%{name}/vgabios.bin
 
 %dir %{_libdir}/%{name}
 
@@ -1141,7 +1141,6 @@ fi
 %ifarch %{ix86} %{x8664} x32
 %config(noreplace) %verify(not md5 mtime size) /etc/modules-load.d/kvm.conf
 %config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/80-kvm.rules
-%attr(755,root,root) %{_bindir}/kvm_stat
 %endif
 %{_datadir}/%{name}/bios.bin
 %{_datadir}/%{name}/bios-256k.bin
