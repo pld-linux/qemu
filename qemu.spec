@@ -23,6 +23,7 @@
 %bcond_without	usbredir	# usb network redirection support
 %bcond_without	system_seabios	# system seabios binary
 %bcond_without	snappy		# snappy compression library
+%bcond_without	user_static	# build linux-user static packages
 %bcond_with	lttng		# lttng-ust trace backend support
 %bcond_with	systemtap	# SystemTap/dtrace trace backend support
 
@@ -38,7 +39,7 @@ Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
 Version:	2.7.0
-Release:	1
+Release:	2
 License:	GPL v2
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
@@ -133,6 +134,12 @@ BuildRequires:	gtk+2-devel >= 2:2.18.0
 %if %{with gtk3}
 BuildRequires:	gtk+3-devel >= 3.0.0
 %{?with_vte:BuildRequires:	vte2.90-devel >= 0.32.0}
+%endif
+%if %{with user_static}
+BuildRequires:	glib2-static
+BuildRequires:	glibc-static
+BuildRequires:	pcre-static
+BuildRequires:	zlib-static
 %endif
 Requires:	%{name}-img = %{version}-%{release}
 Requires:	%{name}-system-aarch64 = %{version}-%{release}
@@ -281,6 +288,20 @@ QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
 Ten pakiet udostępnia emulację trybu użytkownika środowisk QEMU.
+
+%package user-static
+Summary:	QEMU user mode emulation of qemu targets static build
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+Requires(post,postun):	systemd-units >= 38
+Requires:	systemd-units >= 38
+
+%description user-static
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the user mode emulation of qemu targets built as
+static binaries
 
 %package system-aarch64
 Summary:	QEMU system emulator for AArch64
@@ -755,16 +776,38 @@ Moduł QEMU dla urządeń blokowych typu 'ssh'.
 ln -s ../error.h qapi/error.h
 
 %build
-./configure \
-	--extra-cflags="%{rpmcflags} %{rpmcppflags} -fPIE -DPIE" \
-	--extra-ldflags="%{rpmldflags} -pie -Wl,-z,relro -Wl,-z,now" \
+
+build() {
+	local target=$1
+	shift
+
+	install -d build-$target
+	cd build-$target
+
+	../configure \
 	--prefix=%{_prefix} \
 	--libdir=%{_libdir} \
 	--libexecdir=%{_libexecdir} \
 	--sysconfdir=%{_sysconfdir} \
+	--localstatedir=%{_localstatedir} \
+	--interp-prefix=%{_libdir}/qemu/lib-%%M \
 	--cc="%{__cc}" \
 	--host-cc="%{__cc}" \
 	--disable-strip \
+	--enable-trace-backends="nop%{?with_systemtap:,dtrace}%{?with_lttng:,ust}" \
+	--enable-kvm \
+	"$@"
+
+	%{__make} \
+		V=1 \
+		%{!?with_smartcard:CONFIG_USB_SMARTCARD=n}
+
+	cd ..
+}
+
+build dynamic \
+	--extra-cflags="%{rpmcflags} %{rpmcppflags} -fPIE -DPIE" \
+	--extra-ldflags="%{rpmldflags} -pie -Wl,-z,relro -Wl,-z,now" \
 	%{__enable_disable xseg archipelago} \
 	--enable-attr \
 	%{__enable_disable bluetooth bluez} \
@@ -784,7 +827,6 @@ ln -s ../error.h qapi/error.h
 	%{__enable_disable spice} \
 	%{__enable_disable smartcard smartcard} \
 	--enable-tpm \
-	--enable-trace-backends="nop%{?with_systemtap:,dtrace}%{?with_lttng:,ust}" \
 	%{__enable_disable usbredir usb-redir} \
 	--enable-uuid \
 	--enable-vde \
@@ -793,7 +835,6 @@ ln -s ../error.h qapi/error.h
 	--enable-vnc-png \
 	--enable-vnc-sasl \
 	%{!?with_vte:--disable-vte} \
-	--enable-kvm \
 	%{__enable_disable xen} \
 	--enable-modules \
 	--disable-netmap \
@@ -801,16 +842,36 @@ ln -s ../error.h qapi/error.h
 	--enable-lzo \
 	%{__enable_disable snappy} \
 	--audio-drv-list="alsa%{?with_iss:,oss}%{?with_sdl:,sdl}%{?with_esd:,esd}%{?with_pulseaudio:,pa}" \
-	--interp-prefix=%{_libdir}/qemu/lib-%%M \
 %if %{without gtk2} && %{without gtk3}
 	--disable-gtk
 %else
 	--with-gtkabi="%{?with_gtk2:2.0}%{!?with_gtk2:3.0}"
 %endif
 
-%{__make} \
-	V=1 \
-	%{!?with_smartcard:CONFIG_USB_SMARTCARD=n}
+%if %{with user_static}
+build static \
+	--disable-brlapi \
+	--disable-cap-ng \
+	--disable-curl \
+	--disable-curses \
+	--disable-gcrypt \
+	--disable-gnutls \
+	--disable-gtk \
+	--disable-guest-agent \
+	--disable-guest-agent-msi \
+	--disable-libnfs \
+	--disable-nettle \
+	--disable-pie \
+	--disable-sdl \
+	--disable-spice \
+	--disable-tcmalloc \
+	--disable-tools \
+	--disable-uuid \
+	--enable-user \
+	--disable-system \
+	--static
+
+%endif
 
 # rebuild patched vesa tables with additional widescreen modes.
 %{__make} -C roms/vgabios stdvga-bios
@@ -823,7 +884,19 @@ install -d $RPM_BUILD_ROOT{%{systemdunitdir},/usr/lib/binfmt.d} \
 	$RPM_BUILD_ROOT/etc/{qemu,sysconfig,udev/rules.d,modules-load.d} \
 	$RPM_BUILD_ROOT{%{_sysconfdir}/sasl,%{_sbindir}}
 
-%{__make} install \
+%if %{with user_static}
+%{__make} -C build-static install \
+	%{!?with_smartcard:CONFIG_USB_SMARTCARD=n} \
+	DESTDIR=$RPM_BUILD_ROOT
+
+# Give all QEMU user emulators a -static suffix
+for src in $RPM_BUILD_ROOT%{_bindir}/qemu-*; do
+	mv $src $src-static
+done
+
+%endif
+
+%{__make} -C build-dynamic install \
 	%{!?with_smartcard:CONFIG_USB_SMARTCARD=n} \
 	DESTDIR=$RPM_BUILD_ROOT
 
@@ -976,7 +1049,8 @@ fi
 
 %files common -f %{name}.lang
 %defattr(644,root,root,755)
-%doc LICENSE README qemu-doc.html qemu-tech.html qmp-commands.txt
+%doc LICENSE README
+%doc build-dynamic/{qemu-doc.html,qemu-tech.html,qmp-commands.txt}
 %attr(755,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu-ifup
 %config(noreplace) %verify(not md5 mtime size) /etc/ksmtuned.conf
 %config(noreplace) %verify(not md5 mtime size) /etc/sasl/qemu.conf
@@ -1085,6 +1159,40 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-sparc64
 %attr(755,root,root) %{_bindir}/qemu-unicore32
 %attr(755,root,root) %{_bindir}/qemu-x86_64
+
+%if %{with user_static}
+%files user-static
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-aarch64-static
+%attr(755,root,root) %{_bindir}/qemu-alpha-static
+%attr(755,root,root) %{_bindir}/qemu-arm-static
+%attr(755,root,root) %{_bindir}/qemu-armeb-static
+%attr(755,root,root) %{_bindir}/qemu-cris-static
+%attr(755,root,root) %{_bindir}/qemu-i386-static
+%attr(755,root,root) %{_bindir}/qemu-m68k-static
+%attr(755,root,root) %{_bindir}/qemu-microblaze-static
+%attr(755,root,root) %{_bindir}/qemu-microblazeel-static
+%attr(755,root,root) %{_bindir}/qemu-mips-static
+%attr(755,root,root) %{_bindir}/qemu-mips64-static
+%attr(755,root,root) %{_bindir}/qemu-mips64el-static
+%attr(755,root,root) %{_bindir}/qemu-mipsel-static
+%attr(755,root,root) %{_bindir}/qemu-mipsn32-static
+%attr(755,root,root) %{_bindir}/qemu-mipsn32el-static
+%attr(755,root,root) %{_bindir}/qemu-or32-static
+%attr(755,root,root) %{_bindir}/qemu-ppc-static
+%attr(755,root,root) %{_bindir}/qemu-ppc64-static
+%attr(755,root,root) %{_bindir}/qemu-ppc64abi32-static
+%attr(755,root,root) %{_bindir}/qemu-ppc64le-static
+%attr(755,root,root) %{_bindir}/qemu-s390x-static
+%attr(755,root,root) %{_bindir}/qemu-sh4-static
+%attr(755,root,root) %{_bindir}/qemu-sh4eb-static
+%attr(755,root,root) %{_bindir}/qemu-sparc-static
+%attr(755,root,root) %{_bindir}/qemu-sparc32plus-static
+%attr(755,root,root) %{_bindir}/qemu-sparc64-static
+%attr(755,root,root) %{_bindir}/qemu-tilegx-static
+%attr(755,root,root) %{_bindir}/qemu-unicore32-static
+%attr(755,root,root) %{_bindir}/qemu-x86_64-static
+%endif
 
 %files system-aarch64
 %defattr(644,root,root,755)
