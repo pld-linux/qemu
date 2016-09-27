@@ -972,7 +972,12 @@ for i in dummy \
 	qemu-sh4eb \
 ; do
 	test $i = dummy && continue
-	grep /$i:\$ %{SOURCE2} > $RPM_BUILD_ROOT/usr/lib/binfmt.d/$i.conf
+	grep /$i:\$ %{SOURCE2} > $RPM_BUILD_ROOT/usr/lib/binfmt.d/$i-dynamic.conf
+
+	%if %{with user_static}
+	grep /$i:\$ %{SOURCE2} > $RPM_BUILD_ROOT/usr/lib/binfmt.d/$i-static.conf
+	%{__sed} -i -e "s/$i/$i-static/" $RPM_BUILD_ROOT/usr/lib/binfmt.d/$i-static.conf
+	%endif
 done < %{SOURCE2}
 
 # packaged as %doc
@@ -1033,6 +1038,12 @@ fi
 %systemd_service_restart systemd-binfmt.service
 
 %postun user
+%systemd_service_restart systemd-binfmt.service
+
+%post user-static
+%systemd_service_restart systemd-binfmt.service
+
+%postun user-static
 %systemd_service_restart systemd-binfmt.service
 
 %post guest-agent
@@ -1129,7 +1140,7 @@ fi
 
 %files user
 %defattr(644,root,root,755)
-/usr/lib/binfmt.d/qemu-*.conf
+/usr/lib/binfmt.d/qemu-*-dynamic.conf
 %attr(755,root,root) %{_bindir}/qemu-aarch64
 %attr(755,root,root) %{_bindir}/qemu-alpha
 %attr(755,root,root) %{_bindir}/qemu-arm
@@ -1163,6 +1174,7 @@ fi
 %if %{with user_static}
 %files user-static
 %defattr(644,root,root,755)
+/usr/lib/binfmt.d/qemu-*-static.conf
 %attr(755,root,root) %{_bindir}/qemu-aarch64-static
 %attr(755,root,root) %{_bindir}/qemu-alpha-static
 %attr(755,root,root) %{_bindir}/qemu-arm-static
