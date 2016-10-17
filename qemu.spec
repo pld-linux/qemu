@@ -292,7 +292,6 @@ Ten pakiet udostępnia emulację trybu użytkownika środowisk QEMU.
 %package user-static
 Summary:	QEMU user mode emulation of qemu targets static build
 Group:		Development/Tools
-Requires:	%{name}-common = %{version}-%{release}
 Requires(post,postun):	systemd-units >= 38
 Requires:	systemd-units >= 38
 
