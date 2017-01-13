@@ -38,12 +38,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	2.7.0
-Release:	2
+Version:	2.8.0
+Release:	1
 License:	GPL v2
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
-# Source0-md5:	08d4d06d1cb598efecd796137f4844ab
+# Source0-md5:	17940dce063b6ce450a12e719a6c9c43
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -980,7 +980,7 @@ for i in dummy \
 done < %{SOURCE2}
 
 # packaged as %doc
-%{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qemu-{doc,tech}.html
+%{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qemu-doc.html
 %{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qmp-commands.txt
 
 # install patched vesa tables with additional widescreen modes.
@@ -1060,7 +1060,7 @@ fi
 %files common -f %{name}.lang
 %defattr(644,root,root,755)
 %doc LICENSE README
-%doc build-dynamic/{qemu-doc.html,qemu-tech.html,qmp-commands.txt}
+%doc build-dynamic/qemu-doc.html
 %attr(755,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu-ifup
 %config(noreplace) %verify(not md5 mtime size) /etc/ksmtuned.conf
 %config(noreplace) %verify(not md5 mtime size) /etc/sasl/qemu.conf
@@ -1118,6 +1118,7 @@ fi
 %{_datadir}/%{name}/QEMU,tcx.bin
 %{_datadir}/%{name}/s390-ccw.img
 %{_datadir}/%{name}/sgabios.bin
+%{_datadir}/%{name}/skiboot.lid
 %{_datadir}/%{name}/slof.bin
 %{_datadir}/%{name}/spapr-rtas.bin
 %{_datadir}/%{name}/vgabios.bin
@@ -1130,7 +1131,8 @@ fi
 %dir %{_libdir}/%{name}
 
 # modules without too many external dependencies
-%attr(755,root,root) %{_libdir}/%{name}/block-dmg.so
+%attr(755,root,root) %{_libdir}/%{name}/block-dmg-bz2.so
+%attr(755,root,root) %{_libdir}/%{name}/block-nfs.so
 
 %files img
 %defattr(644,root,root,755)
@@ -1167,7 +1169,6 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-sparc
 %attr(755,root,root) %{_bindir}/qemu-sparc32plus
 %attr(755,root,root) %{_bindir}/qemu-sparc64
-%attr(755,root,root) %{_bindir}/qemu-unicore32
 %attr(755,root,root) %{_bindir}/qemu-x86_64
 
 %if %{with user_static}
@@ -1201,7 +1202,6 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-sparc32plus-static
 %attr(755,root,root) %{_bindir}/qemu-sparc64-static
 %attr(755,root,root) %{_bindir}/qemu-tilegx-static
-%attr(755,root,root) %{_bindir}/qemu-unicore32-static
 %attr(755,root,root) %{_bindir}/qemu-x86_64-static
 %endif
 
