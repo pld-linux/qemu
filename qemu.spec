@@ -2,10 +2,9 @@
 # Conditional build:
 %bcond_without	sdl		# SDL UI and audio support
 %bcond_without	gl		# Don't require gl deps
-%bcond_without	ceph		# Ceph/RBD support
+%bcond_with	ceph		# Ceph/RBD support
 %bcond_without	glusterfs	# GlusterFS backend
 %bcond_without	rdma		# RDMA-based migration support
-%bcond_with	xseg		# Archipelago backend [non-distributable: GPLv3+ vs GPLv2-only]
 %bcond_with	gtk2		# GTK+ 2.x instead of 3.x
 %bcond_without	gtk3		# Do not build GTK+ UI
 %bcond_without	vte		# VTE support in GTK+ UI
@@ -38,12 +37,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	2.8.0
-Release:	4
+Version:	2.9.0
+Release:	1
 License:	GPL v2
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
-# Source0-md5:	17940dce063b6ce450a12e719a6c9c43
+# Source0-md5:	02781eb15b364aedef79da7a5113f5b7
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -97,7 +96,6 @@ BuildRequires:	libpng-devel
 BuildRequires:	libssh2-devel >= 1.2.8
 BuildRequires:	libusb-devel >= 1.0.13
 BuildRequires:	libuuid-devel
-%{?with_xseg:BuildRequires:	libxseg-devel}
 %{?with_lttng:BuildRequires:	lttng-ust-devel}
 BuildRequires:	lzo-devel >= 2
 BuildRequires:	ncurses-devel
@@ -151,7 +149,7 @@ Requires:	%{name}-system-m68k = %{version}-%{release}
 Requires:	%{name}-system-microblaze = %{version}-%{release}
 Requires:	%{name}-system-mips = %{version}-%{release}
 Requires:	%{name}-system-moxie = %{version}-%{release}
-Requires:	%{name}-system-or32 = %{version}-%{release}
+Requires:	%{name}-system-or1k = %{version}-%{release}
 Requires:	%{name}-system-ppc = %{version}-%{release}
 Requires:	%{name}-system-s390x = %{version}-%{release}
 Requires:	%{name}-system-sh4 = %{version}-%{release}
@@ -481,21 +479,21 @@ dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
 Ten pakiet zawiera emulator systemu z procesorem Moxie.
 
-%package system-or32
+%package system-or1k
 Summary:	QEMU system emulator for OpenRISC
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem OpenRISC
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
-Obsoletes:	qemu-kvm-system-or32
+Obsoletes:	qemu-kvm-system-or1k
 
-%description system-or32
+%description system-or1k
 QEMU is a generic and open source processor emulator which achieves a
 good emulation speed by using dynamic translation.
 
 This package provides the system emulator with OpenRISC CPU.
 
-%description system-or32 -l pl.UTF-8
+%description system-or1k -l pl.UTF-8
 QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
@@ -687,18 +685,6 @@ systemach-gościach, komunikującego się kanałem virtio-serial o nazwie
 
 Ten pakiet nie musi być zainstalowany w systemie hosta.
 
-%package module-block-archipelago
-Summary:	QEMU module for Archipelago block devices
-Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych Archipelago
-Group:		Development/Tools
-Requires:	%{name}-common = %{version}-%{release}
-
-%description module-block-archipelago
-Archipelago block device support for QEMU.
-
-%description module-block-archipelago -l pl.UTF-8
-Moduł QEMU dla urządeń blokowych Archipelago.
-
 %package module-block-curl
 Summary:	QEMU module for 'curl' block devices
 Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'curl'
@@ -807,7 +793,6 @@ build() {
 build dynamic \
 	--extra-cflags="%{rpmcflags} %{rpmcppflags} -fPIE -DPIE" \
 	--extra-ldflags="%{rpmldflags} -pie -Wl,-z,relro -Wl,-z,now" \
-	%{__enable_disable xseg archipelago} \
 	--enable-attr \
 	%{__enable_disable bluetooth bluez} \
 	%{__enable_disable brlapi} \
@@ -981,7 +966,6 @@ done < %{SOURCE2}
 
 # packaged as %doc
 %{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qemu-doc.html
-%{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qmp-commands.txt
 
 # install patched vesa tables with additional widescreen modes.
 cp -p roms/vgabios/VGABIOS-lgpl-latest.stdvga.bin $RPM_BUILD_ROOT%{_datadir}/%{name}/vgabios-stdvga.bin
@@ -1158,7 +1142,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-mips64el
 %attr(755,root,root) %{_bindir}/qemu-mipsn32
 %attr(755,root,root) %{_bindir}/qemu-mipsn32el
-%attr(755,root,root) %{_bindir}/qemu-or32
+%attr(755,root,root) %{_bindir}/qemu-or1k
 %attr(755,root,root) %{_bindir}/qemu-ppc
 %attr(755,root,root) %{_bindir}/qemu-ppc64
 %attr(755,root,root) %{_bindir}/qemu-ppc64abi32
@@ -1190,7 +1174,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-mipsel-static
 %attr(755,root,root) %{_bindir}/qemu-mipsn32-static
 %attr(755,root,root) %{_bindir}/qemu-mipsn32el-static
-%attr(755,root,root) %{_bindir}/qemu-or32-static
+%attr(755,root,root) %{_bindir}/qemu-or1k-static
 %attr(755,root,root) %{_bindir}/qemu-ppc-static
 %attr(755,root,root) %{_bindir}/qemu-ppc64-static
 %attr(755,root,root) %{_bindir}/qemu-ppc64abi32-static
@@ -1245,9 +1229,9 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-moxie
 
-%files system-or32
+%files system-or1k
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/qemu-system-or32
+%attr(755,root,root) %{_bindir}/qemu-system-or1k
 
 %files system-ppc
 %defattr(644,root,root,755)
@@ -1302,12 +1286,6 @@ fi
 %{systemdunitdir}/qemu-guest-agent.service
 %attr(755,root,root) %{_bindir}/qemu-ga
 %{_mandir}/man8/qemu-ga.8*
-
-%if %{with xseg}
-%files module-block-archipelago
-%defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/%{name}/block-archipelago.so
-%endif
 
 %files module-block-curl
 %defattr(644,root,root,755)
