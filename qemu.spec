@@ -2,7 +2,7 @@
 # Conditional build:
 %bcond_without	sdl		# SDL UI and audio support
 %bcond_without	gl		# Don't require gl deps
-%bcond_with	ceph		# Ceph/RBD support
+%bcond_without	ceph		# Ceph/RBD support
 %bcond_without	glusterfs	# GlusterFS backend
 %bcond_without	rdma		# RDMA-based migration support
 %bcond_with	gtk2		# GTK+ 2.x instead of 3.x
@@ -38,7 +38,7 @@ Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
 Version:	2.9.0
-Release:	1
+Release:	2
 License:	GPL v2
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
