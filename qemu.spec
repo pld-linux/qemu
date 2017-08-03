@@ -486,6 +486,7 @@ Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 Obsoletes:	qemu-kvm-system-or1k
+Obsoletes:	qemu-system-or32
 
 %description system-or1k
 QEMU is a generic and open source processor emulator which achieves a
