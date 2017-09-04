@@ -37,12 +37,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	2.9.0
-Release:	2
+Version:	2.10.0
+Release:	1
 License:	GPL v2
 Group:		Applications/Emulators
-Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.bz2
-# Source0-md5:	02781eb15b364aedef79da7a5113f5b7
+Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.xz
+# Source0-md5:	a89e3293cf69c32cf4be4188dfa25544
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -1240,11 +1240,13 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-system-ppc64
 #%attr(755,root,root) %{_bindir}/qemu-system-ppc64le
 %attr(755,root,root) %{_bindir}/qemu-system-ppcemb
+%{_datadir}/%{name}/qemu_vga.ndrv
 %{_datadir}/%{name}/u-boot.e500
 
 %files system-s390x
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-s390x
+%{_datadir}/%{name}/s390-netboot.img
 
 %files system-sh4
 %defattr(644,root,root,755)
