@@ -149,6 +149,7 @@ Requires:	%{name}-system-m68k = %{version}-%{release}
 Requires:	%{name}-system-microblaze = %{version}-%{release}
 Requires:	%{name}-system-mips = %{version}-%{release}
 Requires:	%{name}-system-moxie = %{version}-%{release}
+Requires:	%{name}-system-nios2 = %{version}-%{release}
 Requires:	%{name}-system-or1k = %{version}-%{release}
 Requires:	%{name}-system-ppc = %{version}-%{release}
 Requires:	%{name}-system-s390x = %{version}-%{release}
@@ -479,6 +480,25 @@ QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
 Ten pakiet zawiera emulator systemu z procesorem Moxie.
+
+%package system-nios2
+Summary:	QEMU system emulator for Nios II
+Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Nios II
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
+
+%description system-nios2
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator with Nios II CPU.
+
+%description system-nios2 -l pl.UTF-8
+QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
+dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
+
+Ten pakiet zawiera emulator systemu z procesorem Nios II.
 
 %package system-or1k
 Summary:	QEMU system emulator for OpenRISC
@@ -1131,6 +1151,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-arm
 %attr(755,root,root) %{_bindir}/qemu-armeb
 %attr(755,root,root) %{_bindir}/qemu-cris
+%attr(755,root,root) %{_bindir}/qemu-hppa
 %attr(755,root,root) %{_bindir}/qemu-i386
 %attr(755,root,root) %{_bindir}/qemu-io
 %attr(755,root,root) %{_bindir}/qemu-m68k
@@ -1142,6 +1163,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-mips64el
 %attr(755,root,root) %{_bindir}/qemu-mipsn32
 %attr(755,root,root) %{_bindir}/qemu-mipsn32el
+%attr(755,root,root) %{_bindir}/qemu-nios2
 %attr(755,root,root) %{_bindir}/qemu-or1k
 %attr(755,root,root) %{_bindir}/qemu-ppc
 %attr(755,root,root) %{_bindir}/qemu-ppc64
@@ -1164,6 +1186,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-arm-static
 %attr(755,root,root) %{_bindir}/qemu-armeb-static
 %attr(755,root,root) %{_bindir}/qemu-cris-static
+%attr(755,root,root) %{_bindir}/qemu-hppa-static
 %attr(755,root,root) %{_bindir}/qemu-i386-static
 %attr(755,root,root) %{_bindir}/qemu-m68k-static
 %attr(755,root,root) %{_bindir}/qemu-microblaze-static
@@ -1174,6 +1197,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-mipsel-static
 %attr(755,root,root) %{_bindir}/qemu-mipsn32-static
 %attr(755,root,root) %{_bindir}/qemu-mipsn32el-static
+%attr(755,root,root) %{_bindir}/qemu-nios2-static
 %attr(755,root,root) %{_bindir}/qemu-or1k-static
 %attr(755,root,root) %{_bindir}/qemu-ppc-static
 %attr(755,root,root) %{_bindir}/qemu-ppc64-static
@@ -1228,6 +1252,10 @@ fi
 %files system-moxie
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-moxie
+
+%files system-nios2
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-nios2
 
 %files system-or1k
 %defattr(644,root,root,755)
