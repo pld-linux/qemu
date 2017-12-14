@@ -814,7 +814,6 @@ build dynamic \
 	%{__enable_disable smartcard smartcard} \
 	--enable-tpm \
 	%{__enable_disable usbredir usb-redir} \
-	--enable-uuid \
 	--enable-vde \
 	--enable-virtfs \
 	--enable-vnc-jpeg \
@@ -852,7 +851,6 @@ build static \
 	--disable-spice \
 	--disable-tcmalloc \
 	--disable-tools \
-	--disable-uuid \
 	--enable-user \
 	--disable-system \
 	--static
