@@ -37,12 +37,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	2.10.1
+Version:	2.11.0
 Release:	1
 License:	GPL v2
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.xz
-# Source0-md5:	0c4d98038480c5c19a95990eb8d04a51
+# Source0-md5:	5c823d2e01934b46a080f9e4d0695805
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -1076,13 +1076,16 @@ fi
 %attr(755,root,root) %{_bindir}/ivshmem-client
 %attr(755,root,root) %{_bindir}/ivshmem-server
 %attr(755,root,root) %{_bindir}/virtfs-proxy-helper
+%attr(755,root,root) %{_bindir}/qemu-keymap
 %attr(755,root,root) %{_bindir}/qemu-nbd
+%attr(755,root,root) %{_bindir}/qemu-pr-helper
 %attr(755,root,root) %{_bindir}/qemu-tilegx
 %attr(755,root,root) %{_libexecdir}/qemu-bridge-helper
 %attr(755,root,root) %{_sbindir}/ksmctl
 %attr(755,root,root) %{_sbindir}/ksmtuned
 %{_mandir}/man1/qemu.1*
 %{_mandir}/man1/virtfs-proxy-helper.1*
+%{_mandir}/man7/qemu-block-drivers.7*
 %{_mandir}/man8/qemu-nbd.8*
 
 %dir %{_datadir}/qemu
