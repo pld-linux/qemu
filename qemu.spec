@@ -85,7 +85,7 @@ BuildRequires:	libaio-devel
 BuildRequires:	libcap-devel
 BuildRequires:	libcap-ng-devel
 %{?with_gl:BuildRequires:	libepoxy-devel}
-BuildRequires:	libfdt-devel
+BuildRequires:	libfdt-devel >= 1.4.2
 %{?with_rdma:BuildRequires:	libibverbs-devel}
 %{?with_iscsi:BuildRequires:	libiscsi-devel >= 1.9.0}
 BuildRequires:	libjpeg-devel
@@ -166,6 +166,7 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %if %{with sdl} \
 Requires:	SDL2 \
 %endif \
+Requires:	libfdt >= 1.4.2 \
 %if %{with seccomp} \
 Requires:	libseccomp >= 2.1.0 \
 %endif \
