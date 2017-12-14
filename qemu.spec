@@ -1058,7 +1058,7 @@ fi
 %attr(755,root,root) %{_bindir}/virtfs-proxy-helper
 %attr(755,root,root) %{_bindir}/qemu-nbd
 %attr(755,root,root) %{_bindir}/qemu-tilegx
-%attr(755,root,root) %{_libdir}/qemu-bridge-helper
+%attr(755,root,root) %{_libexecdir}/qemu-bridge-helper
 %attr(755,root,root) %{_sbindir}/ksmctl
 %attr(755,root,root) %{_sbindir}/ksmtuned
 %{_mandir}/man1/qemu.1*
