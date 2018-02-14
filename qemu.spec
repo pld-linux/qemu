@@ -64,6 +64,7 @@ Patch3:		%{name}-user-execve.patch
 Patch4:		%{name}-xattr.patch
 Patch5:		libjpeg-boolean.patch
 Patch6:		x32.patch
+Patch7:		%{name}-glibc2_27.patch
 URL:		http://www.qemu-project.org/
 %{?with_gl:BuildRequires:	OpenGL-GLX-devel}
 %{?with_gl:BuildRequires:	OpenGL-devel}
@@ -778,6 +779,7 @@ Moduł QEMU dla urządeń blokowych typu 'ssh'.
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
+%patch7 -p1
 
 # workaround for conflict with alsa/error.h
 ln -s ../error.h qapi/error.h
