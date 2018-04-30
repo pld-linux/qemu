@@ -37,12 +37,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	2.11.1
-Release:	1
+Version:	2.12.0
+Release:	0.1
 License:	GPL v2
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.xz
-# Source0-md5:	0ee48c0f0cae47cc5d05408e03cd199e
+# Source0-md5:	ca553eb04c933f58111c304452fc4cc5
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -64,7 +64,6 @@ Patch3:		%{name}-user-execve.patch
 Patch4:		%{name}-xattr.patch
 Patch5:		libjpeg-boolean.patch
 Patch6:		x32.patch
-Patch7:		%{name}-glibc2_27.patch
 URL:		http://www.qemu-project.org/
 %{?with_gl:BuildRequires:	OpenGL-GLX-devel}
 %{?with_gl:BuildRequires:	OpenGL-devel}
@@ -89,6 +88,7 @@ BuildRequires:	libcap-ng-devel
 BuildRequires:	libfdt-devel >= 1.4.2
 %{?with_rdma:BuildRequires:	libibverbs-devel}
 %{?with_iscsi:BuildRequires:	libiscsi-devel >= 1.9.0}
+%{?with_rdma:BuildRequires:	libibumad-devel}
 BuildRequires:	libjpeg-devel
 %{?with_libnfs:BuildRequires:	libnfs-devel >= 1.9.3}
 BuildRequires:	libpng-devel
@@ -145,6 +145,7 @@ Requires:	%{name}-system-aarch64 = %{version}-%{release}
 Requires:	%{name}-system-alpha = %{version}-%{release}
 Requires:	%{name}-system-arm = %{version}-%{release}
 Requires:	%{name}-system-cris = %{version}-%{release}
+Requires:	%{name}-system-hppa = %{version}-%{release}
 Requires:	%{name}-system-lm32 = %{version}-%{release}
 Requires:	%{name}-system-m68k = %{version}-%{release}
 Requires:	%{name}-system-microblaze = %{version}-%{release}
@@ -153,6 +154,8 @@ Requires:	%{name}-system-moxie = %{version}-%{release}
 Requires:	%{name}-system-nios2 = %{version}-%{release}
 Requires:	%{name}-system-or1k = %{version}-%{release}
 Requires:	%{name}-system-ppc = %{version}-%{release}
+Requires:	%{name}-system-riscv32 = %{version}-%{release}
+Requires:	%{name}-system-riscv64 = %{version}-%{release}
 Requires:	%{name}-system-s390x = %{version}-%{release}
 Requires:	%{name}-system-sh4 = %{version}-%{release}
 Requires:	%{name}-system-sparc = %{version}-%{release}
@@ -383,6 +386,25 @@ dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
 Ten pakiet zawiera emulator systemu z procesorem CRIS.
 
+%package system-hppa
+Summary:	QEMU system emulator for HP/PA
+Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem HP/PA
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
+
+%description system-hppa
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator with HP/PA CPU.
+
+%description system-hppa -l pl.UTF-8
+QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
+dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
+
+Ten pakiet zawiera emulator systemu z procesorem HP/PA.
+
 %package system-lm32
 Summary:	QEMU system emulator for LM32
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem LM32
@@ -541,6 +563,44 @@ QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
 Ten pakiet zawiera emulator systemu z procesorem PowerPC.
+
+%package system-riscv32
+Summary:	QEMU system emulator for RISC-V (32 bit)
+Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem RISC-V (32 bit)
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
+
+%description system-riscv32
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator with RISC-V (32 bit) CPU.
+
+%description system-riscv32 -l pl.UTF-8
+QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
+dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
+
+Ten pakiet zawiera emulator systemu z procesorem RISC-V (32 bit).
+
+%package system-riscv64
+Summary:	QEMU system emulator for RISC-V (64 bit)
+Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem RISC-V (64 bit)
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
+
+%description system-riscv64
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator with RISC-V (64 bit) CPU.
+
+%description system-riscv64 -l pl.UTF-8
+QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
+dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
+
+Ten pakiet zawiera emulator systemu z procesorem RISC-V (64 bit).
 
 %package system-s390x
 Summary:	QEMU system emulator for S390
@@ -775,11 +835,10 @@ Moduł QEMU dla urządeń blokowych typu 'ssh'.
 %patch0 -p1
 %patch1 -p1
 %patch2 -p0
-%patch3 -p1
+#%%patch3 -p1
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
-%patch7 -p1
 
 # workaround for conflict with alsa/error.h
 ln -s ../error.h qapi/error.h
@@ -1143,6 +1202,13 @@ fi
 %attr(755,root,root) %{_libdir}/%{name}/block-dmg-bz2.so
 %attr(755,root,root) %{_libdir}/%{name}/block-nfs.so
 
+%attr(755,root,root) %{_libdir}/%{name}/audio-alsa.so
+%attr(755,root,root) %{_libdir}/%{name}/audio-pa.so
+%attr(755,root,root) %{_libdir}/%{name}/audio-sdl.so
+%attr(755,root,root) %{_libdir}/%{name}/ui-curses.so
+%attr(755,root,root) %{_libdir}/%{name}/ui-gtk.so
+%attr(755,root,root) %{_libdir}/%{name}/ui-sdl.so
+
 %files img
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-img
@@ -1152,6 +1218,7 @@ fi
 %defattr(644,root,root,755)
 /usr/lib/binfmt.d/qemu-*-dynamic.conf
 %attr(755,root,root) %{_bindir}/qemu-aarch64
+%attr(755,root,root) %{_bindir}/qemu-aarch64_be
 %attr(755,root,root) %{_bindir}/qemu-alpha
 %attr(755,root,root) %{_bindir}/qemu-arm
 %attr(755,root,root) %{_bindir}/qemu-armeb
@@ -1174,6 +1241,8 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-ppc64
 %attr(755,root,root) %{_bindir}/qemu-ppc64abi32
 %attr(755,root,root) %{_bindir}/qemu-ppc64le
+%attr(755,root,root) %{_bindir}/qemu-riscv32
+%attr(755,root,root) %{_bindir}/qemu-riscv64
 %attr(755,root,root) %{_bindir}/qemu-s390x
 %attr(755,root,root) %{_bindir}/qemu-sh4
 %attr(755,root,root) %{_bindir}/qemu-sh4eb
@@ -1181,12 +1250,15 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-sparc32plus
 %attr(755,root,root) %{_bindir}/qemu-sparc64
 %attr(755,root,root) %{_bindir}/qemu-x86_64
+%attr(755,root,root) %{_bindir}/qemu-xtensa
+%attr(755,root,root) %{_bindir}/qemu-xtensaeb
 
 %if %{with user_static}
 %files user-static
 %defattr(644,root,root,755)
 /usr/lib/binfmt.d/qemu-*-static.conf
 %attr(755,root,root) %{_bindir}/qemu-aarch64-static
+%attr(755,root,root) %{_bindir}/qemu-aarch64_be-static
 %attr(755,root,root) %{_bindir}/qemu-alpha-static
 %attr(755,root,root) %{_bindir}/qemu-arm-static
 %attr(755,root,root) %{_bindir}/qemu-armeb-static
@@ -1208,6 +1280,8 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-ppc64-static
 %attr(755,root,root) %{_bindir}/qemu-ppc64abi32-static
 %attr(755,root,root) %{_bindir}/qemu-ppc64le-static
+%attr(755,root,root) %{_bindir}/qemu-riscv32-static
+%attr(755,root,root) %{_bindir}/qemu-riscv64-static
 %attr(755,root,root) %{_bindir}/qemu-s390x-static
 %attr(755,root,root) %{_bindir}/qemu-sh4-static
 %attr(755,root,root) %{_bindir}/qemu-sh4eb-static
@@ -1216,6 +1290,8 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-sparc64-static
 %attr(755,root,root) %{_bindir}/qemu-tilegx-static
 %attr(755,root,root) %{_bindir}/qemu-x86_64-static
+%attr(755,root,root) %{_bindir}/qemu-xtensa-static
+%attr(755,root,root) %{_bindir}/qemu-xtensaeb-static
 %endif
 
 %files system-aarch64
@@ -1233,6 +1309,11 @@ fi
 %files system-cris
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-cris
+
+%files system-hppa
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-hppa
+%{_datadir}/%{name}/hppa-firmware.img
 
 %files system-lm32
 %defattr(644,root,root,755)
@@ -1270,10 +1351,19 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-ppc
 %attr(755,root,root) %{_bindir}/qemu-system-ppc64
-#%attr(755,root,root) %{_bindir}/qemu-system-ppc64le
 %attr(755,root,root) %{_bindir}/qemu-system-ppcemb
+%{_datadir}/%{name}/canyonlands.dtb
 %{_datadir}/%{name}/qemu_vga.ndrv
 %{_datadir}/%{name}/u-boot.e500
+%{_datadir}/%{name}/u-boot-sam460-20100605.bin
+
+%files system-riscv32
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-riscv32
+
+%files system-riscv64
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-riscv64
 
 %files system-s390x
 %defattr(644,root,root,755)
@@ -1308,7 +1398,6 @@ fi
 %endif
 %{_datadir}/%{name}/bios.bin
 %{_datadir}/%{name}/bios-256k.bin
-%{_datadir}/%{name}/acpi-dsdt.aml
 
 %files system-xtensa
 %defattr(644,root,root,755)
