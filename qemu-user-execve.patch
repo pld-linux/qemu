@@ -90,10 +90,8 @@ index bd90cc3..0d9b058 100644
  extern unsigned long mmap_min_addr;
  
  /* ??? See if we can avoid exposing so much of the loader internals.  */
-diff --git a/linux-user/syscall.c b/linux-user/syscall.c
-index 0cbace4..d0b5442 100644
---- a/linux-user/syscall.c
-+++ b/linux-user/syscall.c
+--- qemu-2.12.0/linux-user/syscall.c~	2018-04-30 21:43:39.000000000 +0300
++++ qemu-2.12.0/linux-user/syscall.c	2018-04-30 21:46:36.362935706 +0300
 @@ -5854,6 +5854,109 @@ static target_timer_t get_timer_id(abi_long arg)
      return timerid;
  }
@@ -198,22 +196,21 @@ index 0cbace4..d0b5442 100644
 +        new_argp[2] = argv[0];
 +    }
 +
-+    return get_errno(execve(qemu_execve_path, new_argp, envp));
++    return get_errno(safe_execve(qemu_execve_path, new_argp, envp));
 +}
 +
  /* do_syscall() should always have a single exit point at the end so
     that actions, such as logging of syscall results, can be performed.
     All errnos that do_syscall() returns must be -TARGET_<errcode>. */
-@@ -6113,7 +6216,13 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
- 
-             if (!(p = lock_user_string(arg1)))
-                 goto execve_efault;
--            ret = get_errno(execve(p, argp, envp));
-+
+@@ -8257,7 +8257,12 @@
+              * before the execve completes and makes it the other
+              * program's problem.
+              */
+-            ret = get_errno(safe_execve(p, argp, envp));
 +            if (qemu_execve_path && *qemu_execve_path) {
 +                ret = get_errno(qemu_execve(p, argp, envp));
 +            } else {
-+                ret = get_errno(execve(p, argp, envp));
++                ret = get_errno(safe_execve(p, argp, envp));
 +            }
 +
              unlock_user(p, arg1, 0);
