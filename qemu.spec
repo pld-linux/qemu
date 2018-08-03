@@ -37,12 +37,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	2.12.0
+Version:	2.12.1
 Release:	1
 License:	GPL v2
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.xz
-# Source0-md5:	ca553eb04c933f58111c304452fc4cc5
+# Source0-md5:	6e830a88e36908d9563ed01131ce72ec
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
