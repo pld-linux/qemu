@@ -37,12 +37,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	2.12.1
+Version:	3.0.0
 Release:	1
 License:	GPL v2
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.xz
-# Source0-md5:	6e830a88e36908d9563ed01131ce72ec
+# Source0-md5:	6a5c8df583406ea24ef25b239c3243e0
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -58,12 +58,11 @@ Source10:	ksmtuned.conf
 Source11:	%{name}-guest-agent.service
 Source12:	99-%{name}-guest-agent.rules
 Patch0:		%{name}-cflags.patch
-Patch1:		vgabios-widescreens.patch
-Patch2:		%{name}-whitelist.patch
-Patch3:		%{name}-user-execve.patch
-Patch4:		%{name}-xattr.patch
-Patch5:		libjpeg-boolean.patch
-Patch6:		x32.patch
+Patch1:		%{name}-whitelist.patch
+Patch2:		%{name}-user-execve.patch
+Patch3:		%{name}-xattr.patch
+Patch4:		libjpeg-boolean.patch
+Patch5:		x32.patch
 URL:		http://www.qemu-project.org/
 %{?with_gl:BuildRequires:	OpenGL-GLX-devel}
 %{?with_gl:BuildRequires:	OpenGL-devel}
@@ -833,12 +832,11 @@ Moduł QEMU dla urządeń blokowych typu 'ssh'.
 %prep
 %setup -q
 %patch0 -p1
-%patch1 -p1
-%patch2 -p0
+%patch1 -p0
+%patch2 -p1
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
-%patch6 -p1
 
 # workaround for conflict with alsa/error.h
 ln -s ../error.h qapi/error.h
@@ -937,9 +935,6 @@ build static \
 	--static
 
 %endif
-
-# rebuild patched vesa tables with additional widescreen modes.
-%{__make} -C roms/vgabios stdvga-bios
 
 %{__cc} %{SOURCE7} %{rpmcflags} -o ksmctl
 
@@ -1047,9 +1042,6 @@ done < %{SOURCE2}
 
 # packaged as %doc
 %{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qemu-doc.html
-
-# install patched vesa tables with additional widescreen modes.
-cp -p roms/vgabios/VGABIOS-lgpl-latest.stdvga.bin $RPM_BUILD_ROOT%{_datadir}/%{name}/vgabios-stdvga.bin
 
 %if %{with system_seabios}
 ln -sf /usr/share/seabios/bios.bin $RPM_BUILD_ROOT%{_datadir}/%{name}/bios-256k.bin
