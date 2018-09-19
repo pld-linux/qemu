@@ -25,6 +25,7 @@
 %bcond_without	user_static	# build linux-user static packages
 %bcond_with	lttng		# lttng-ust trace backend support
 %bcond_with	systemtap	# SystemTap/dtrace trace backend support
+%bcond_with	virgl		# build virgl support
 
 %if %{with gtk2}
 %undefine with_gtk3
@@ -121,6 +122,7 @@ BuildRequires:	texinfo
 %{?with_lttng:BuildRequires:	userspace-rcu-devel}
 BuildRequires:	vde2-devel
 BuildRequires:	which
+%{?with_virgl:BuildRequires:	virglrenderer-devel}
 %{?with_xen:BuildRequires:	xen-devel >= 3.4}
 BuildRequires:	xfsprogs-devel
 BuildRequires:	xorg-lib-libX11-devel
@@ -899,6 +901,7 @@ build dynamic \
 	--enable-vnc-png \
 	--enable-vnc-sasl \
 	%{!?with_vte:--disable-vte} \
+	%{__enable_disable virgl virglrenderer} \
 	%{__enable_disable xen} \
 	--enable-modules \
 	--disable-netmap \
