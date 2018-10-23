@@ -26,6 +26,7 @@
 %bcond_with	lttng		# lttng-ust trace backend support
 %bcond_with	systemtap	# SystemTap/dtrace trace backend support
 %bcond_with	virgl		# build virgl support
+%bcond_without	xkbcommon	# xkbcommon support
 
 %if %{with gtk2}
 %undefine with_gtk3
@@ -125,6 +126,7 @@ BuildRequires:	which
 %{?with_virgl:BuildRequires:	virglrenderer-devel}
 %{?with_xen:BuildRequires:	xen-devel >= 3.4}
 BuildRequires:	xfsprogs-devel
+%{?with_xkbcommon:BuildRequires:	xorg-lib-libxkbcommon-devel}
 BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	zlib-devel
 %if %{with gtk2}
@@ -1132,7 +1134,7 @@ fi
 %attr(755,root,root) %{_bindir}/ivshmem-client
 %attr(755,root,root) %{_bindir}/ivshmem-server
 %attr(755,root,root) %{_bindir}/virtfs-proxy-helper
-%attr(755,root,root) %{_bindir}/qemu-keymap
+%{?with_xkbcommon:%attr(755,root,root) %{_bindir}/qemu-keymap}
 %attr(755,root,root) %{_bindir}/qemu-nbd
 %attr(755,root,root) %{_bindir}/qemu-pr-helper
 %attr(755,root,root) %{_bindir}/qemu-tilegx
@@ -1195,14 +1197,16 @@ fi
 
 # modules without too many external dependencies
 %attr(755,root,root) %{_libdir}/%{name}/block-dmg-bz2.so
-%attr(755,root,root) %{_libdir}/%{name}/block-nfs.so
+%{?with_libnfs:%attr(755,root,root) %{_libdir}/%{name}/block-nfs.so}
 
 %attr(755,root,root) %{_libdir}/%{name}/audio-alsa.so
-%attr(755,root,root) %{_libdir}/%{name}/audio-pa.so
-%attr(755,root,root) %{_libdir}/%{name}/audio-sdl.so
+%{?with_pulseaudio:%attr(755,root,root) %{_libdir}/%{name}/audio-pa.so}
+%{?with_sdl:%attr(755,root,root) %{_libdir}/%{name}/audio-sdl.so}
 %attr(755,root,root) %{_libdir}/%{name}/ui-curses.so
+%if %{with gtk2} || %{with gtk3}
 %attr(755,root,root) %{_libdir}/%{name}/ui-gtk.so
-%attr(755,root,root) %{_libdir}/%{name}/ui-sdl.so
+%endif
+%{?with_sdl:%attr(755,root,root) %{_libdir}/%{name}/ui-sdl.so}
 
 %files img
 %defattr(644,root,root,755)
