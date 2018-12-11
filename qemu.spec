@@ -5,7 +5,6 @@
 %bcond_without	ceph		# Ceph/RBD support
 %bcond_without	glusterfs	# GlusterFS backend
 %bcond_without	rdma		# RDMA-based migration support
-%bcond_with	gtk2		# GTK+ 2.x instead of 3.x
 %bcond_without	gtk3		# Do not build GTK+ UI
 %bcond_without	vte		# VTE support in GTK+ UI
 %bcond_without	spice		# SPICE support
@@ -28,10 +27,6 @@
 %bcond_with	virgl		# build virgl support
 %bcond_without	xkbcommon	# xkbcommon support
 
-%if %{with gtk2}
-%undefine with_gtk3
-%endif
-
 %ifarch x32
 %undefine	with_xen
 %endif
@@ -39,12 +34,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	3.0.0
+Version:	3.1.0
 Release:	1
 License:	GPL v2
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.xz
-# Source0-md5:	6a5c8df583406ea24ef25b239c3243e0
+# Source0-md5:	fb687ce0b02d3bf4327e36d3b99427a8
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -80,7 +75,7 @@ BuildRequires:	cyrus-sasl-devel >= 2
 %{?with_esd:BuildRequires:	esound-devel}
 BuildRequires:	glib2-devel >= 1:2.22
 %{?with_glusterfs:BuildRequires:	glusterfs-devel >= 3.4}
-BuildRequires:	gnutls-devel > 2.10.0
+BuildRequires:	gnutls-devel >= 3.1.18
 BuildRequires:	libaio-devel
 %{?with_smartcard:BuildRequires:	libcacard-devel}
 BuildRequires:	libcap-devel
@@ -94,7 +89,7 @@ BuildRequires:	libjpeg-devel
 %{?with_libnfs:BuildRequires:	libnfs-devel >= 1.9.3}
 BuildRequires:	libpng-devel
 %{?with_rdma:BuildRequires:	librdmacm-devel}
-%{?with_seccomp:BuildRequires:	libseccomp-devel >= 2.1.1}
+%{?with_seccomp:BuildRequires:	libseccomp-devel >= 2.2.0}
 BuildRequires:	libssh2-devel >= 1.2.8
 BuildRequires:	libusb-devel >= 1.0.13
 BuildRequires:	libuuid-devel
@@ -129,12 +124,8 @@ BuildRequires:	xfsprogs-devel
 %{?with_xkbcommon:BuildRequires:	xorg-lib-libxkbcommon-devel}
 BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	zlib-devel
-%if %{with gtk2}
-BuildRequires:	gtk+2-devel >= 2:2.18.0
-%{?with_vte:BuildRequires:	vte0-devel >= 0.24.0}
-%endif
 %if %{with gtk3}
-BuildRequires:	gtk+3-devel >= 3.0.0
+BuildRequires:	gtk+3-devel >= 3.14.0
 %{?with_vte:BuildRequires:	vte2.90-devel >= 0.32.0}
 %endif
 %if %{with user_static}
@@ -176,19 +167,15 @@ Requires:	SDL2 \
 %endif \
 Requires:	libfdt >= 1.4.2 \
 %if %{with seccomp} \
-Requires:	libseccomp >= 2.1.0 \
+Requires:	libseccomp >= 2.2.0 \
 %endif \
 Requires:	libusb >= 1.0.13 \
 Requires:	pixman >= 0.21.8 \
 %if %{with usbredir} \
 Requires:	usbredir >= 0.6 \
 %endif \
-%if %{with gtk2} \
-Requires:	gtk+2 >= 2:2.18.0 \
-%{?with_vte:Requires:	vte0 >= 0.24.0} \
-%endif \
 %if %{with gtk3} \
-Requires:	gtk+3 >= 3.0.0 \
+Requires:	gtk+3 >= 3.14.0 \
 %{?with_vte:Requires:	vte2.90 >= 0.32.0} \
 %endif
 
@@ -911,10 +898,8 @@ build dynamic \
 	--enable-lzo \
 	%{__enable_disable snappy} \
 	--audio-drv-list="alsa%{?with_iss:,oss}%{?with_sdl:,sdl}%{?with_esd:,esd}%{?with_pulseaudio:,pa}" \
-%if %{without gtk2} && %{without gtk3}
+%if %{without gtk3}
 	--disable-gtk
-%else
-	--with-gtkabi="%{?with_gtk2:2.0}%{!?with_gtk2:3.0}"
 %endif
 
 %if %{with user_static}
@@ -1059,7 +1044,7 @@ for f in $RPM_BUILD_ROOT%{_datadir}/%{name}/*.aml ; do
 done
 %endif
 
-%if %{with gtk2} || %{with gtk3}
+%if %{with gtk3}
 %{__mv} $RPM_BUILD_ROOT%{_localedir}/{de_DE,de}
 %{__mv} $RPM_BUILD_ROOT%{_localedir}/{fr_FR,fr}
 %find_lang %{name}
@@ -1187,8 +1172,10 @@ fi
 %{_datadir}/%{name}/slof.bin
 %{_datadir}/%{name}/spapr-rtas.bin
 %{_datadir}/%{name}/vgabios.bin
+%{_datadir}/%{name}/vgabios-bochs-display.bin
 %{_datadir}/%{name}/vgabios-cirrus.bin
 %{_datadir}/%{name}/vgabios-qxl.bin
+%{_datadir}/%{name}/vgabios-ramfb.bin
 %{_datadir}/%{name}/vgabios-stdvga.bin
 %{_datadir}/%{name}/vgabios-virtio.bin
 %{_datadir}/%{name}/vgabios-vmware.bin
@@ -1203,7 +1190,7 @@ fi
 %{?with_pulseaudio:%attr(755,root,root) %{_libdir}/%{name}/audio-pa.so}
 %{?with_sdl:%attr(755,root,root) %{_libdir}/%{name}/audio-sdl.so}
 %attr(755,root,root) %{_libdir}/%{name}/ui-curses.so
-%if %{with gtk2} || %{with gtk3}
+%if %{with gtk3}
 %attr(755,root,root) %{_libdir}/%{name}/ui-gtk.so
 %endif
 %{?with_sdl:%attr(755,root,root) %{_libdir}/%{name}/ui-sdl.so}
@@ -1350,7 +1337,6 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-ppc
 %attr(755,root,root) %{_bindir}/qemu-system-ppc64
-%attr(755,root,root) %{_bindir}/qemu-system-ppcemb
 %{_datadir}/%{name}/canyonlands.dtb
 %{_datadir}/%{name}/qemu_vga.ndrv
 %{_datadir}/%{name}/u-boot.e500

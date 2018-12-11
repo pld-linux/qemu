@@ -199,9 +199,9 @@ index bd90cc3..0d9b058 100644
 +    return get_errno(safe_execve(qemu_execve_path, new_argp, envp));
 +}
 +
- /* do_syscall() should always have a single exit point at the end so
-    that actions, such as logging of syscall results, can be performed.
-    All errnos that do_syscall() returns must be -TARGET_<errcode>. */
+ static int target_to_host_cpu_mask(unsigned long *host_mask,
+                                    size_t host_size,
+                                    abi_ulong target_addr,
 @@ -8257,7 +8257,12 @@
               * before the execve completes and makes it the other
               * program's problem.
