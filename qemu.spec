@@ -60,6 +60,7 @@ Patch2:		%{name}-user-execve.patch
 Patch3:		%{name}-xattr.patch
 Patch4:		libjpeg-boolean.patch
 Patch5:		x32.patch
+Patch6:		%{name}-CVE-2018-20815.patch
 URL:		http://www.qemu-project.org/
 %{?with_gl:BuildRequires:	OpenGL-GLX-devel}
 %{?with_gl:BuildRequires:	OpenGL-devel}
@@ -828,6 +829,7 @@ Moduł QEMU dla urządeń blokowych typu 'ssh'.
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
+%patch6 -p1
 
 # workaround for conflict with alsa/error.h
 ln -s ../error.h qapi/error.h
