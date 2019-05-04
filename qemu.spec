@@ -34,12 +34,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	3.1.0
+Version:	4.0.0
 Release:	1
 License:	GPL v2
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.xz
-# Source0-md5:	fb687ce0b02d3bf4327e36d3b99427a8
+# Source0-md5:	0afeca336fd57ae3d3086ec07f59d708
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -60,7 +60,6 @@ Patch2:		%{name}-user-execve.patch
 Patch3:		%{name}-xattr.patch
 Patch4:		libjpeg-boolean.patch
 Patch5:		x32.patch
-Patch6:		%{name}-CVE-2018-20815.patch
 URL:		http://www.qemu-project.org/
 %{?with_gl:BuildRequires:	OpenGL-GLX-devel}
 %{?with_gl:BuildRequires:	OpenGL-devel}
@@ -829,7 +828,6 @@ Moduł QEMU dla urządeń blokowych typu 'ssh'.
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
-%patch6 -p1
 
 # workaround for conflict with alsa/error.h
 ln -s ../error.h qapi/error.h
@@ -880,7 +878,6 @@ build dynamic \
 	%{__enable_disable ceph rbd} \
 	%{__enable_disable rdma} \
 	%{__enable_disable sdl} \
-	--with-sdlabi=2.0 \
 	%{__enable_disable seccomp} \
 	%{__enable_disable spice} \
 	%{__enable_disable smartcard smartcard} \
@@ -1054,6 +1051,8 @@ done
 : > qemu.lang
 %endif
 
+%{__rm} -r $RPM_BUILD_ROOT%{_docdir}/qemu
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -1118,9 +1117,11 @@ fi
 %attr(640,root,qemu) %config(noreplace) %verify(not md5 mtime size) /etc/qemu/bridge.conf
 %{systemdunitdir}/ksm.service
 %{systemdunitdir}/ksmtuned.service
+%attr(755,root,root) %{_bindir}/elf2dmp
 %attr(755,root,root) %{_bindir}/ivshmem-client
 %attr(755,root,root) %{_bindir}/ivshmem-server
 %attr(755,root,root) %{_bindir}/virtfs-proxy-helper
+%attr(755,root,root) %{_bindir}/qemu-edid
 %{?with_xkbcommon:%attr(755,root,root) %{_bindir}/qemu-keymap}
 %attr(755,root,root) %{_bindir}/qemu-nbd
 %attr(755,root,root) %{_bindir}/qemu-pr-helper
@@ -1130,12 +1131,12 @@ fi
 %attr(755,root,root) %{_sbindir}/ksmtuned
 %{_mandir}/man1/qemu.1*
 %{_mandir}/man1/virtfs-proxy-helper.1*
+%{_mandir}/man7/qemu-cpu-models.7*
 %{_mandir}/man7/qemu-block-drivers.7*
 %{_mandir}/man8/qemu-nbd.8*
 
 %dir %{_datadir}/qemu
 %{_datadir}/%{name}/keymaps
-%{_datadir}/%{name}/qemu-icon.bmp
 %{_datadir}/%{name}/trace-events-all
 
 # various bios images
@@ -1159,6 +1160,7 @@ fi
 %{_datadir}/%{name}/petalogix-ml605.dtb
 %{_datadir}/%{name}/petalogix-s3adsp1800.dtb
 %{_datadir}/%{name}/ppc_rom.bin
+%{_datadir}/%{name}/pvh.bin
 %{_datadir}/%{name}/pxe-e1000.rom
 %{_datadir}/%{name}/pxe-eepro100.rom
 %{_datadir}/%{name}/pxe-ne2k_pci.rom
@@ -1166,7 +1168,6 @@ fi
 %{_datadir}/%{name}/pxe-rtl8139.rom
 %{_datadir}/%{name}/pxe-virtio.rom
 %{_datadir}/%{name}/QEMU,cgthree.bin
-%{_datadir}/%{name}/qemu_logo_no_text.svg
 %{_datadir}/%{name}/QEMU,tcx.bin
 %{_datadir}/%{name}/s390-ccw.img
 %{_datadir}/%{name}/sgabios.bin
@@ -1396,6 +1397,7 @@ fi
 %config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/99-qemu-guest-agent.rules
 %{systemdunitdir}/qemu-guest-agent.service
 %attr(755,root,root) %{_bindir}/qemu-ga
+%{_mandir}/man7/qemu-ga-ref.7*
 %{_mandir}/man8/qemu-ga.8*
 
 %files module-block-curl

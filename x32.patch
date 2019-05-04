@@ -9,25 +9,15 @@
          ;;
      arm|aarch64)
          libseccomp_minver="2.2.3"
-@@ -2932,7 +2932,7 @@
- ##########################################
- # TPM passthrough is only on x86 Linux
- 
--if test "$targetos" = Linux && test "$cpu" = i386 -o "$cpu" = x86_64; then
-+if test "$targetos" = Linux && test "$cpu" = i386 -o "$cpu" = x86_64 -o "$cpu" = x32; then
-   tpm_passthrough=$tpm
- else
-   tpm_passthrough=no
-@@ -4161,7 +4161,7 @@
+@@ -6148,7 +6148,7 @@
  
  # Mac OS X ships with a broken assembler
  roms=
--if test \( "$cpu" = "i386" -o "$cpu" = "x86_64" \) -a \
-+if test \( "$cpu" = "i386" -o "$cpu" = "x86_64" -o "$cpu" = "x32" \) -a \
-         "$targetos" != "Darwin" -a "$targetos" != "SunOS" -a \
-         "$softmmu" = yes ; then
-   roms="optionrom"
-
+-if { test "$cpu" = "i386" || test "$cpu" = "x86_64"; } && \
++if { test "$cpu" = "i386" || test "$cpu" = "x86_64" || test "$cpu" = "x32"; } && \
+         test "$targetos" != "Darwin" && test "$targetos" != "SunOS" && \
+         test "$softmmu" = yes ; then
+     # Different host OS linkers have different ideas about the name of the ELF
 --- qemu-2.6.0/include/qemu/atomic.h~	2016-07-17 18:37:57.000000000 +0200
 +++ qemu-2.6.0/include/qemu/atomic.h	2016-07-17 18:38:33.485893530 +0200
 @@ -20,7 +20,7 @@
