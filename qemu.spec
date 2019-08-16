@@ -34,12 +34,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	4.0.0
-Release:	3
-License:	GPL v2
+Version:	4.1.0
+Release:	1
+License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.xz
-# Source0-md5:	0afeca336fd57ae3d3086ec07f59d708
+# Source0-md5:	cdf2b5ca52b9abac9bacb5842fa420f8
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -89,7 +89,7 @@ BuildRequires:	libjpeg-devel
 %{?with_libnfs:BuildRequires:	libnfs-devel >= 1.9.3}
 BuildRequires:	libpng-devel
 %{?with_rdma:BuildRequires:	librdmacm-devel}
-%{?with_seccomp:BuildRequires:	libseccomp-devel >= 2.2.0}
+%{?with_seccomp:BuildRequires:	libseccomp-devel >= 2.3.0}
 BuildRequires:	libssh2-devel >= 1.2.8
 BuildRequires:	libusb-devel >= 1.0.13
 BuildRequires:	libuuid-devel
@@ -168,7 +168,7 @@ Requires:	SDL2 \
 %endif \
 Requires:	libfdt >= 1.4.2 \
 %if %{with seccomp} \
-Requires:	libseccomp >= 2.2.0 \
+Requires:	libseccomp >= 2.3.0 \
 %endif \
 Requires:	libusb >= 1.0.13 \
 Requires:	pixman >= 0.21.8 \
@@ -1137,6 +1137,7 @@ fi
 %{_mandir}/man8/qemu-nbd.8*
 
 %dir %{_datadir}/qemu
+%dir %{_datadir}/%{name}/firmware
 %{_datadir}/%{name}/keymaps
 %{_datadir}/%{name}/trace-events-all
 
@@ -1176,6 +1177,7 @@ fi
 %{_datadir}/%{name}/slof.bin
 %{_datadir}/%{name}/spapr-rtas.bin
 %{_datadir}/%{name}/vgabios.bin
+%{_datadir}/%{name}/vgabios-ati.bin
 %{_datadir}/%{name}/vgabios-bochs-display.bin
 %{_datadir}/%{name}/vgabios-cirrus.bin
 %{_datadir}/%{name}/vgabios-qxl.bin
@@ -1287,6 +1289,8 @@ fi
 %files system-aarch64
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-aarch64
+%{_datadir}/%{name}/edk2-aarch64-code.fd
+%{_datadir}/%{name}/firmware/60-edk2-aarch64.json
 
 %files system-alpha
 %defattr(644,root,root,755)
@@ -1295,6 +1299,9 @@ fi
 %files system-arm
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-arm
+%{_datadir}/%{name}/edk2-arm-code.fd
+%{_datadir}/%{name}/edk2-arm-vars.fd
+%{_datadir}/%{name}/firmware/60-edk2-arm.json
 
 %files system-cris
 %defattr(644,root,root,755)
@@ -1349,10 +1356,13 @@ fi
 %files system-riscv32
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-riscv32
+%{_datadir}/%{name}/opensbi-riscv32-virt-fw_jump.bin
 
 %files system-riscv64
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-riscv64
+%{_datadir}/%{name}/opensbi-riscv64-sifive_u-fw_jump.bin
+%{_datadir}/%{name}/opensbi-riscv64-virt-fw_jump.bin
 
 %files system-s390x
 %defattr(644,root,root,755)
@@ -1387,6 +1397,15 @@ fi
 %endif
 %{_datadir}/%{name}/bios.bin
 %{_datadir}/%{name}/bios-256k.bin
+%{_datadir}/%{name}/edk2-i386-code.fd
+%{_datadir}/%{name}/edk2-i386-secure-code.fd
+%{_datadir}/%{name}/edk2-i386-vars.fd
+%{_datadir}/%{name}/edk2-x86_64-code.fd
+%{_datadir}/%{name}/edk2-x86_64-secure-code.fd
+%{_datadir}/%{name}/firmware/50-edk2-i386-secure.json
+%{_datadir}/%{name}/firmware/50-edk2-x86_64-secure.json
+%{_datadir}/%{name}/firmware/60-edk2-i386.json
+%{_datadir}/%{name}/firmware/60-edk2-x86_64.json
 
 %files system-xtensa
 %defattr(644,root,root,755)
