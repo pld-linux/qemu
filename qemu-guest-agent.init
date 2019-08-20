@@ -1,0 +1,124 @@
+#!/bin/sh
+#
+# qemu-ga	qemu-ga	QEMU Guest Agent
+#
+# chkconfig:	345 12 88
+#
+# description:	qemu-ga QEMU Guest Agent
+
+# Source function library
+. /etc/rc.d/init.d/functions
+
+# Get service config - may override defaults
+[ -f /etc/sysconfig/qemu-ga ] && . /etc/sysconfig/qemu-ga
+
+pidfile="/var/run/qemu-ga.pid"
+
+# configtest itself
+# must return non-zero if check failed
+# output is discarded if checkconfig is ran without details
+configtest() {
+	/usr/bin/qemu-ga -D
+	return $?
+}
+
+# wrapper for configtest
+checkconfig() {
+	local details=${1:-0}
+
+	if [ $details = 1 ]; then
+		# run config test and display report (status action)
+		show "Checking %s configuration" "qemu-ga"; busy
+		local out
+		out=$(configtest 2>&1)
+		RETVAL=$?
+		if [ $RETVAL = 0 ]; then
+			ok
+		else
+			fail
+		fi
+		[ "$out" ] && echo >&2 "$out"
+	else
+		# run config test and abort with nice message if failed
+		# (for actions checking status before action).
+		configtest >/dev/null 2>&1
+		RETVAL=$?
+		if [ $RETVAL != 0 ]; then
+			show "Checking %s configuration" "qemu-ga"; fail
+			nls 'Configuration test failed. See details with %s "checkconfig"' $0
+			exit $RETVAL
+		fi
+	fi
+}
+
+start() {
+	# Check if the service is already running?
+	if [ -f /var/lock/subsys/qemu-ga ]; then
+		msg_already_running "qemu-ga"
+		return
+	fi
+
+	checkconfig
+	msg_starting "qemu-ga"
+	daemon /usr/bin/qemu-ga -d -l /var/log/qemu-ga
+	RETVAL=$?
+	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/qemu-ga
+}
+
+stop() {
+	if [ ! -f /var/lock/subsys/qemu-ga ]; then
+		msg_not_running "qemu-ga"
+		return
+	fi
+
+	# Stop daemons.
+	msg_stopping "qemu-ga"
+	killproc --pidfile $pidfile qemu-ga -TERM
+	rm -f /var/lock/subsys/qemu-ga
+}
+
+condrestart() {
+	if [ ! -f /var/lock/subsys/qemu-ga ]; then
+		msg_not_running "qemu-ga"
+		RETVAL=$1
+		return
+	fi
+
+	checkconfig
+	stop
+	start
+}
+
+RETVAL=0
+# See how we were called.
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  restart)
+	checkconfig
+	stop
+	start
+	;;
+  try-restart)
+	condrestart 0
+	;;
+  force-reload)
+	condrestart 7
+	;;
+  checkconfig|configtest)
+	checkconfig 1
+	;;
+  status)
+	status --pidfile $pidfile qemu-ga
+	RETVAL=$?
+	;;
+  *)
+	msg_usage "$0 {start|stop|restart|try-restart|force-reload|checkconfig|status}"
+	exit 3
+esac
+
+exit $RETVAL

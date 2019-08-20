@@ -35,7 +35,7 @@ Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
 Version:	4.1.0
-Release:	1
+Release:	2
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.xz
@@ -54,6 +54,8 @@ Source9:	ksmtuned
 Source10:	ksmtuned.conf
 Source11:	%{name}-guest-agent.service
 Source12:	99-%{name}-guest-agent.rules
+Source13:	%{name}-guest-agent.init
+Source14:	%{name}-guest-agent.logrotate
 Patch0:		%{name}-cflags.patch
 Patch1:		%{name}-whitelist.patch
 Patch2:		%{name}-user-execve.patch
@@ -931,7 +933,7 @@ build static \
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{systemdunitdir},/usr/lib/binfmt.d} \
-	$RPM_BUILD_ROOT/etc/{qemu,sysconfig,udev/rules.d,modules-load.d} \
+	$RPM_BUILD_ROOT/etc/{qemu,sysconfig,udev/rules.d,modules-load.d,rc.d/init.d,logrotate.d} \
 	$RPM_BUILD_ROOT{%{_sysconfdir}/sasl,%{_sbindir}}
 
 %if %{with user_static}
@@ -977,6 +979,9 @@ install -p %{SOURCE10} $RPM_BUILD_ROOT%{_sysconfdir}/ksmtuned.conf
 # service and udev rules.
 install -p %{SOURCE11} $RPM_BUILD_ROOT%{systemdunitdir}
 install -p %{SOURCE12} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d
+
+install -p %{SOURCE13} $RPM_BUILD_ROOT/etc/rc.d/init.d/qemu-ga
+install -p %{SOURCE14} $RPM_BUILD_ROOT/etc/logrotate.d/qemu-ga
 
 # Install binfmt
 for i in dummy \
@@ -1095,9 +1100,15 @@ fi
 %systemd_service_restart systemd-binfmt.service
 
 %post guest-agent
+/sbin/chkconfig --add qemu-ga
+%service qemu-ga restart "qemu-ga"
 %systemd_reload
 
 %preun guest-agent
+if [ "$1" = "0" ]; then
+  %service qemu-ga stop
+  /sbin/chkconfig --del qemu-ga
+fi
 %systemd_preun qemu-guest-agent.service
 
 %postun guest-agent
@@ -1416,6 +1427,8 @@ fi
 %defattr(644,root,root,755)
 %config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/99-qemu-guest-agent.rules
 %{systemdunitdir}/qemu-guest-agent.service
+%attr(754,root,root) /etc/rc.d/init.d/qemu-ga
+%attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) /etc/logrotate.d/qemu-ga
 %attr(755,root,root) %{_bindir}/qemu-ga
 %{_mandir}/man7/qemu-ga-ref.7*
 %{_mandir}/man8/qemu-ga.8*

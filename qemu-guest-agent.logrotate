@@ -1,0 +1,6 @@
+/var/log/qemu-ga
+{
+	postrotate
+		/sbin/service qemu-ga restart >/dev/null
+	endscript
+}
