@@ -128,7 +128,7 @@ BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	zlib-devel
 %if %{with gtk3}
 BuildRequires:	gtk+3-devel >= 3.14.0
-%{?with_vte:BuildRequires:	vte2.90-devel >= 0.32.0}
+%{?with_vte:BuildRequires:	vte-devel >= 0.32.0}
 %endif
 %if %{with user_static}
 BuildRequires:	glib2-static
@@ -179,7 +179,7 @@ Requires:	usbredir >= 0.6 \
 %endif \
 %if %{with gtk3} \
 Requires:	gtk+3 >= 3.14.0 \
-%{?with_vte:Requires:	vte2.90 >= 0.32.0} \
+%{?with_vte:Requires:	vte >= 0.32.0} \
 %endif
 
 # don't strip/chrpath anything in there; these are boot images, roms etc
