@@ -172,7 +172,7 @@ Requires:	libfdt >= 1.4.2 \
 %if %{with seccomp} \
 Requires:	libseccomp >= 2.3.0 \
 %endif \
-Requires:	libusb >= 1.0.13 \
+Requires:	libusb >= 1.0.22 \
 Requires:	pixman >= 0.21.8 \
 %if %{with usbredir} \
 Requires:	usbredir >= 0.6 \
@@ -708,9 +708,13 @@ Obsoletes:	qemu-kvm-system-x86
 QEMU is a generic and open source processor emulator which achieves a
 good emulation speed by using dynamic translation.
 
+This package provides the system emulator with x86 CPU.
+
 %description system-x86 -l pl.UTF-8
 QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
+
+Ten pakiet zawiera emulator systemu z procesorem x86.
 
 %package system-xtensa
 Summary:	QEMU system emulator for Xtensa
@@ -1106,8 +1110,8 @@ fi
 
 %preun guest-agent
 if [ "$1" = "0" ]; then
-  %service qemu-ga stop
-  /sbin/chkconfig --del qemu-ga
+	%service qemu-ga stop
+	/sbin/chkconfig --del qemu-ga
 fi
 %systemd_preun qemu-guest-agent.service
 
