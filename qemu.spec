@@ -34,12 +34,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	4.1.1
+Version:	4.2.0
 Release:	1
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.xz
-# Source0-md5:	53879f792ef2675c6c5e6cbf5cc1ac6c
+# Source0-md5:	278eeb294e4b497e79af7a57e660cb9a
 Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
@@ -111,7 +111,7 @@ BuildRequires:	sed >= 4.0
 %{?with_snappy:BuildRequires:	snappy-devel}
 %if %{with spice}
 BuildRequires:	spice-protocol >= 0.12.3
-BuildRequires:	spice-server-devel >= 0.12.0
+BuildRequires:	spice-server-devel >= 0.12.5
 %endif
 %{?with_systemtap:BuildRequires:	systemtap-sdt-devel}
 BuildRequires:	texi2html
@@ -1123,7 +1123,7 @@ fi
 
 %files common -f %{name}.lang
 %defattr(644,root,root,755)
-%doc LICENSE README
+%doc LICENSE README.rst
 %doc build-dynamic/qemu-doc.html
 %attr(755,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu-ifup
 %config(noreplace) %verify(not md5 mtime size) /etc/ksmtuned.conf
@@ -1190,7 +1190,7 @@ fi
 %{_datadir}/%{name}/sgabios.bin
 %{_datadir}/%{name}/skiboot.lid
 %{_datadir}/%{name}/slof.bin
-%{_datadir}/%{name}/spapr-rtas.bin
+#%{_datadir}/%{name}/spapr-rtas.bin
 %{_datadir}/%{name}/vgabios.bin
 %{_datadir}/%{name}/vgabios-ati.bin
 %{_datadir}/%{name}/vgabios-bochs-display.bin
@@ -1215,6 +1215,7 @@ fi
 %attr(755,root,root) %{_libdir}/%{name}/ui-gtk.so
 %endif
 %{?with_sdl:%attr(755,root,root) %{_libdir}/%{name}/ui-sdl.so}
+%{?with_spice:%attr(755,root,root) %{_libdir}/%{name}/ui-spice-app.so}
 
 %files img
 %defattr(644,root,root,755)
@@ -1412,6 +1413,7 @@ fi
 %endif
 %{_datadir}/%{name}/bios.bin
 %{_datadir}/%{name}/bios-256k.bin
+%{_datadir}/%{name}/bios-microvm.bin
 %{_datadir}/%{name}/edk2-i386-code.fd
 %{_datadir}/%{name}/edk2-i386-secure-code.fd
 %{_datadir}/%{name}/edk2-i386-vars.fd
