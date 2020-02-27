@@ -744,6 +744,7 @@ Requires(post,preun,postun):	systemd-units >= 38
 Requires:	glib2 >= 1:2.22
 Requires:	systemd-units >= 38
 Obsoletes:	qemu-kvm-guest-agent
+Conflicts:	SysVinit < 2.96-2
 
 %description guest-agent
 QEMU is a generic and open source processor emulator which achieves a
