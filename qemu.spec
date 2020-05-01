@@ -40,7 +40,6 @@ License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.xz
 # Source0-md5:	278eeb294e4b497e79af7a57e660cb9a
-Source2:	%{name}.binfmt
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
 # Creates /dev/kvm
@@ -989,56 +988,67 @@ install -p %{SOURCE13} $RPM_BUILD_ROOT/etc/rc.d/init.d/qemu-ga
 install -p %{SOURCE14} $RPM_BUILD_ROOT/etc/logrotate.d/qemu-ga
 
 # Install binfmt
-for i in dummy \
+BINFMT_CPUS=" \
 %ifnarch %{ix86} %{x8664} x32
-	qemu-i386 \
+	i386 x86_64 \
+%endif
+%ifnarch aarch64
+	aarch64 \
 %endif
 %ifnarch alpha
-	qemu-alpha \
+	alpha \
 %endif
 %ifnarch %{arm}
-	qemu-arm \
+	arm \
 %endif
-	qemu-armeb \
-	qemu-cris \
-	qemu-microblaze qemu-microblazeel \
+	aarch64_be \
+	armeb \
+	microblaze microblazeel \
 %ifnarch mips64
-	qemu-mips64 \
+	mips64 \
 %ifnarch mips
-	qemu-mips \
+	mips \
 %endif
 %endif
 %ifnarch mips64el
-	qemu-mips64el \
+	mips64el \
 %ifnarch mipsel
-	qemu-mipsel \
+	mipsel \
 %endif
 %endif
 %ifnarch m68k
-	qemu-m68k \
+	m68k \
 %endif
 %ifnarch ppc ppc64 ppc64le
-	qemu-ppc qemu-ppc64abi32 qemu-ppc64 \
+	ppc ppc64 ppc64le \
 %endif
 %ifnarch sparc sparc64
-	qemu-sparc qemu-sparc32plus qemu-sparc64 \
+	sparc sparc32plus sparc64 \
 %endif
 %ifnarch s390 s390x
-	qemu-s390x \
+	s390x \
 %endif
 %ifnarch sh4
-	qemu-sh4 \
+	sh4 \
 %endif
-	qemu-sh4eb \
-; do
-	test $i = dummy && continue
-	grep /$i:\$ %{SOURCE2} > $RPM_BUILD_ROOT/usr/lib/binfmt.d/$i-dynamic.conf
+	sh4eb \
+"
+
+if [ -n "$BINFMT_CPUS" ]; then
+	for cpu in $BINFMT_CPUS; do
+		bash ./scripts/qemu-binfmt-conf.sh --systemd "$cpu" --exportdir $RPM_BUILD_ROOT/usr/lib/binfmt.d --qemu-path %{_bindir}
+	done
+	for i in /$RPM_BUILD_ROOT/usr/lib/binfmt.d/*.conf; do
+		mv $i ${i%.conf}-dynamic.conf
+	done
 
 	%if %{with user_static}
-	grep /$i:\$ %{SOURCE2} > $RPM_BUILD_ROOT/usr/lib/binfmt.d/$i-static.conf
-	%{__sed} -i -e "s/$i/$i-static/" $RPM_BUILD_ROOT/usr/lib/binfmt.d/$i-static.conf
+	for regularfmt in $RPM_BUILD_ROOT/usr/lib/binfmt.d/*; do
+		staticfmt="${regularfmt%\-dynamic.conf}-static.conf"
+		cat $regularfmt | tr -d '\n' | sed "s/:$/-static:F/" > $staticfmt
+	done
 	%endif
-done < %{SOURCE2}
+fi
 
 # packaged as %doc
 %{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qemu-doc.html
