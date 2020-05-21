@@ -1,3 +1,8 @@
+# TODO:
+# libvxhs/libqnio (Veritas HyperScale block driver VxHS)
+# capstone=system
+# libpmem (x86_64 only?)
+# plugins?
 #
 # Conditional build:
 %bcond_without	sdl		# SDL UI and audio support
@@ -8,7 +13,6 @@
 %bcond_without	gtk3		# Do not build GTK+ UI
 %bcond_without	vte		# VTE support in GTK+ UI
 %bcond_without	spice		# SPICE support
-%bcond_with	esd		# EsounD audio support
 %bcond_without	oss		# OSS audio support
 %bcond_without	pulseaudio	# PulseAudio audio support
 %bcond_without	xen		# Xen backend driver support
@@ -17,6 +21,7 @@
 %bcond_without	smartcard	# smartcard-nss support
 %bcond_without	iscsi		# iscsi support
 %bcond_without	libnfs		# NFS support
+%bcond_without	multipath	# Multipath support
 %bcond_without	seccomp		# seccomp support
 %bcond_without	usbredir	# usb network redirection support
 %bcond_without	system_seabios	# system seabios binary
@@ -62,9 +67,11 @@ Patch3:		%{name}-xattr.patch
 Patch4:		libjpeg-boolean.patch
 Patch5:		x32.patch
 URL:		http://www.qemu-project.org/
+%{?with_opengl:BuildRequires:	Mesa-libgbm-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
 %{?with_opengl:BuildRequires:	OpenGL-devel}
 %{?with_sdl:BuildRequires:	SDL2-devel >= 2.0}
+%{?with_sdl:BuildRequires:	SDL2_image-devel >= 2.0}
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bcc >= 0.16.21-2
 %{?with_bluetooth:BuildRequires:	bluez-libs-devel}
@@ -73,12 +80,12 @@ BuildRequires:	bzip2-devel
 %{?with_ceph:BuildRequires:	ceph-devel}
 BuildRequires:	curl-devel
 BuildRequires:	cyrus-sasl-devel >= 2
-%{?with_esd:BuildRequires:	esound-devel}
-BuildRequires:	glib2-devel >= 1:2.22
-%{?with_glusterfs:BuildRequires:	glusterfs-devel >= 3.4}
+BuildRequires:	glib2-devel >= 1:2.48
+# minimal is 3.4 but new features are used up to 6
+%{?with_glusterfs:BuildRequires:	glusterfs-devel >= 6}
 BuildRequires:	gnutls-devel >= 3.1.18
 BuildRequires:	libaio-devel
-%{?with_smartcard:BuildRequires:	libcacard-devel}
+%{?with_smartcard:BuildRequires:	libcacard-devel >= 2.5.1}
 BuildRequires:	libcap-devel
 BuildRequires:	libcap-ng-devel
 %{?with_opengl:BuildRequires:	libepoxy-devel}
@@ -91,14 +98,23 @@ BuildRequires:	libjpeg-devel
 BuildRequires:	libpng-devel
 %{?with_rdma:BuildRequires:	librdmacm-devel}
 %{?with_seccomp:BuildRequires:	libseccomp-devel >= 2.3.0}
-BuildRequires:	libssh2-devel >= 1.2.8
+BuildRequires:	libssh-devel >= 0.8
+BuildRequires:	libslirp-devel >= 4.0.0
+# for tests only
+#BuildRequires:	libtasn1-devel
 BuildRequires:	libusb-devel >= 1.0.13
 BuildRequires:	libuuid-devel
+BuildRequires:	libxml2-devel >= 2.0
 %{?with_lttng:BuildRequires:	lttng-ust-devel}
+BuildRequires:	lzfse-devel
 BuildRequires:	lzo-devel >= 2
+%{?with_multipath:BuildRequires:	multipath-tools-devel}
 BuildRequires:	ncurses-devel
+# also libgcrypt-devel >= 1.5.0 possible, but gnutls already pulls nettle
+BuildRequires:	nettle-devel >= 2.7.1
 %{?with_smartcard:BuildRequires:	nss-devel >= 1:3.12.8}
 BuildRequires:	numactl-devel
+BuildRequires:	pam-devel
 BuildRequires:	perl-Encode
 BuildRequires:	perl-tools-pod
 BuildRequires:	pixman-devel >= 0.21.8
@@ -108,6 +124,7 @@ BuildRequires:	rpmbuild(macros) >= 1.644
 %{?with_system_seabios:BuildRequires:	seabios}
 BuildRequires:	sed >= 4.0
 %{?with_snappy:BuildRequires:	snappy-devel}
+BuildRequires:	sphinx-pdg
 %if %{with spice}
 BuildRequires:	spice-protocol >= 0.12.3
 BuildRequires:	spice-server-devel >= 0.12.5
@@ -115,27 +132,28 @@ BuildRequires:	spice-server-devel >= 0.12.5
 %{?with_systemtap:BuildRequires:	systemtap-sdt-devel}
 BuildRequires:	texi2html
 BuildRequires:	texinfo
+%{?with_multipath:BuildRequires:	udev-devel}
 %{?with_usbredir:BuildRequires:	usbredir-devel >= 0.6}
 %{?with_lttng:BuildRequires:	userspace-rcu-devel}
 BuildRequires:	vde2-devel
 BuildRequires:	which
 %{?with_virgl:BuildRequires:	virglrenderer-devel}
-%{?with_xen:BuildRequires:	xen-devel >= 3.4}
+# xencontrol xenstore xenguest xenforeignmemory xengnttab xenevtchn xendevicemodel [xentoolcore for xen 4.10+]
+%{?with_xen:BuildRequires:	xen-devel >= 4.2}
 BuildRequires:	xfsprogs-devel
 %{?with_xkbcommon:BuildRequires:	xorg-lib-libxkbcommon-devel}
 BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	zlib-devel
 %if %{with gtk3}
-BuildRequires:	gtk+3-devel >= 3.14.0
+BuildRequires:	gtk+3-devel >= 3.16
 %{?with_vte:BuildRequires:	vte-devel >= 0.32.0}
 %endif
 %if %{with user_static}
-BuildRequires:	glib2-static
+BuildRequires:	glib2-static >= 1:2.48
 BuildRequires:	glibc-static
 BuildRequires:	pcre-static
 BuildRequires:	zlib-static
 %endif
-BuildConflicts:	libslirp-devel
 Requires:	%{name}-img = %{version}-%{release}
 Requires:	%{name}-system-aarch64 = %{version}-%{release}
 Requires:	%{name}-system-alpha = %{version}-%{release}
@@ -161,23 +179,26 @@ Requires:	%{name}-system-x86 = %{version}-%{release}
 Requires:	%{name}-system-xtensa = %{version}-%{release}
 Requires:	%{name}-user = %{version}-%{release}
 Obsoletes:	qemu-kvm
+ExcludeArch:	i386
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define	systempkg_req \
 %if %{with sdl} \
 Requires:	SDL2 \
 %endif \
+%{?with_smartcard:Requires:	libcacard >= 2.5.1} \
 Requires:	libfdt >= 1.4.2 \
 %if %{with seccomp} \
 Requires:	libseccomp >= 2.3.0 \
 %endif \
+Requires:	libslirp >= 4.0.0 \
 Requires:	libusb >= 1.0.22 \
 Requires:	pixman >= 0.21.8 \
 %if %{with usbredir} \
 Requires:	usbredir >= 0.6 \
 %endif \
 %if %{with gtk3} \
-Requires:	gtk+3 >= 3.14.0 \
+Requires:	gtk+3 >= 3.16 \
 %{?with_vte:Requires:	vte >= 0.32.0} \
 %endif
 
@@ -227,9 +248,9 @@ Requires(pre):	/bin/id
 Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
-Requires:	glib2 >= 1:2.22
+Requires:	glib2 >= 1:2.48
 %{?with_libnfs:Requires:	libnfs >= 1.9.3}
-Requires:	libssh2 >= 1.2.8
+Requires:	libssh >= 0.8
 Requires:	systemd-units >= 38
 Provides:	group(qemu)
 Provides:	user(qemu)
@@ -740,7 +761,7 @@ Summary:	QEMU guest agent
 Summary(pl.UTF-8):	Agent gościa QEMU
 Group:		Daemons
 Requires(post,preun,postun):	systemd-units >= 38
-Requires:	glib2 >= 1:2.22
+Requires:	glib2 >= 1:2.48
 Requires:	systemd-units >= 38
 Obsoletes:	qemu-kvm-guest-agent
 Conflicts:	SysVinit < 2.96-2
@@ -782,7 +803,7 @@ Summary:	QEMU module for 'gluster' block devices
 Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'gluster'
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
-Requires:	glusterfs-libs >= 3.4
+Requires:	glusterfs-libs >= 6
 
 %description module-block-gluster
 'gluster' block device support for QEMU.
@@ -872,6 +893,7 @@ build() {
 build dynamic \
 	--extra-cflags="%{rpmcflags} %{rpmcppflags} -fPIE -DPIE" \
 	--extra-ldflags="%{rpmldflags} -pie -Wl,-z,relro -Wl,-z,now" \
+	--audio-drv-list="alsa%{?with_oss:,oss}%{?with_sdl:,sdl}%{?with_pulseaudio:,pa}" \
 	--enable-attr \
 	%{__enable_disable bluetooth bluez} \
 	%{__enable_disable brlapi} \
@@ -881,32 +903,33 @@ build dynamic \
 	--enable-docs \
 	--enable-fdt \
 	%{__enable_disable glusterfs} \
+	%{!?with_gtk3:--disable-gtk} \
 	%{__enable_disable iscsi libiscsi} \
+	%{__enable_disable libnfs} \
+	--enable-lzo \
+	%{__enable_disable multipath mpath} \
+	--enable-modules \
+	--disable-netmap \
+	--enable-nettle \
 	%{__enable_disable ceph rbd} \
 	%{__enable_disable rdma} \
 	%{__enable_disable sdl} \
 	%{__enable_disable seccomp} \
+	--enable-slirp=system \
 	%{__enable_disable spice} \
 	%{__enable_disable smartcard smartcard} \
+	%{__enable_disable snappy} \
 	--enable-tpm \
 	%{__enable_disable usbredir usb-redir} \
 	--enable-vde \
+	%{__enable_disable virgl virglrenderer} \
 	--enable-virtfs \
 	--enable-vnc-jpeg \
 	--enable-vnc-png \
 	--enable-vnc-sasl \
 	%{!?with_vte:--disable-vte} \
-	%{__enable_disable virgl virglrenderer} \
 	%{__enable_disable xen} \
-	--enable-modules \
-	--disable-netmap \
-	%{__enable_disable libnfs} \
-	--enable-lzo \
-	%{__enable_disable snappy} \
-	--audio-drv-list="alsa%{?with_iss:,oss}%{?with_sdl:,sdl}%{?with_esd:,esd}%{?with_pulseaudio:,pa}" \
-%if %{without gtk3}
-	--disable-gtk
-%endif
+	%{__enable_disable xkbcommon}
 
 %if %{with user_static}
 build static \
@@ -920,16 +943,18 @@ build static \
 	--disable-guest-agent \
 	--disable-guest-agent-msi \
 	--disable-libnfs \
+	--disable-mpath \
 	--disable-nettle \
 	--disable-pie \
 	--disable-sdl \
+	--enable-slirp=internal \
 	--disable-spice \
+	--disable-system \
 	--disable-tcmalloc \
 	--disable-tools \
 	--enable-user \
-	--disable-system \
+	--disable-xkbcommon \
 	--static
-
 %endif
 
 %{__cc} %{SOURCE7} %{rpmcflags} -o ksmctl
@@ -947,7 +972,7 @@ install -d $RPM_BUILD_ROOT{%{systemdunitdir},/usr/lib/binfmt.d} \
 
 # Give all QEMU user emulators a -static suffix
 for src in $RPM_BUILD_ROOT%{_bindir}/qemu-*; do
-	mv $src $src-static
+	%{__mv} $src $src-static
 done
 
 %endif
@@ -955,6 +980,9 @@ done
 %{__make} -C build-dynamic install \
 	%{!?with_smartcard:CONFIG_USB_SMARTCARD=n} \
 	DESTDIR=$RPM_BUILD_ROOT
+
+# let rpm generate dependencies
+chmod 755 $RPM_BUILD_ROOT%{_libdir}/%{name}/*.so
 
 echo "#allow br0" > $RPM_BUILD_ROOT/etc/qemu/bridge.conf
 
@@ -1072,6 +1100,10 @@ done
 : > qemu.lang
 %endif
 
+# Windows installed icon, not used
+%{__rm} $RPM_BUILD_ROOT%{_datadir}/%{name}/qemu-nsis.bmp
+# packaged as %doc
+%{__rm} $RPM_BUILD_ROOT%{_datadir}/%{name}/edk2-licenses.txt
 %{__rm} -r $RPM_BUILD_ROOT%{_docdir}/qemu
 
 %clean
@@ -1134,8 +1166,7 @@ fi
 
 %files common -f %{name}.lang
 %defattr(644,root,root,755)
-%doc LICENSE README.rst
-%doc build-dynamic/qemu-doc.html
+%doc LICENSE README.rst build-dynamic/qemu-doc.html pc-bios/edk2-licenses.txt
 %attr(755,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu-ifup
 %config(noreplace) %verify(not md5 mtime size) /etc/ksmtuned.conf
 %config(noreplace) %verify(not md5 mtime size) /etc/sasl/qemu.conf
@@ -1149,84 +1180,59 @@ fi
 %attr(755,root,root) %{_bindir}/ivshmem-server
 %attr(755,root,root) %{_bindir}/virtfs-proxy-helper
 %attr(755,root,root) %{_bindir}/qemu-edid
-%{?with_xkbcommon:%attr(755,root,root) %{_bindir}/qemu-keymap}
+%if %{with xkbcommon}
+%attr(755,root,root) %{_bindir}/qemu-keymap
+%endif
 %attr(755,root,root) %{_bindir}/qemu-nbd
 %attr(755,root,root) %{_bindir}/qemu-pr-helper
 %attr(755,root,root) %{_bindir}/qemu-tilegx
-%attr(755,root,root) %{_libexecdir}/qemu-bridge-helper
 %attr(755,root,root) %{_sbindir}/ksmctl
 %attr(755,root,root) %{_sbindir}/ksmtuned
+%attr(755,root,root) %{_libexecdir}/qemu-bridge-helper
 %{_mandir}/man1/qemu.1*
 %{_mandir}/man1/virtfs-proxy-helper.1*
 %{_mandir}/man7/qemu-cpu-models.7*
 %{_mandir}/man7/qemu-block-drivers.7*
+%{_mandir}/man7/qemu-qmp-ref.7*
 %{_mandir}/man8/qemu-nbd.8*
 
-%dir %{_datadir}/qemu
+%dir %{_datadir}/%{name}
 %dir %{_datadir}/%{name}/firmware
 %{_datadir}/%{name}/keymaps
 %{_datadir}/%{name}/trace-events-all
-
-# various bios images
-# all should be probably moved to the right system subpackage
-%{_datadir}/%{name}/bamboo.dtb
-%{_datadir}/%{name}/efi-e1000e.rom
-%{_datadir}/%{name}/efi-e1000.rom
-%{_datadir}/%{name}/efi-eepro100.rom
-%{_datadir}/%{name}/efi-ne2k_pci.rom
-%{_datadir}/%{name}/efi-pcnet.rom
-%{_datadir}/%{name}/efi-rtl8139.rom
-%{_datadir}/%{name}/efi-virtio.rom
-%{_datadir}/%{name}/efi-vmxnet3.rom
-%{_datadir}/%{name}/kvmvapic.bin
-%{_datadir}/%{name}/linuxboot.bin
-%{_datadir}/%{name}/linuxboot_dma.bin
-%{_datadir}/%{name}/multiboot.bin
-%{_datadir}/%{name}/openbios-ppc
-%{_datadir}/%{name}/openbios-sparc*
-%{_datadir}/%{name}/palcode-clipper
-%{_datadir}/%{name}/petalogix-ml605.dtb
-%{_datadir}/%{name}/petalogix-s3adsp1800.dtb
-%{_datadir}/%{name}/ppc_rom.bin
-%{_datadir}/%{name}/pvh.bin
-%{_datadir}/%{name}/pxe-e1000.rom
-%{_datadir}/%{name}/pxe-eepro100.rom
-%{_datadir}/%{name}/pxe-ne2k_pci.rom
-%{_datadir}/%{name}/pxe-pcnet.rom
-%{_datadir}/%{name}/pxe-rtl8139.rom
-%{_datadir}/%{name}/pxe-virtio.rom
-%{_datadir}/%{name}/QEMU,cgthree.bin
-%{_datadir}/%{name}/QEMU,tcx.bin
-%{_datadir}/%{name}/s390-ccw.img
-%{_datadir}/%{name}/sgabios.bin
-%{_datadir}/%{name}/skiboot.lid
-%{_datadir}/%{name}/slof.bin
-#%{_datadir}/%{name}/spapr-rtas.bin
-%{_datadir}/%{name}/vgabios.bin
-%{_datadir}/%{name}/vgabios-ati.bin
-%{_datadir}/%{name}/vgabios-bochs-display.bin
-%{_datadir}/%{name}/vgabios-cirrus.bin
-%{_datadir}/%{name}/vgabios-qxl.bin
-%{_datadir}/%{name}/vgabios-ramfb.bin
-%{_datadir}/%{name}/vgabios-stdvga.bin
-%{_datadir}/%{name}/vgabios-virtio.bin
-%{_datadir}/%{name}/vgabios-vmware.bin
+%{_desktopdir}/qemu.desktop
+%{_iconsdir}/hicolor/*x*/apps/qemu.png
+%{_iconsdir}/hicolor/32x32/apps/qemu.bmp
+%{_iconsdir}/hicolor/scalable/apps/qemu.svg
 
 %dir %{_libdir}/%{name}
 
 # modules without too many external dependencies
 %attr(755,root,root) %{_libdir}/%{name}/block-dmg-bz2.so
-%{?with_libnfs:%attr(755,root,root) %{_libdir}/%{name}/block-nfs.so}
+%attr(755,root,root) %{_libdir}/%{name}/block-dmg-lzfse.so
+%if %{with libnfs}
+%attr(755,root,root) %{_libdir}/%{name}/block-nfs.so
+%endif
 
 %attr(755,root,root) %{_libdir}/%{name}/audio-alsa.so
-%{?with_pulseaudio:%attr(755,root,root) %{_libdir}/%{name}/audio-pa.so}
-%{?with_sdl:%attr(755,root,root) %{_libdir}/%{name}/audio-sdl.so}
+%if %{with oss}
+%attr(755,root,root) %{_libdir}/%{name}/audio-oss.so
+%endif
+%if %{with pulseaudio}
+%attr(755,root,root) %{_libdir}/%{name}/audio-pa.so
+%endif
+
 %attr(755,root,root) %{_libdir}/%{name}/ui-curses.so
 %if %{with gtk3}
 %attr(755,root,root) %{_libdir}/%{name}/ui-gtk.so
 %endif
-%{?with_sdl:%attr(755,root,root) %{_libdir}/%{name}/ui-sdl.so}
-%{?with_spice:%attr(755,root,root) %{_libdir}/%{name}/ui-spice-app.so}
+%if %{with sdl}
+%attr(755,root,root) %{_libdir}/%{name}/audio-sdl.so
+%attr(755,root,root) %{_libdir}/%{name}/ui-sdl.so
+%endif
+%if %{with spice}
+%attr(755,root,root) %{_libdir}/%{name}/ui-spice-app.so
+%endif
 
 %files img
 %defattr(644,root,root,755)
@@ -1322,6 +1328,7 @@ fi
 %files system-alpha
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-alpha
+%{_datadir}/%{name}/palcode-clipper
 
 %files system-arm
 %defattr(644,root,root,755)
@@ -1375,8 +1382,15 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-ppc
 %attr(755,root,root) %{_bindir}/qemu-system-ppc64
+%{_datadir}/%{name}/bamboo.dtb
 %{_datadir}/%{name}/canyonlands.dtb
+%{_datadir}/%{name}/openbios-ppc
+%{_datadir}/%{name}/petalogix-ml605.dtb
+%{_datadir}/%{name}/petalogix-s3adsp1800.dtb
+%{_datadir}/%{name}/ppc_rom.bin
 %{_datadir}/%{name}/qemu_vga.ndrv
+%{_datadir}/%{name}/skiboot.lid
+%{_datadir}/%{name}/slof.bin
 %{_datadir}/%{name}/u-boot.e500
 %{_datadir}/%{name}/u-boot-sam460-20100605.bin
 
@@ -1394,6 +1408,7 @@ fi
 %files system-s390x
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-s390x
+%{_datadir}/%{name}/s390-ccw.img
 %{_datadir}/%{name}/s390-netboot.img
 
 %files system-sh4
@@ -1405,6 +1420,10 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-sparc
 %attr(755,root,root) %{_bindir}/qemu-system-sparc64
+%{_datadir}/%{name}/QEMU,cgthree.bin
+%{_datadir}/%{name}/QEMU,tcx.bin
+%{_datadir}/%{name}/openbios-sparc32
+%{_datadir}/%{name}/openbios-sparc64
 
 %files system-tricore
 %defattr(644,root,root,755)
@@ -1430,6 +1449,35 @@ fi
 %{_datadir}/%{name}/edk2-i386-vars.fd
 %{_datadir}/%{name}/edk2-x86_64-code.fd
 %{_datadir}/%{name}/edk2-x86_64-secure-code.fd
+%{_datadir}/%{name}/efi-e1000e.rom
+%{_datadir}/%{name}/efi-e1000.rom
+%{_datadir}/%{name}/efi-eepro100.rom
+%{_datadir}/%{name}/efi-ne2k_pci.rom
+%{_datadir}/%{name}/efi-pcnet.rom
+%{_datadir}/%{name}/efi-rtl8139.rom
+%{_datadir}/%{name}/efi-virtio.rom
+%{_datadir}/%{name}/efi-vmxnet3.rom
+%{_datadir}/%{name}/kvmvapic.bin
+%{_datadir}/%{name}/linuxboot.bin
+%{_datadir}/%{name}/linuxboot_dma.bin
+%{_datadir}/%{name}/multiboot.bin
+%{_datadir}/%{name}/pvh.bin
+%{_datadir}/%{name}/pxe-e1000.rom
+%{_datadir}/%{name}/pxe-eepro100.rom
+%{_datadir}/%{name}/pxe-ne2k_pci.rom
+%{_datadir}/%{name}/pxe-pcnet.rom
+%{_datadir}/%{name}/pxe-rtl8139.rom
+%{_datadir}/%{name}/pxe-virtio.rom
+%{_datadir}/%{name}/sgabios.bin
+%{_datadir}/%{name}/vgabios.bin
+%{_datadir}/%{name}/vgabios-ati.bin
+%{_datadir}/%{name}/vgabios-bochs-display.bin
+%{_datadir}/%{name}/vgabios-cirrus.bin
+%{_datadir}/%{name}/vgabios-qxl.bin
+%{_datadir}/%{name}/vgabios-ramfb.bin
+%{_datadir}/%{name}/vgabios-stdvga.bin
+%{_datadir}/%{name}/vgabios-virtio.bin
+%{_datadir}/%{name}/vgabios-vmware.bin
 %{_datadir}/%{name}/firmware/50-edk2-i386-secure.json
 %{_datadir}/%{name}/firmware/50-edk2-x86_64-secure.json
 %{_datadir}/%{name}/firmware/60-edk2-i386.json
