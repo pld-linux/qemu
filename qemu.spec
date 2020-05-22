@@ -1100,7 +1100,7 @@ done
 : > qemu.lang
 %endif
 
-# Windows installed icon, not used
+# Windows installer icon, not used
 %{__rm} $RPM_BUILD_ROOT%{_datadir}/%{name}/qemu-nsis.bmp
 # packaged as %doc
 %{__rm} $RPM_BUILD_ROOT%{_datadir}/%{name}/edk2-licenses.txt
