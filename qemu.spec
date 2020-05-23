@@ -102,7 +102,7 @@ BuildRequires:	libssh-devel >= 0.8
 BuildRequires:	libslirp-devel >= 4.0.0
 # for tests only
 #BuildRequires:	libtasn1-devel
-BuildRequires:	libusb-devel >= 1.0.13
+BuildRequires:	libusb-devel >= 1.0.22
 BuildRequires:	libuuid-devel
 BuildRequires:	libxml2-devel >= 2.0
 %{?with_lttng:BuildRequires:	lttng-ust-devel}
@@ -255,6 +255,7 @@ Requires:	systemd-units >= 38
 Provides:	group(qemu)
 Provides:	user(qemu)
 Obsoletes:	qemu-kvm-common
+Obsoletes:	qemu-module-block-archipelago < 2.9.0
 Conflicts:	qemu < 1.0-2
 
 %description common
@@ -308,6 +309,7 @@ Ten pakiet udostępnia emulację trybu użytkownika środowisk QEMU.
 
 %package user-static
 Summary:	QEMU user mode emulation of qemu targets static build
+Summary(pl.UTF-8):	QEMU - emulacja trybu użytkownika środowisk qemu - wersja statyczna
 Group:		Development/Tools
 Requires(post,postun):	systemd-units >= 38
 Requires:	systemd-units >= 38
@@ -317,7 +319,14 @@ QEMU is a generic and open source processor emulator which achieves a
 good emulation speed by using dynamic translation.
 
 This package provides the user mode emulation of qemu targets built as
-static binaries
+static binaries.
+
+%description user-static -l pl.UTF-8
+QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
+dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
+
+Ten pakiet udostępnia emulację trybu użytkownika środowisk QEMU w
+oparciu o programy wykonywalne zbudowane statycznie.
 
 %package system-aarch64
 Summary:	QEMU system emulator for AArch64
@@ -331,13 +340,13 @@ Obsoletes:	qemu-kvm-system-aarch64
 QEMU is a generic and open source processor emulator which achieves a
 good emulation speed by using dynamic translation.
 
-This package provides the system emulator with AArch64 CPU.
+This package provides the system emulator with AArch64 (ARM64) CPU.
 
 %description system-aarch64 -l pl.UTF-8
 QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
-Ten pakiet zawiera emulator systemu z procesorem AArch64.
+Ten pakiet zawiera emulator systemu z procesorem AArch64 (ARM64).
 
 %package system-alpha
 Summary:	QEMU system emulator for Alpha
@@ -360,8 +369,8 @@ dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 Ten pakiet zawiera emulator systemu z procesorem Alpha.
 
 %package system-arm
-Summary:	QEMU system emulator for ARM
-Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem ARM
+Summary:	QEMU system emulator for 32-bit ARM
+Summary(pl.UTF-8):	QEMU - emulator systemu z 32-bitowym procesorem ARM
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
@@ -371,13 +380,13 @@ Obsoletes:	qemu-kvm-system-arm
 QEMU is a generic and open source processor emulator which achieves a
 good emulation speed by using dynamic translation.
 
-This package provides the system emulator for ARM.
+This package provides the system emulator for 32-bit ARM.
 
 %description system-arm -l pl.UTF-8
 QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
-Ten pakiet zawiera emulator systemu z procesorem ARM.
+Ten pakiet zawiera emulator systemu z 32-bitowym procesorem ARM.
 
 %package system-cris
 Summary:	QEMU system emulator for CRIS
@@ -410,13 +419,13 @@ Requires:	%{name}-common = %{version}-%{release}
 QEMU is a generic and open source processor emulator which achieves a
 good emulation speed by using dynamic translation.
 
-This package provides the system emulator with HP/PA CPU.
+This package provides the system emulator with HP/PA (PA-RISC) CPU.
 
 %description system-hppa -l pl.UTF-8
 QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
-Ten pakiet zawiera emulator systemu z procesorem HP/PA.
+Ten pakiet zawiera emulator systemu z procesorem HP/PA (PA-RISC).
 
 %package system-lm32
 Summary:	QEMU system emulator for LM32
@@ -450,13 +459,15 @@ Obsoletes:	qemu-kvm-system-m68k
 QEMU is a generic and open source processor emulator which achieves a
 good emulation speed by using dynamic translation.
 
-This package provides the system emulator with m68k CPU.
+This package provides the system emulator with m68k (Motorola 68xxx)
+CPU.
 
 %description system-m68k -l pl.UTF-8
 QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
-Ten pakiet zawiera emulator systemu z procesorem m68k.
+Ten pakiet zawiera emulator systemu z procesorem m68k (Motorola
+68xxx).
 
 %package system-microblaze
 Summary:	QEMU system emulator for MicroBlaze
@@ -598,7 +609,7 @@ Ten pakiet zawiera emulator systemu z procesorem RISC-V (32 bit).
 
 %package system-riscv64
 Summary:	QEMU system emulator for RISC-V (64 bit)
-Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem RISC-V (64 bit)
+Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem RISC-V (64 bitowym)
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
@@ -613,11 +624,11 @@ This package provides the system emulator with RISC-V (64 bit) CPU.
 QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
-Ten pakiet zawiera emulator systemu z procesorem RISC-V (64 bit).
+Ten pakiet zawiera emulator systemu z procesorem RISC-V (64-bitowym).
 
 %package system-s390x
-Summary:	QEMU system emulator for S390
-Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem S390
+Summary:	QEMU system emulator for S390x (IBM Z)
+Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem S390x (IBM Z)
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
@@ -627,13 +638,13 @@ Obsoletes:	qemu-kvm-system-s390x
 QEMU is a generic and open source processor emulator which achieves a
 good emulation speed by using dynamic translation.
 
-This package provides the system emulator with S390 CPU.
+This package provides the system emulator with S390x (IBM Z) CPU.
 
 %description system-s390x -l pl.UTF-8
 QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
-Ten pakiet zawiera emulator systemu z procesorem S390.
+Ten pakiet zawiera emulator systemu z procesorem S390x (IBM Z).
 
 %package system-sh4
 Summary:	QEMU system emulator for SH4
@@ -1178,21 +1189,20 @@ fi
 %attr(755,root,root) %{_bindir}/elf2dmp
 %attr(755,root,root) %{_bindir}/ivshmem-client
 %attr(755,root,root) %{_bindir}/ivshmem-server
-%attr(755,root,root) %{_bindir}/virtfs-proxy-helper
 %attr(755,root,root) %{_bindir}/qemu-edid
 %if %{with xkbcommon}
 %attr(755,root,root) %{_bindir}/qemu-keymap
 %endif
 %attr(755,root,root) %{_bindir}/qemu-nbd
 %attr(755,root,root) %{_bindir}/qemu-pr-helper
-%attr(755,root,root) %{_bindir}/qemu-tilegx
+%attr(755,root,root) %{_bindir}/virtfs-proxy-helper
 %attr(755,root,root) %{_sbindir}/ksmctl
 %attr(755,root,root) %{_sbindir}/ksmtuned
 %attr(755,root,root) %{_libexecdir}/qemu-bridge-helper
 %{_mandir}/man1/qemu.1*
 %{_mandir}/man1/virtfs-proxy-helper.1*
-%{_mandir}/man7/qemu-cpu-models.7*
 %{_mandir}/man7/qemu-block-drivers.7*
+%{_mandir}/man7/qemu-cpu-models.7*
 %{_mandir}/man7/qemu-qmp-ref.7*
 %{_mandir}/man8/qemu-nbd.8*
 
@@ -1274,6 +1284,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-sparc
 %attr(755,root,root) %{_bindir}/qemu-sparc32plus
 %attr(755,root,root) %{_bindir}/qemu-sparc64
+%attr(755,root,root) %{_bindir}/qemu-tilegx
 %attr(755,root,root) %{_bindir}/qemu-x86_64
 %attr(755,root,root) %{_bindir}/qemu-xtensa
 %attr(755,root,root) %{_bindir}/qemu-xtensaeb
