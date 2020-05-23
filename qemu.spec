@@ -192,9 +192,9 @@ Requires:	libseccomp >= 2.3.0 \
 Requires:	libslirp >= 4.0.0 \
 Requires:	libusb >= 1.0.22 \
 Requires:	pixman >= 0.21.8 \
-%if %{with spice}
-Requires:	spice-server-libs >= 0.12.5
-%endif
+%if %{with spice} \
+Requires:	spice-server-libs >= 0.12.5 \
+%endif \
 %if %{with usbredir} \
 Requires:	usbredir >= 0.6 \
 %endif
@@ -929,7 +929,7 @@ build dynamic \
 	%{__enable_disable seccomp} \
 	--enable-slirp=system \
 	%{__enable_disable spice} \
-	%{__enable_disable smartcard smartcard} \
+	%{__enable_disable smartcard} \
 	%{__enable_disable snappy} \
 	--enable-tpm \
 	%{__enable_disable usbredir usb-redir} \
