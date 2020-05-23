@@ -32,6 +32,9 @@
 %bcond_with	virgl		# build virgl support
 %bcond_without	xkbcommon	# xkbcommon support
 
+%if %{without gtk}
+%undefine	with_vte
+%endif
 %ifarch x32
 %undefine	with_xen
 %endif
@@ -84,6 +87,7 @@ BuildRequires:	glib2-devel >= 1:2.48
 # minimal is 3.4 but new features are used up to 6
 %{?with_glusterfs:BuildRequires:	glusterfs-devel >= 6}
 BuildRequires:	gnutls-devel >= 3.1.18
+%{?with_gtk3:BuildRequires:	gtk+3-devel >= 3.16}
 BuildRequires:	libaio-devel
 %{?with_smartcard:BuildRequires:	libcacard-devel >= 2.5.1}
 BuildRequires:	libcap-devel
@@ -138,16 +142,13 @@ BuildRequires:	texinfo
 BuildRequires:	vde2-devel
 BuildRequires:	which
 %{?with_virgl:BuildRequires:	virglrenderer-devel}
+%{?with_vte:BuildRequires:	vte-devel >= 0.32.0}
 # xencontrol xenstore xenguest xenforeignmemory xengnttab xenevtchn xendevicemodel [xentoolcore for xen 4.10+]
 %{?with_xen:BuildRequires:	xen-devel >= 4.2}
 BuildRequires:	xfsprogs-devel
 %{?with_xkbcommon:BuildRequires:	xorg-lib-libxkbcommon-devel}
 BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	zlib-devel
-%if %{with gtk3}
-BuildRequires:	gtk+3-devel >= 3.16
-%{?with_vte:BuildRequires:	vte-devel >= 0.32.0}
-%endif
 %if %{with user_static}
 BuildRequires:	glib2-static >= 1:2.48
 BuildRequires:	glibc-static
@@ -183,9 +184,6 @@ ExcludeArch:	i386
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define	systempkg_req \
-%if %{with sdl} \
-Requires:	SDL2 \
-%endif \
 %{?with_smartcard:Requires:	libcacard >= 2.5.1} \
 Requires:	libfdt >= 1.4.2 \
 %if %{with seccomp} \
@@ -194,12 +192,11 @@ Requires:	libseccomp >= 2.3.0 \
 Requires:	libslirp >= 4.0.0 \
 Requires:	libusb >= 1.0.22 \
 Requires:	pixman >= 0.21.8 \
+%if %{with spice}
+Requires:	spice-server-libs >= 0.12.5
+%endif
 %if %{with usbredir} \
 Requires:	usbredir >= 0.6 \
-%endif \
-%if %{with gtk3} \
-Requires:	gtk+3 >= 3.16 \
-%{?with_vte:Requires:	vte >= 0.32.0} \
 %endif
 
 # don't strip/chrpath anything in there; these are boot images, roms etc
@@ -249,9 +246,12 @@ Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
 Requires:	glib2 >= 1:2.48
+Requires:	gnutls-libs >= 3.1.18
+%{?with_gtk3:Requires:	gtk+3 >= 3.16}
 %{?with_libnfs:Requires:	libnfs >= 1.9.3}
-Requires:	libssh >= 0.8
+Requires:	nettle >= 2.7.1
 Requires:	systemd-units >= 38
+%{?with_vte:Requires:	vte >= 0.32.0}
 Provides:	group(qemu)
 Provides:	user(qemu)
 Obsoletes:	qemu-kvm-common
@@ -852,6 +852,7 @@ Summary:	QEMU module for 'ssh' block devices
 Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'ssh'
 Group:		Development/Tools
 Requires:	%{name}-common = %{version}-%{release}
+Requires:	libssh >= 0.8
 
 %description module-block-ssh
 'ssh' block device support for QEMU.
