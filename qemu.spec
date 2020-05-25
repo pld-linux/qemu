@@ -1,6 +1,4 @@
 # TODO:
-# libvxhs/libqnio (Veritas HyperScale block driver VxHS)
-# capstone=system
 # libpmem (x86_64 only?)
 # plugins?
 #
@@ -29,7 +27,8 @@
 %bcond_without	user_static	# build linux-user static packages
 %bcond_with	lttng		# lttng-ust trace backend support
 %bcond_with	systemtap	# SystemTap/dtrace trace backend support
-%bcond_with	virgl		# build virgl support
+%bcond_without	virgl		# build virgl support
+%bcond_with	vxhs		# Veritas HyperScale vDisk backend support (builtin; module not supported)
 %bcond_without	xkbcommon	# xkbcommon support
 
 %if %{without gtk}
@@ -69,6 +68,7 @@ Patch2:		%{name}-user-execve.patch
 Patch3:		%{name}-xattr.patch
 Patch4:		libjpeg-boolean.patch
 Patch5:		x32.patch
+Patch6:		%{name}-vxhs.patch
 URL:		http://www.qemu-project.org/
 %{?with_opengl:BuildRequires:	Mesa-libgbm-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
@@ -80,6 +80,7 @@ BuildRequires:	bcc >= 0.16.21-2
 %{?with_bluetooth:BuildRequires:	bluez-libs-devel}
 %{?with_brlapi:BuildRequires:	brlapi-devel}
 BuildRequires:	bzip2-devel
+BuildRequires:	capstone-devel >= 3.0.5
 %{?with_ceph:BuildRequires:	ceph-devel}
 BuildRequires:	curl-devel
 BuildRequires:	cyrus-sasl-devel >= 2
@@ -108,6 +109,7 @@ BuildRequires:	libslirp-devel >= 4.0.0
 #BuildRequires:	libtasn1-devel
 BuildRequires:	libusb-devel >= 1.0.22
 BuildRequires:	libuuid-devel
+%{?with_vxhs:BuildRequires:	libvxhs-devel}
 BuildRequires:	libxml2-devel >= 2.0
 %{?with_lttng:BuildRequires:	lttng-ust-devel}
 BuildRequires:	lzfse-devel
@@ -184,6 +186,7 @@ ExcludeArch:	i386
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define	systempkg_req \
+Requires:	capstone >= 3.0.5 \
 %{?with_smartcard:Requires:	libcacard >= 2.5.1} \
 Requires:	libfdt >= 1.4.2 \
 %if %{with seccomp} \
@@ -868,6 +871,7 @@ Moduł QEMU dla urządeń blokowych typu 'ssh'.
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
+%patch6 -p1
 
 # workaround for conflict with alsa/error.h
 ln -s ../error.h qapi/error.h
@@ -889,6 +893,7 @@ build() {
 	--localstatedir=%{_localstatedir} \
 	--interp-prefix=%{_libdir}/qemu/lib-%%M \
 	--cc="%{__cc}" \
+	--cxx="%{__cxx}" \
 	--host-cc="%{__cc}" \
 	--disable-strip \
 	--enable-trace-backends="nop%{?with_systemtap:,dtrace}%{?with_lttng:,ust}" \
@@ -910,6 +915,7 @@ build dynamic \
 	%{__enable_disable bluetooth bluez} \
 	%{__enable_disable brlapi} \
 	--enable-cap-ng \
+	--enable-capstone=system \
 	--enable-curl \
 	--enable-curses \
 	--enable-docs \
@@ -939,6 +945,7 @@ build dynamic \
 	--enable-vnc-jpeg \
 	--enable-vnc-png \
 	--enable-vnc-sasl \
+	%{__enable_disable vxhs} \
 	%{!?with_vte:--disable-vte} \
 	%{__enable_disable xen} \
 	%{__enable_disable xkbcommon}
@@ -947,6 +954,7 @@ build dynamic \
 build static \
 	--disable-brlapi \
 	--disable-cap-ng \
+	--disable-capstone \
 	--disable-curl \
 	--disable-curses \
 	--disable-gcrypt \
@@ -964,6 +972,7 @@ build static \
 	--disable-system \
 	--disable-tcmalloc \
 	--disable-tools \
+	--disable-vxhs \
 	--enable-user \
 	--disable-xkbcommon \
 	--static
@@ -1200,6 +1209,9 @@ fi
 %attr(755,root,root) %{_sbindir}/ksmctl
 %attr(755,root,root) %{_sbindir}/ksmtuned
 %attr(755,root,root) %{_libexecdir}/qemu-bridge-helper
+%if %{with virgl}
+%attr(755,root,root) %{_libexecdir}/vhost-user-gpu
+%endif
 %{_mandir}/man1/qemu.1*
 %{_mandir}/man1/virtfs-proxy-helper.1*
 %{_mandir}/man7/qemu-block-drivers.7*
@@ -1211,6 +1223,10 @@ fi
 %dir %{_datadir}/%{name}/firmware
 %{_datadir}/%{name}/keymaps
 %{_datadir}/%{name}/trace-events-all
+%if %{with virgl}
+%dir %{_datadir}/%{name}/vhost-user
+%{_datadir}/%{name}/vhost-user/50-qemu-gpu.json
+%endif
 %{_desktopdir}/qemu.desktop
 %{_iconsdir}/hicolor/*x*/apps/qemu.png
 %{_iconsdir}/hicolor/32x32/apps/qemu.bmp
