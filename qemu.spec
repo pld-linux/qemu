@@ -1047,8 +1047,8 @@ build static \
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{systemdunitdir},/usr/lib/binfmt.d} \
-	$RPM_BUILD_ROOT/etc/{qemu,sysconfig,udev/rules.d,modules-load.d,rc.d/init.d,logrotate.d} \
-	$RPM_BUILD_ROOT{%{_sysconfdir}/sasl,%{_sbindir}}
+	$RPM_BUILD_ROOT/etc/{qemu,sysconfig,modules-load.d,rc.d/init.d,logrotate.d} \
+	$RPM_BUILD_ROOT{%{_sysconfdir}/sasl,/lib/udev/rules.d,%{_sbindir}}
 
 %if %{with user_static}
 %{__make} -C build-static install \
@@ -1081,7 +1081,7 @@ install -p qemu.sasl $RPM_BUILD_ROOT%{_sysconfdir}/sasl/qemu.conf
 
 %ifarch %{ix86} %{x8664} x32
 install -p %{SOURCE3} $RPM_BUILD_ROOT/etc/modules-load.d/kvm.conf
-install -p %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d
+install -p %{SOURCE4} $RPM_BUILD_ROOT/lib/udev/rules.d
 %endif
 
 install -p %{SOURCE5} $RPM_BUILD_ROOT%{systemdunitdir}/ksm.service
@@ -1095,7 +1095,7 @@ install -p %{SOURCE10} $RPM_BUILD_ROOT%{_sysconfdir}/ksmtuned.conf
 # For the qemu-guest-agent subpackage install the systemd
 # service and udev rules.
 install -p %{SOURCE11} $RPM_BUILD_ROOT%{systemdunitdir}
-install -p %{SOURCE12} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d
+install -p %{SOURCE12} $RPM_BUILD_ROOT/lib/udev/rules.d
 
 install -p %{SOURCE13} $RPM_BUILD_ROOT/etc/rc.d/init.d/qemu-ga
 install -p %{SOURCE14} $RPM_BUILD_ROOT/etc/logrotate.d/qemu-ga
@@ -1526,7 +1526,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-system-x86_64
 %ifarch %{ix86} %{x8664} x32
 %config(noreplace) %verify(not md5 mtime size) /etc/modules-load.d/kvm.conf
-%config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/80-kvm.rules
+/lib/udev/rules.d/80-kvm.rules
 %endif
 %{_datadir}/%{name}/bios.bin
 %{_datadir}/%{name}/bios-256k.bin
@@ -1577,11 +1577,11 @@ fi
 
 %files guest-agent
 %defattr(644,root,root,755)
-%config(noreplace) %verify(not md5 mtime size) /etc/udev/rules.d/99-qemu-guest-agent.rules
+%attr(755,root,root) %{_bindir}/qemu-ga
+/lib/udev/rules.d/99-qemu-guest-agent.rules
 %{systemdunitdir}/qemu-guest-agent.service
 %attr(754,root,root) /etc/rc.d/init.d/qemu-ga
 %attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) /etc/logrotate.d/qemu-ga
-%attr(755,root,root) %{_bindir}/qemu-ga
 %{_mandir}/man7/qemu-ga-ref.7*
 %{_mandir}/man8/qemu-ga.8*
 
