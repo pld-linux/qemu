@@ -1,16 +1,16 @@
---- qemu-2.5.0/configure~	2015-12-21 22:27:18.000000000 +0100
-+++ qemu-2.5.0/configure	2015-12-21 22:29:00.990327069 +0100
-@@ -4494,12 +4494,8 @@
- # After here, no more $cc or $ld runs
+--- qemu-5.0.0/configure.orig	2020-05-25 07:18:02.653298508 +0200
++++ qemu-5.0.0/configure	2020-05-25 07:23:20.044912383 +0200
+@@ -6258,12 +6258,8 @@
+ write_c_skeleton
  
  if test "$gcov" = "yes" ; then
--  CFLAGS="-fprofile-arcs -ftest-coverage -g $CFLAGS"
-+  CFLAGS="-fprofile-arcs -ftest-coverage $CFLAGS"
-   LDFLAGS="-fprofile-arcs -ftest-coverage $LDFLAGS"
+-  QEMU_CFLAGS="-fprofile-arcs -ftest-coverage -g $QEMU_CFLAGS"
++  QEMU_CFLAGS="-fprofile-arcs -ftest-coverage $QEMU_CFLAGS"
+   QEMU_LDFLAGS="-fprofile-arcs -ftest-coverage $QEMU_LDFLAGS"
 -elif test "$fortify_source" = "yes" ; then
 -  CFLAGS="-O2 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 $CFLAGS"
 -elif test "$debug" = "no"; then
 -  CFLAGS="-O2 $CFLAGS"
  fi
  
- ##########################################
+ if test "$have_asan" = "yes"; then

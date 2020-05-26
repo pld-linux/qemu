@@ -14,7 +14,6 @@
 %bcond_without	oss		# OSS audio support
 %bcond_without	pulseaudio	# PulseAudio audio support
 %bcond_without	xen		# Xen backend driver support
-%bcond_without	bluetooth	# bluetooth support
 %bcond_without	brlapi		# brlapi support
 %bcond_without	smartcard	# smartcard-nss support
 %bcond_without	iscsi		# iscsi support
@@ -25,7 +24,7 @@
 %bcond_without	system_seabios	# system seabios binary
 %bcond_without	snappy		# snappy compression library
 %bcond_without	user_static	# build linux-user static packages
-%bcond_with	lttng		# lttng-ust trace backend support
+%bcond_with	lttng		# lttng-ust trace backend support [needs update]
 %bcond_with	systemtap	# SystemTap/dtrace trace backend support
 %bcond_without	virgl		# build virgl support
 %bcond_with	vxhs		# Veritas HyperScale vDisk backend support (builtin; module not supported)
@@ -41,12 +40,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	4.2.0
-Release:	2
+Version:	5.0.0
+Release:	1
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
-Source0:	http://wiki.qemu-project.org/download/%{name}-%{version}.tar.xz
-# Source0-md5:	278eeb294e4b497e79af7a57e660cb9a
+Source0:	https://download.qemu.org/%{name}-%{version}.tar.xz
+# Source0-md5:	ede6005d7143fe994dd089d31dc2cf6c
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
 # Creates /dev/kvm
@@ -69,7 +68,7 @@ Patch3:		%{name}-xattr.patch
 Patch4:		libjpeg-boolean.patch
 Patch5:		x32.patch
 Patch6:		%{name}-vxhs.patch
-URL:		http://www.qemu-project.org/
+URL:		https://www.qemu.org/
 %{?with_opengl:BuildRequires:	Mesa-libgbm-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
 %{?with_opengl:BuildRequires:	OpenGL-devel}
@@ -77,7 +76,6 @@ URL:		http://www.qemu-project.org/
 %{?with_sdl:BuildRequires:	SDL2_image-devel >= 2.0}
 BuildRequires:	alsa-lib-devel
 BuildRequires:	bcc >= 0.16.21-2
-%{?with_bluetooth:BuildRequires:	bluez-libs-devel}
 %{?with_brlapi:BuildRequires:	brlapi-devel}
 BuildRequires:	bzip2-devel
 BuildRequires:	capstone-devel >= 3.0.5
@@ -91,7 +89,6 @@ BuildRequires:	gnutls-devel >= 3.1.18
 %{?with_gtk3:BuildRequires:	gtk+3-devel >= 3.16}
 BuildRequires:	libaio-devel
 %{?with_smartcard:BuildRequires:	libcacard-devel >= 2.5.1}
-BuildRequires:	libcap-devel
 BuildRequires:	libcap-ng-devel
 %{?with_opengl:BuildRequires:	libepoxy-devel}
 BuildRequires:	libfdt-devel >= 1.4.2
@@ -108,6 +105,7 @@ BuildRequires:	libslirp-devel >= 4.0.0
 # for tests only
 #BuildRequires:	libtasn1-devel
 BuildRequires:	libusb-devel >= 1.0.22
+BuildRequires:	liburing-devel
 BuildRequires:	libuuid-devel
 %{?with_vxhs:BuildRequires:	libvxhs-devel}
 BuildRequires:	libxml2-devel >= 2.0
@@ -126,6 +124,7 @@ BuildRequires:	perl-tools-pod
 BuildRequires:	pixman-devel >= 0.21.8
 BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
+BuildRequires:	python3 >= 1:3.5
 BuildRequires:	rpmbuild(macros) >= 1.644
 %{?with_system_seabios:BuildRequires:	seabios}
 BuildRequires:	sed >= 4.0
@@ -151,6 +150,7 @@ BuildRequires:	xfsprogs-devel
 %{?with_xkbcommon:BuildRequires:	xorg-lib-libxkbcommon-devel}
 BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	zlib-devel
+BuildRequires:	zstd-devel >= 1.4.0
 %if %{with user_static}
 BuildRequires:	glib2-static >= 1:2.48
 BuildRequires:	glibc-static
@@ -173,6 +173,7 @@ Requires:	%{name}-system-or1k = %{version}-%{release}
 Requires:	%{name}-system-ppc = %{version}-%{release}
 Requires:	%{name}-system-riscv32 = %{version}-%{release}
 Requires:	%{name}-system-riscv64 = %{version}-%{release}
+Requires:	%{name}-system-rx = %{version}-%{release}
 Requires:	%{name}-system-s390x = %{version}-%{release}
 Requires:	%{name}-system-sh4 = %{version}-%{release}
 Requires:	%{name}-system-sparc = %{version}-%{release}
@@ -200,7 +201,8 @@ Requires:	spice-server-libs >= 0.12.5 \
 %endif \
 %if %{with usbredir} \
 Requires:	usbredir >= 0.6 \
-%endif
+%endif \
+Requires:	zstd >= 1.4.0
 
 # don't strip/chrpath anything in there; these are boot images, roms etc
 %define		_noautostrip	.*%{_datadir}/qemu/.*
@@ -240,7 +242,7 @@ aby działał na kolejnych procesorach. QEMU ma dwa tryby pracy:
 %package common
 Summary:	QEMU common files needed by all QEMU targets
 Summary(pl.UTF-8):	Wspólne pliki QEMU wymagane przez wszystkie środowiska QEMU
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires(post,preun,postun):	systemd-units >= 38
 Requires(postun):	/usr/sbin/groupdel
 Requires(postun):	/usr/sbin/userdel
@@ -251,7 +253,6 @@ Requires(pre):	/usr/sbin/useradd
 Requires:	glib2 >= 1:2.48
 Requires:	gnutls-libs >= 3.1.18
 %{?with_gtk3:Requires:	gtk+3 >= 3.16}
-%{?with_libnfs:Requires:	libnfs >= 1.9.3}
 Requires:	nettle >= 2.7.1
 Requires:	systemd-units >= 38
 %{?with_vte:Requires:	vte >= 0.32.0}
@@ -277,7 +278,7 @@ Ten pakiet udostępnia wspólne pliki wymagane przez wszystkie
 %package img
 Summary:	QEMU command line tool for manipulating disk images
 Summary(pl.UTF-8):	Narzędzie QEMU do operacji na obrazach dysków
-Group:		Development/Tools
+Group:		Applications/Emulators
 Obsoletes:	qemu-kvm-img
 Conflicts:	qemu < 1.0-2
 
@@ -292,7 +293,7 @@ na obrazach dysków.
 %package user
 Summary:	QEMU user mode emulation of qemu targets
 Summary(pl.UTF-8):	QEMU - emulacja trybu użytkownika środowisk qemu
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 Requires(post,postun):	systemd-units >= 38
 Requires:	systemd-units >= 38
@@ -313,7 +314,7 @@ Ten pakiet udostępnia emulację trybu użytkownika środowisk QEMU.
 %package user-static
 Summary:	QEMU user mode emulation of qemu targets static build
 Summary(pl.UTF-8):	QEMU - emulacja trybu użytkownika środowisk qemu - wersja statyczna
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires(post,postun):	systemd-units >= 38
 Requires:	systemd-units >= 38
 
@@ -334,7 +335,7 @@ oparciu o programy wykonywalne zbudowane statycznie.
 %package system-aarch64
 Summary:	QEMU system emulator for AArch64
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem AArch64
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 Obsoletes:	qemu-kvm-system-aarch64
@@ -354,7 +355,7 @@ Ten pakiet zawiera emulator systemu z procesorem AArch64 (ARM64).
 %package system-alpha
 Summary:	QEMU system emulator for Alpha
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Alpha
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 Obsoletes:	qemu-kvm-system-alpha
@@ -374,7 +375,7 @@ Ten pakiet zawiera emulator systemu z procesorem Alpha.
 %package system-arm
 Summary:	QEMU system emulator for 32-bit ARM
 Summary(pl.UTF-8):	QEMU - emulator systemu z 32-bitowym procesorem ARM
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 Obsoletes:	qemu-kvm-system-arm
@@ -394,7 +395,7 @@ Ten pakiet zawiera emulator systemu z 32-bitowym procesorem ARM.
 %package system-cris
 Summary:	QEMU system emulator for CRIS
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem CRIS
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 Obsoletes:	qemu-kvm-system-cris
@@ -414,7 +415,7 @@ Ten pakiet zawiera emulator systemu z procesorem CRIS.
 %package system-hppa
 Summary:	QEMU system emulator for HP/PA
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem HP/PA
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 
@@ -433,7 +434,7 @@ Ten pakiet zawiera emulator systemu z procesorem HP/PA (PA-RISC).
 %package system-lm32
 Summary:	QEMU system emulator for LM32
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem LM32
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 Obsoletes:	qemu-kvm-system-lm32
@@ -453,7 +454,7 @@ Ten pakiet zawiera emulator systemu z procesorem LM32.
 %package system-m68k
 Summary:	QEMU system emulator for m68k
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem m68k
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 Obsoletes:	qemu-kvm-system-m68k
@@ -475,7 +476,7 @@ Ten pakiet zawiera emulator systemu z procesorem m68k (Motorola
 %package system-microblaze
 Summary:	QEMU system emulator for MicroBlaze
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem MicroBlaze
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 Obsoletes:	qemu-kvm-system-microblaze
@@ -495,7 +496,7 @@ Ten pakiet zawiera emulator systemu z procesorem MicroBlaze.
 %package system-mips
 Summary:	QEMU system emulator for MIPS
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem MIPS
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 Obsoletes:	qemu-kvm-system-mips
@@ -515,7 +516,7 @@ Ten pakiet zawiera emulator systemu z procesorem MIPS.
 %package system-moxie
 Summary:	QEMU system emulator for Moxie
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Moxie
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 
@@ -534,7 +535,7 @@ Ten pakiet zawiera emulator systemu z procesorem Moxie.
 %package system-nios2
 Summary:	QEMU system emulator for Nios II
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Nios II
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 
@@ -553,7 +554,7 @@ Ten pakiet zawiera emulator systemu z procesorem Nios II.
 %package system-or1k
 Summary:	QEMU system emulator for OpenRISC
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem OpenRISC
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 Obsoletes:	qemu-kvm-system-or1k
@@ -574,7 +575,7 @@ Ten pakiet zawiera emulator systemu z procesorem OpenRISC.
 %package system-ppc
 Summary:	QEMU system emulator for PowerPC
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem PowerPC
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 Obsoletes:	qemu-kvm-system-ppc
@@ -594,7 +595,7 @@ Ten pakiet zawiera emulator systemu z procesorem PowerPC.
 %package system-riscv32
 Summary:	QEMU system emulator for RISC-V (32 bit)
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem RISC-V (32 bit)
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 
@@ -613,7 +614,7 @@ Ten pakiet zawiera emulator systemu z procesorem RISC-V (32 bit).
 %package system-riscv64
 Summary:	QEMU system emulator for RISC-V (64 bit)
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem RISC-V (64 bitowym)
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 
@@ -629,10 +630,29 @@ dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
 Ten pakiet zawiera emulator systemu z procesorem RISC-V (64-bitowym).
 
+%package system-rx
+Summary:	QEMU system emulator for Renesas RX
+Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Renesas RX
+Group:		Applications/Emulators
+Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
+
+%description system-rx
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator with Renesas RX CPU.
+
+%description system-rx -l pl.UTF-8
+QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
+dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
+
+Ten pakiet zawiera emulator systemu z procesorem Renesas RX.
+
 %package system-s390x
 Summary:	QEMU system emulator for S390x (IBM Z)
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem S390x (IBM Z)
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 Obsoletes:	qemu-kvm-system-s390x
@@ -652,7 +672,7 @@ Ten pakiet zawiera emulator systemu z procesorem S390x (IBM Z).
 %package system-sh4
 Summary:	QEMU system emulator for SH4
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem SH4
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 Obsoletes:	qemu-kvm-system-sh4
@@ -672,7 +692,7 @@ Ten pakiet zawiera emulator systemu z procesorem SH4.
 %package system-sparc
 Summary:	QEMU system emulator for SPARC
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem SPARC
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 Obsoletes:	qemu-kvm-system-sparc
@@ -692,7 +712,7 @@ Ten pakiet zawiera emulator systemu z procesorem SPARC/SPARC64.
 %package system-tricore
 Summary:	QEMU system emulator for TriCore
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem TriCore
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 
@@ -711,7 +731,7 @@ Ten pakiet zawiera emulator systemu z procesorem TriCore.
 %package system-unicore32
 Summary:	QEMU system emulator for UniCore32
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem UniCore32
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 Obsoletes:	qemu-kvm-system-unicore32
@@ -731,7 +751,7 @@ Ten pakiet zawiera emulator systemu z procesorem UniCore32.
 %package system-x86
 Summary:	QEMU system emulator for x86
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem x86
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %{?with_system_seabios:Requires:	seabios}
 %systempkg_req
@@ -753,7 +773,7 @@ Ten pakiet zawiera emulator systemu z procesorem x86.
 %package system-xtensa
 Summary:	QEMU system emulator for Xtensa
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Xtensa
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %systempkg_req
 Obsoletes:	qemu-kvm-system-xtensa
@@ -803,65 +823,110 @@ Ten pakiet nie musi być zainstalowany w systemie hosta.
 %package module-block-curl
 Summary:	QEMU module for 'curl' block devices
 Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'curl'
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 
 %description module-block-curl
-'curl' block device support for QEMU.
+QEMU block device support for CURL. It allows to access remote disks
+over http, https, ftp and other transports provided by the CURL
+library.
 
 %description module-block-curl -l pl.UTF-8
-Moduł QEMU dla urządeń blokowych typu 'curl'.
+Moduł QEMU dla urządeń blokowych CURL. Pozwala na dostęp do zdalnych
+dysków poprzez http, https, ftp i inne protokoły obsługiwane przez
+bibliotekę CURL.
 
 %package module-block-gluster
 Summary:	QEMU module for 'gluster' block devices
 Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'gluster'
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 Requires:	glusterfs-libs >= 6
 
 %description module-block-gluster
-'gluster' block device support for QEMU.
+QEMU block device support for remote Gluster storage.
 
 %description module-block-gluster -l pl.UTF-8
-Moduł QEMU dla urządeń blokowych typu 'gluster'.
+Moduł urządzeń blokowych QEMU do dostępu do zdalnej przestrzeni
+dyskowej Gluster.
 
 %package module-block-iscsi
 Summary:	QEMU module for 'iscsi' block devices
 Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'iscsi'
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 Requires:	libiscsi >= 1.9.0
 
 %description module-block-iscsi
-'iscsi' block device support for QEMU.
+QEMU block device support for iSCSI volumes.
 
 %description module-block-iscsi -l pl.UTF-8
-Moduł QEMU dla urządeń blokowych typu 'iscsi'.
+Moduł urządzeń blokowych QEMU do dostępu do wolumenów iSCSI.
+
+%package module-block-nfs
+Summary:	QEMU module for 'nfs' block devices
+Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'nfs'
+Group:		Applications/Emulators
+Requires:	%{name}-common = %{version}-%{release}
+Requires:	libnfs >= 1.9.3
+
+%description module-block-nfs
+QEMU block device support for remote NFS storage.
+
+%description module-block-nfs -l pl.UTF-8
+Moduł urządzeń blokowych QEMU do dostępu do zdalnej przestrzeni po
+NFS.
 
 %package module-block-rbd
 Summary:	QEMU module for 'rbd' block devices
 Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'rbd'
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 
 %description module-block-rbd
-'rbd' block device support for QEMU.
+QEMU block device support for Ceph/RBD volumes.
 
 %description module-block-rbd -l pl.UTF-8
-Moduł QEMU dla urządeń blokowych typu 'rbd'.
+Moduł urządzeń blokowych QEMU do wolumenów Ceph/RBD.
 
 %package module-block-ssh
 Summary:	QEMU module for 'ssh' block devices
 Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'ssh'
-Group:		Development/Tools
+Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 Requires:	libssh >= 0.8
 
 %description module-block-ssh
-'ssh' block device support for QEMU.
+QEMU block device support for accessing remote disks using the Secure
+Shell (SSH) protocol.
 
 %description module-block-ssh -l pl.UTF-8
-Moduł QEMU dla urządeń blokowych typu 'ssh'.
+Moduł urządzeń blokowych QEMU do dostępu do zdalnych dysków poprzez
+protokół SSH (Secure Shell).
+
+%package module-ui-gtk
+Summary:	QEMU GTK UI driver
+Summary(pl.UTF-8):	Sterownik interfejsu użytkownika GTK dla QEMU
+Group:		Applications/Emulators
+Requires:	%{name}-common = %{version}-%{release}
+
+%description module-ui-gtk
+QEMU GTK UI driver.
+
+%description module-ui-gtk -l pl.UTF-8
+Sterownik interfejsu użytkownika GTK dla QEMU.
+
+%package module-ui-sdl
+Summary:	QEMU SDL UI and audio driver
+Summary(pl.UTF-8):	Sterownik interfejsu użytkownika i dźwięku SDL dla QEMU
+Group:		Applications/Emulators
+Requires:	%{name}-common = %{version}-%{release}
+
+%description module-ui-sdl
+QEMU SDL UI and audio driver.
+
+%description module-ui-sdl -l pl.UTF-8
+Sterownik interfejsu użytkownika i dźwięku SDL dla QEMU.
 
 %prep
 %setup -q
@@ -912,7 +977,6 @@ build dynamic \
 	--extra-ldflags="%{rpmldflags} -pie -Wl,-z,relro -Wl,-z,now" \
 	--audio-drv-list="alsa%{?with_oss:,oss}%{?with_sdl:,sdl}%{?with_pulseaudio:,pa}" \
 	--enable-attr \
-	%{__enable_disable bluetooth bluez} \
 	%{__enable_disable brlapi} \
 	--enable-cap-ng \
 	--enable-capstone=system \
@@ -1087,8 +1151,8 @@ if [ -n "$BINFMT_CPUS" ]; then
 	for cpu in $BINFMT_CPUS; do
 		bash ./scripts/qemu-binfmt-conf.sh --systemd "$cpu" --exportdir $RPM_BUILD_ROOT/usr/lib/binfmt.d --qemu-path %{_bindir}
 	done
-	for i in /$RPM_BUILD_ROOT/usr/lib/binfmt.d/*.conf; do
-		mv $i ${i%.conf}-dynamic.conf
+	for i in $RPM_BUILD_ROOT/usr/lib/binfmt.d/*.conf; do
+		%{__mv} $i ${i%.conf}-dynamic.conf
 	done
 
 	%if %{with user_static}
@@ -1098,9 +1162,6 @@ if [ -n "$BINFMT_CPUS" ]; then
 	done
 	%endif
 fi
-
-# packaged as %doc
-%{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qemu-doc.html
 
 %if %{with system_seabios}
 ln -sf /usr/share/seabios/bios.bin $RPM_BUILD_ROOT%{_datadir}/%{name}/bios-256k.bin
@@ -1125,7 +1186,11 @@ done
 %{__rm} $RPM_BUILD_ROOT%{_datadir}/%{name}/qemu-nsis.bmp
 # packaged as %doc
 %{__rm} $RPM_BUILD_ROOT%{_datadir}/%{name}/edk2-licenses.txt
-%{__rm} -r $RPM_BUILD_ROOT%{_docdir}/qemu
+
+# cleanup Sphinx files
+%{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/{interop,specs,system,tools,user}/{.buildinfo,objects.inv}
+# leave just HTML version
+%{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qemu-{ga,qmp}-ref.txt
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -1187,7 +1252,7 @@ fi
 
 %files common -f %{name}.lang
 %defattr(644,root,root,755)
-%doc LICENSE README.rst build-dynamic/qemu-doc.html pc-bios/edk2-licenses.txt
+%doc LICENSE README.rst pc-bios/edk2-licenses.txt
 %attr(755,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/qemu-ifup
 %config(noreplace) %verify(not md5 mtime size) /etc/ksmtuned.conf
 %config(noreplace) %verify(not md5 mtime size) /etc/sasl/qemu.conf
@@ -1205,6 +1270,7 @@ fi
 %endif
 %attr(755,root,root) %{_bindir}/qemu-nbd
 %attr(755,root,root) %{_bindir}/qemu-pr-helper
+%attr(755,root,root) %{_bindir}/qemu-storage-daemon
 %attr(755,root,root) %{_bindir}/virtfs-proxy-helper
 %attr(755,root,root) %{_sbindir}/ksmctl
 %attr(755,root,root) %{_sbindir}/ksmtuned
@@ -1212,35 +1278,11 @@ fi
 %if %{with virgl}
 %attr(755,root,root) %{_libexecdir}/vhost-user-gpu
 %endif
-%{_mandir}/man1/qemu.1*
-%{_mandir}/man1/virtfs-proxy-helper.1*
-%{_mandir}/man7/qemu-block-drivers.7*
-%{_mandir}/man7/qemu-cpu-models.7*
-%{_mandir}/man7/qemu-qmp-ref.7*
-%{_mandir}/man8/qemu-nbd.8*
-
-%dir %{_datadir}/%{name}
-%dir %{_datadir}/%{name}/firmware
-%{_datadir}/%{name}/keymaps
-%{_datadir}/%{name}/trace-events-all
-%if %{with virgl}
-%dir %{_datadir}/%{name}/vhost-user
-%{_datadir}/%{name}/vhost-user/50-qemu-gpu.json
-%endif
-%{_desktopdir}/qemu.desktop
-%{_iconsdir}/hicolor/*x*/apps/qemu.png
-%{_iconsdir}/hicolor/32x32/apps/qemu.bmp
-%{_iconsdir}/hicolor/scalable/apps/qemu.svg
-
+%attr(755,root,root) %{_libexecdir}/virtiofsd
 %dir %{_libdir}/%{name}
-
 # modules without too many external dependencies
 %attr(755,root,root) %{_libdir}/%{name}/block-dmg-bz2.so
 %attr(755,root,root) %{_libdir}/%{name}/block-dmg-lzfse.so
-%if %{with libnfs}
-%attr(755,root,root) %{_libdir}/%{name}/block-nfs.so
-%endif
-
 %attr(755,root,root) %{_libdir}/%{name}/audio-alsa.so
 %if %{with oss}
 %attr(755,root,root) %{_libdir}/%{name}/audio-oss.so
@@ -1248,18 +1290,31 @@ fi
 %if %{with pulseaudio}
 %attr(755,root,root) %{_libdir}/%{name}/audio-pa.so
 %endif
-
 %attr(755,root,root) %{_libdir}/%{name}/ui-curses.so
-%if %{with gtk3}
-%attr(755,root,root) %{_libdir}/%{name}/ui-gtk.so
-%endif
-%if %{with sdl}
-%attr(755,root,root) %{_libdir}/%{name}/audio-sdl.so
-%attr(755,root,root) %{_libdir}/%{name}/ui-sdl.so
-%endif
 %if %{with spice}
 %attr(755,root,root) %{_libdir}/%{name}/ui-spice-app.so
 %endif
+%dir %{_datadir}/%{name}
+%dir %{_datadir}/%{name}/firmware
+%{_datadir}/%{name}/keymaps
+%{_datadir}/%{name}/trace-events-all
+%dir %{_datadir}/%{name}/vhost-user
+%if %{with virgl}
+%{_datadir}/%{name}/vhost-user/50-qemu-gpu.json
+%endif
+%{_datadir}/%{name}/vhost-user/50-qemu-virtiofsd.json
+%{_desktopdir}/qemu.desktop
+%{_iconsdir}/hicolor/*x*/apps/qemu.png
+%{_iconsdir}/hicolor/32x32/apps/qemu.bmp
+%{_iconsdir}/hicolor/scalable/apps/qemu.svg
+%{_mandir}/man1/qemu.1*
+%{_mandir}/man1/virtfs-proxy-helper.1*
+%{_mandir}/man1/virtiofsd.1*
+%{_mandir}/man7/qemu-block-drivers.7*
+%{_mandir}/man7/qemu-cpu-models.7*
+%{_mandir}/man7/qemu-qmp-ref.7*
+%{_mandir}/man8/qemu-nbd.8*
+%{_docdir}/qemu
 
 %files img
 %defattr(644,root,root,755)
@@ -1415,7 +1470,6 @@ fi
 %{_datadir}/%{name}/openbios-ppc
 %{_datadir}/%{name}/petalogix-ml605.dtb
 %{_datadir}/%{name}/petalogix-s3adsp1800.dtb
-%{_datadir}/%{name}/ppc_rom.bin
 %{_datadir}/%{name}/qemu_vga.ndrv
 %{_datadir}/%{name}/skiboot.lid
 %{_datadir}/%{name}/slof.bin
@@ -1425,6 +1479,7 @@ fi
 %files system-riscv32
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-riscv32
+%{_datadir}/%{name}/opensbi-riscv32-sifive_u-fw_jump.bin
 %{_datadir}/%{name}/opensbi-riscv32-virt-fw_jump.bin
 
 %files system-riscv64
@@ -1432,6 +1487,10 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-system-riscv64
 %{_datadir}/%{name}/opensbi-riscv64-sifive_u-fw_jump.bin
 %{_datadir}/%{name}/opensbi-riscv64-virt-fw_jump.bin
+
+%files system-rx
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-rx
 
 %files system-s390x
 %defattr(644,root,root,755)
@@ -1542,6 +1601,12 @@ fi
 %attr(755,root,root) %{_libdir}/%{name}/block-iscsi.so
 %endif
 
+%if %{with libnfs}
+%files module-block-nfs
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/%{name}/block-nfs.so
+%endif
+
 %if %{with ceph}
 %files module-block-rbd
 %defattr(644,root,root,755)
@@ -1551,3 +1616,16 @@ fi
 %files module-block-ssh
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/%{name}/block-ssh.so
+
+%if %{with gtk3}
+%files module-ui-gtk
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/%{name}/ui-gtk.so
+%endif
+
+%if %{with sdl}
+%files module-ui-sdl
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/%{name}/audio-sdl.so
+%attr(755,root,root) %{_libdir}/%{name}/ui-sdl.so
+%endif
