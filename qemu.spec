@@ -61,6 +61,8 @@ Source11:	%{name}-guest-agent.service
 Source12:	99-%{name}-guest-agent.rules
 Source13:	%{name}-guest-agent.init
 Source14:	%{name}-guest-agent.logrotate
+Source15:	%{name}-pr-helper.service
+Source16:	%{name}-pr-helper.socket
 Patch0:		%{name}-cflags.patch
 Patch1:		%{name}-whitelist.patch
 Patch2:		%{name}-user-execve.patch
@@ -1031,7 +1033,7 @@ build static \
 	--disable-nettle \
 	--disable-pie \
 	--disable-sdl \
-	--enable-slirp=internal \
+	--disable-slirp \
 	--disable-spice \
 	--disable-system \
 	--disable-tcmalloc \
@@ -1099,6 +1101,8 @@ install -p %{SOURCE12} $RPM_BUILD_ROOT/lib/udev/rules.d
 
 install -p %{SOURCE13} $RPM_BUILD_ROOT/etc/rc.d/init.d/qemu-ga
 install -p %{SOURCE14} $RPM_BUILD_ROOT/etc/logrotate.d/qemu-ga
+
+cp -p %{SOURCE15} %{SOURCE16} $RPM_BUILD_ROOT%{systemdunitdir}
 
 # Install binfmt
 BINFMT_CPUS=" \
@@ -1219,6 +1223,7 @@ fi
 %triggerpostun common -- qemu-common < 1.6.1-4
 %systemd_trigger ksm.service
 %systemd_trigger ksmtuned.service
+%systemd_trigger qemu-pr-helper.service
 
 %post user
 %systemd_service_restart systemd-binfmt.service
@@ -1261,6 +1266,8 @@ fi
 %attr(640,root,qemu) %config(noreplace) %verify(not md5 mtime size) /etc/qemu/bridge.conf
 %{systemdunitdir}/ksm.service
 %{systemdunitdir}/ksmtuned.service
+%{systemdunitdir}/qemu-pr-helper.service
+%{systemdunitdir}/qemu-pr-helper.socket
 %attr(755,root,root) %{_bindir}/elf2dmp
 %attr(755,root,root) %{_bindir}/ivshmem-client
 %attr(755,root,root) %{_bindir}/ivshmem-server
