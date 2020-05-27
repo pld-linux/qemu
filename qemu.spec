@@ -25,7 +25,7 @@
 %bcond_without	snappy		# snappy compression library
 %bcond_without	user_static	# build linux-user static packages
 %bcond_with	lttng		# lttng-ust trace backend support [needs update]
-%bcond_with	systemtap	# SystemTap/dtrace trace backend support
+%bcond_without	systemtap	# SystemTap/dtrace trace backend support
 %bcond_without	virgl		# build virgl support
 %bcond_with	vxhs		# Veritas HyperScale vDisk backend support (builtin; module not supported)
 %bcond_without	xkbcommon	# xkbcommon support
@@ -930,6 +930,19 @@ QEMU SDL UI and audio driver.
 %description module-ui-sdl -l pl.UTF-8
 Sterownik interfejsu użytkownika i dźwięku SDL dla QEMU.
 
+%package -n systemtap-qemu
+Summary:	systemtap/dtrace probes for QEMU
+Summary(pl.UTF-8):	Sondy systemtap/dtrace dla QEMU
+Group:		Development/Tools
+Requires:	%{name}-common = %{version}-%{release}
+Requires:	systemtap-client
+
+%description -n systemtap-qemu
+systemtap/dtrace probes for QEMU.
+
+%description -n systemtap-qemu -l pl.UTF-8
+Sondy systemtap/dtrace dla QEMU.
+
 %prep
 %setup -q
 %patch0 -p1
@@ -940,9 +953,12 @@ Sterownik interfejsu użytkownika i dźwięku SDL dla QEMU.
 %patch5 -p1
 %patch6 -p1
 
-# workaround for conflict with alsa/error.h
-ln -s ../error.h qapi/error.h
+%{__sed} -i '1s,/usr/bin/env python3,%{__python3},' scripts/qemu-trace-stap
 
+%if %{with systemtap}
+# don't require stap binary during build
+%{__sed} -i -e "s/has 'stap'/true/" configure
+%endif
 %build
 
 build() {
@@ -1635,4 +1651,12 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/%{name}/audio-sdl.so
 %attr(755,root,root) %{_libdir}/%{name}/ui-sdl.so
+%endif
+
+%if %{with systemtap}
+%files -n systemtap-qemu
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-trace-stap
+%{_datadir}/systemtap/tapset/qemu-*.stp
+%{_mandir}/man1/qemu-trace-stap.1*
 %endif
