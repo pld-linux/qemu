@@ -19,6 +19,7 @@
 %bcond_without	iscsi		# iscsi support
 %bcond_without	libnfs		# NFS support
 %bcond_without	multipath	# Multipath support
+%bcond_without	pmem		# libpmem (persistent memory) support
 %bcond_without	seccomp		# seccomp support
 %bcond_without	usbredir	# usb network redirection support
 %bcond_without	system_seabios	# system seabios binary
@@ -35,6 +36,9 @@
 %endif
 %ifarch x32
 %undefine	with_xen
+%endif
+%ifnarch %{x8664} aarch64
+%undefine	with_pmem
 %endif
 
 Summary:	QEMU CPU Emulator
@@ -125,6 +129,7 @@ BuildRequires:	perl-Encode
 BuildRequires:	perl-tools-pod
 BuildRequires:	pixman-devel >= 0.21.8
 BuildRequires:	pkgconfig
+%{?with_pmem:BuildRequires:	pmdk-devel}
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 BuildRequires:	python3 >= 1:3.5
 BuildRequires:	rpmbuild(macros) >= 1.644
@@ -1006,6 +1011,7 @@ build dynamic \
 	%{!?with_gtk3:--disable-gtk} \
 	%{__enable_disable iscsi libiscsi} \
 	%{__enable_disable libnfs} \
+	%{__enable_disable pmem libpmem} \
 	--enable-lzo \
 	%{__enable_disable multipath mpath} \
 	--enable-modules \
@@ -1045,6 +1051,7 @@ build static \
 	--disable-guest-agent \
 	--disable-guest-agent-msi \
 	--disable-libnfs \
+	--disable-linux-io-uring \
 	--disable-mpath \
 	--disable-nettle \
 	--disable-pie \
@@ -1057,6 +1064,7 @@ build static \
 	--disable-vxhs \
 	--enable-user \
 	--disable-xkbcommon \
+	--disable-zstd \
 	--static
 %endif
 
@@ -1423,6 +1431,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-x86_64-static
 %attr(755,root,root) %{_bindir}/qemu-xtensa-static
 %attr(755,root,root) %{_bindir}/qemu-xtensaeb-static
+%attr(755,root,root) %{_bindir}/qemu-trace-stap-static
 %endif
 
 %files system-aarch64
