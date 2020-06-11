@@ -1,6 +1,5 @@
 # TODO:
-# libpmem (x86_64 only?)
-# plugins?
+# plugins? (probes)
 #
 # Conditional build:
 %bcond_without	sdl		# SDL UI and audio support
@@ -151,8 +150,9 @@ BuildRequires:	vde2-devel
 BuildRequires:	which
 %{?with_virgl:BuildRequires:	virglrenderer-devel}
 %{?with_vte:BuildRequires:	vte-devel >= 0.32.0}
-# xencontrol xenstore xenguest xenforeignmemory xengnttab xenevtchn xendevicemodel [xentoolcore for xen 4.10+]
-%{?with_xen:BuildRequires:	xen-devel >= 4.2}
+# xencontrol xenstore xenguest xenforeignmemory xengnttab xenevtchn xendevicemodel; xentoolcore for xen 4.10+
+# min version is 4.2, more features up to 4.10
+%{?with_xen:BuildRequires:	xen-devel >= 4.10}
 BuildRequires:	xfsprogs-devel
 %{?with_xkbcommon:BuildRequires:	xorg-lib-libxkbcommon-devel}
 BuildRequires:	xorg-lib-libX11-devel
