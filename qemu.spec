@@ -73,6 +73,7 @@ Patch3:		%{name}-xattr.patch
 Patch4:		libjpeg-boolean.patch
 Patch5:		x32.patch
 Patch6:		%{name}-vxhs.patch
+Patch7:		binutils-2.36.patch
 URL:		https://www.qemu.org/
 %{?with_opengl:BuildRequires:	Mesa-libgbm-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
@@ -959,6 +960,7 @@ Sondy systemtap/dtrace dla QEMU.
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
+%patch7 -p1
 
 %{__sed} -i '1s,/usr/bin/env python3,%{__python3},' scripts/qemu-trace-stap
 
