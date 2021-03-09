@@ -1,8 +1,18 @@
---- scripts/create_config.org	2011-02-16 15:44:05.000000000 +0100
-+++ scripts/create_config	2011-03-21 21:26:16.136615526 +0100
-@@ -33,7 +33,9 @@
-  CONFIG_BDRV_WHITELIST=*)
-     echo "#define CONFIG_BDRV_WHITELIST \\"
+--- qemu-5.0.0/scripts/create_config.orig	2021-03-09 12:06:01.531473021 +0100
++++ qemu-5.0.0/scripts/create_config	2021-03-09 12:08:49.823397889 +0100
+@@ -43,14 +43,18 @@
+  CONFIG_BDRV_RW_WHITELIST=*)
+     echo "#define CONFIG_BDRV_RW_WHITELIST\\"
+     for drv in ${line#*=}; do
+-      echo "    \"${drv}\",\\"
++      if [ ! -z "$drv" ]; then
++        echo "    \"${drv}\",\\"
++      fi
+     done
+     echo "    NULL"
+     ;;
+  CONFIG_BDRV_RO_WHITELIST=*)
+     echo "#define CONFIG_BDRV_RO_WHITELIST\\"
      for drv in ${line#*=}; do
 -      echo "    \"${drv}\",\\"
 +      if [ ! -z "$drv" ]; then

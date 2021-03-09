@@ -14,7 +14,7 @@ before <sys/capability.h> (which includes <linux/xattr.h>.
  #include <getopt.h>
  #include <syslog.h>
 @@ -23,7 +24,6 @@
- #endif
+ #include <cap-ng.h>
  #include "qemu-common.h"
  #include "qemu/sockets.h"
 -#include "qemu/xattr.h"
