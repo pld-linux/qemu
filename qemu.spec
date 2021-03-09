@@ -141,6 +141,7 @@ BuildRequires:	spice-protocol >= 0.12.3
 BuildRequires:	spice-server-devel >= 0.12.5
 %endif
 %{?with_systemtap:BuildRequires:	systemtap-sdt-devel}
+BuildRequires:	tar >= 1:1.22
 BuildRequires:	texi2html
 BuildRequires:	texinfo
 %{?with_multipath:BuildRequires:	udev-devel}
@@ -156,6 +157,7 @@ BuildRequires:	which
 BuildRequires:	xfsprogs-devel
 %{?with_xkbcommon:BuildRequires:	xorg-lib-libxkbcommon-devel}
 BuildRequires:	xorg-lib-libX11-devel
+BuildRequires:	xz
 BuildRequires:	zlib-devel
 BuildRequires:	zstd-devel >= 1.4.0
 %if %{with user_static}
