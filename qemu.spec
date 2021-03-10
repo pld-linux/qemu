@@ -85,14 +85,16 @@ BuildRequires:	capstone-devel >= 3.0.5
 %{?with_ceph:BuildRequires:	ceph-devel}
 BuildRequires:	curl-devel
 BuildRequires:	cyrus-sasl-devel >= 2
+BuildRequires:	gettext-tools
 BuildRequires:	glib2-devel >= 1:2.48
 # minimal is 3.4 but new features are used up to 6
 %{?with_glusterfs:BuildRequires:	glusterfs-devel >= 6}
 BuildRequires:	gnutls-devel >= 3.1.18
-%{?with_gtk3:BuildRequires:	gtk+3-devel >= 3.16}
+%{?with_gtk3:BuildRequires:	gtk+3-devel >= 3.22.0}
 BuildRequires:	libaio-devel
 %{?with_smartcard:BuildRequires:	libcacard-devel >= 2.5.1}
 BuildRequires:	libcap-ng-devel
+BuildRequires:	libdrm-devel
 %{?with_opengl:BuildRequires:	libepoxy-devel}
 BuildRequires:	libfdt-devel >= 1.4.2
 %{?with_rdma:BuildRequires:	libibverbs-devel}
@@ -114,7 +116,7 @@ BuildRequires:	libxml2-devel >= 2.0
 %{?with_lttng:BuildRequires:	lttng-ust-devel}
 BuildRequires:	lzfse-devel
 BuildRequires:	lzo-devel >= 2
-BuildRequires:	meson
+BuildRequires:	meson >= 0.55.0
 %{?with_multipath:BuildRequires:	multipath-tools-devel}
 BuildRequires:	ncurses-devel
 # also libgcrypt-devel >= 1.5.0 possible, but gnutls already pulls nettle
@@ -259,7 +261,7 @@ Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
 Requires:	glib2 >= 1:2.48
 Requires:	gnutls-libs >= 3.1.18
-%{?with_gtk3:Requires:	gtk+3 >= 3.16}
+%{?with_gtk3:Requires:	gtk+3 >= 3.22.0}
 Requires:	nettle >= 2.7.1
 Requires:	systemd-units >= 38
 %{?with_vte:Requires:	vte >= 0.32.0}
@@ -1187,6 +1189,10 @@ done
 : > qemu.lang
 %endif
 
+for t in client server; do
+	cp -p build-dynamic/contrib/ivshmem-$t/ivshmem-$t $RPM_BUILD_ROOT%{_bindir}
+done
+
 # Windows installer icon, not used
 %{__rm} $RPM_BUILD_ROOT%{_datadir}/%{name}/qemu-nsis.bmp
 # packaged as %doc
@@ -1268,8 +1274,8 @@ fi
 %{systemdunitdir}/qemu-pr-helper.service
 %{systemdunitdir}/qemu-pr-helper.socket
 %attr(755,root,root) %{_bindir}/elf2dmp
-#%attr(755,root,root) %{_bindir}/ivshmem-client
-#%attr(755,root,root) %{_bindir}/ivshmem-server
+%attr(755,root,root) %{_bindir}/ivshmem-client
+%attr(755,root,root) %{_bindir}/ivshmem-server
 %attr(755,root,root) %{_bindir}/qemu-edid
 %if %{with xkbcommon}
 %attr(755,root,root) %{_bindir}/qemu-keymap
@@ -1296,7 +1302,9 @@ fi
 %if %{with pulseaudio}
 %attr(755,root,root) %{_libdir}/%{name}/audio-pa.so
 %endif
+%if %{with brlapi}
 %attr(755,root,root) %{_libdir}/%{name}/chardev-baum.so
+%endif
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-qxl.so
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu-pci.so
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu.so
