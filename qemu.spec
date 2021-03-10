@@ -27,7 +27,6 @@
 %bcond_with	lttng		# lttng-ust trace backend support [needs update]
 %bcond_without	systemtap	# SystemTap/dtrace trace backend support
 %bcond_without	virgl		# build virgl support
-%bcond_with	vxhs		# Veritas HyperScale vDisk backend support (builtin; module not supported)
 %bcond_without	xkbcommon	# xkbcommon support
 
 %if %{without gtk}
@@ -43,12 +42,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	5.0.0
-Release:	5
+Version:	5.2.0
+Release:	0.1
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	https://download.qemu.org/%{name}-%{version}.tar.xz
-# Source0-md5:	ede6005d7143fe994dd089d31dc2cf6c
+# Source0-md5:	179f86928835da857c237b42f4b2df73
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
 # Creates /dev/kvm
@@ -67,13 +66,11 @@ Source14:	%{name}-guest-agent.logrotate
 Source15:	%{name}-pr-helper.service
 Source16:	%{name}-pr-helper.socket
 Patch0:		%{name}-cflags.patch
-Patch1:		%{name}-whitelist.patch
-Patch2:		%{name}-user-execve.patch
-Patch3:		%{name}-xattr.patch
-Patch4:		libjpeg-boolean.patch
-Patch5:		x32.patch
-Patch6:		%{name}-vxhs.patch
-Patch7:		binutils-2.36.patch
+Patch1:		%{name}-user-execve.patch
+Patch2:		%{name}-xattr.patch
+Patch3:		libjpeg-boolean.patch
+Patch4:		x32.patch
+Patch5:		binutils-2.36.patch
 URL:		https://www.qemu.org/
 %{?with_opengl:BuildRequires:	Mesa-libgbm-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
@@ -113,15 +110,16 @@ BuildRequires:	libslirp-devel >= 4.0.0
 BuildRequires:	libusb-devel >= 1.0.22
 BuildRequires:	liburing-devel
 BuildRequires:	libuuid-devel
-%{?with_vxhs:BuildRequires:	libvxhs-devel}
 BuildRequires:	libxml2-devel >= 2.0
 %{?with_lttng:BuildRequires:	lttng-ust-devel}
 BuildRequires:	lzfse-devel
 BuildRequires:	lzo-devel >= 2
+BuildRequires:	meson
 %{?with_multipath:BuildRequires:	multipath-tools-devel}
 BuildRequires:	ncurses-devel
 # also libgcrypt-devel >= 1.5.0 possible, but gnutls already pulls nettle
 BuildRequires:	nettle-devel >= 2.7.1
+BuildRequires:	ninja
 %{?with_smartcard:BuildRequires:	nss-devel >= 1:3.12.8}
 BuildRequires:	numactl-devel
 BuildRequires:	pam-devel
@@ -171,9 +169,9 @@ Requires:	%{name}-img = %{version}-%{release}
 Requires:	%{name}-system-aarch64 = %{version}-%{release}
 Requires:	%{name}-system-alpha = %{version}-%{release}
 Requires:	%{name}-system-arm = %{version}-%{release}
+Requires:	%{name}-system-avr = %{version}-%{release}
 Requires:	%{name}-system-cris = %{version}-%{release}
 Requires:	%{name}-system-hppa = %{version}-%{release}
-Requires:	%{name}-system-lm32 = %{version}-%{release}
 Requires:	%{name}-system-m68k = %{version}-%{release}
 Requires:	%{name}-system-microblaze = %{version}-%{release}
 Requires:	%{name}-system-mips = %{version}-%{release}
@@ -188,7 +186,6 @@ Requires:	%{name}-system-s390x = %{version}-%{release}
 Requires:	%{name}-system-sh4 = %{version}-%{release}
 Requires:	%{name}-system-sparc = %{version}-%{release}
 Requires:	%{name}-system-tricore = %{version}-%{release}
-Requires:	%{name}-system-unicore32 = %{version}-%{release}
 Requires:	%{name}-system-x86 = %{version}-%{release}
 Requires:	%{name}-system-xtensa = %{version}-%{release}
 Requires:	%{name}-user = %{version}-%{release}
@@ -402,6 +399,26 @@ dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
 Ten pakiet zawiera emulator systemu z 32-bitowym procesorem ARM.
 
+%package system-avr
+Summary:	QEMU system emulator for AVR
+Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem AVR
+Group:		Applications/Emulators
+Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
+Obsoletes:	qemu-kvm-system-avr
+
+%description system-avr
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator for AVR.
+
+%description system-avr -l pl.UTF-8
+QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
+dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
+
+Ten pakiet zawiera emulator systemu z procesorem AVR.
+
 %package system-cris
 Summary:	QEMU system emulator for CRIS
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem CRIS
@@ -440,26 +457,6 @@ QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
 Ten pakiet zawiera emulator systemu z procesorem HP/PA (PA-RISC).
-
-%package system-lm32
-Summary:	QEMU system emulator for LM32
-Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem LM32
-Group:		Applications/Emulators
-Requires:	%{name}-common = %{version}-%{release}
-%systempkg_req
-Obsoletes:	qemu-kvm-system-lm32
-
-%description system-lm32
-QEMU is a generic and open source processor emulator which achieves a
-good emulation speed by using dynamic translation.
-
-This package provides the system emulator with LM32 CPU.
-
-%description system-lm32 -l pl.UTF-8
-QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
-dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
-
-Ten pakiet zawiera emulator systemu z procesorem LM32.
 
 %package system-m68k
 Summary:	QEMU system emulator for m68k
@@ -738,26 +735,6 @@ dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
 Ten pakiet zawiera emulator systemu z procesorem TriCore.
 
-%package system-unicore32
-Summary:	QEMU system emulator for UniCore32
-Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem UniCore32
-Group:		Applications/Emulators
-Requires:	%{name}-common = %{version}-%{release}
-%systempkg_req
-Obsoletes:	qemu-kvm-system-unicore32
-
-%description system-unicore32
-QEMU is a generic and open source processor emulator which achieves a
-good emulation speed by using dynamic translation.
-
-This package provides the system emulator with UniCore32 CPU.
-
-%description system-unicore32 -l pl.UTF-8
-QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
-dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
-
-Ten pakiet zawiera emulator systemu z procesorem UniCore32.
-
 %package system-x86
 Summary:	QEMU system emulator for x86
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem x86
@@ -959,8 +936,6 @@ Sondy systemtap/dtrace dla QEMU.
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
-%patch6 -p1
-%patch7 -p1
 
 %{__sed} -i '1s,/usr/bin/env python3,%{__python3},' scripts/qemu-trace-stap
 
@@ -1000,8 +975,8 @@ build() {
 }
 
 build dynamic \
-	--extra-cflags="%{rpmcflags} %{rpmcppflags} -fPIE -DPIE" \
-	--extra-ldflags="%{rpmldflags} -pie -Wl,-z,relro -Wl,-z,now" \
+	--extra-cflags="%{rpmcflags} %{rpmcppflags}" \
+	--extra-ldflags="%{rpmldflags} -Wl,-z,relro -Wl,-z,now" \
 	--audio-drv-list="alsa%{?with_oss:,oss}%{?with_sdl:,sdl}%{?with_pulseaudio:,pa}" \
 	--enable-attr \
 	%{__enable_disable brlapi} \
@@ -1037,7 +1012,6 @@ build dynamic \
 	--enable-vnc-jpeg \
 	--enable-vnc-png \
 	--enable-vnc-sasl \
-	%{__enable_disable vxhs} \
 	%{!?with_vte:--disable-vte} \
 	%{__enable_disable xen} \
 	%{__enable_disable xkbcommon}
@@ -1065,7 +1039,6 @@ build static \
 	--disable-system \
 	--disable-tcmalloc \
 	--disable-tools \
-	--disable-vxhs \
 	--enable-user \
 	--disable-xkbcommon \
 	--disable-zstd \
@@ -1221,8 +1194,6 @@ done
 
 # cleanup Sphinx files
 %{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/{interop,specs,system,tools,user}/{.buildinfo,objects.inv}
-# leave just HTML version
-%{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/qemu-{ga,qmp}-ref.txt
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -1297,8 +1268,8 @@ fi
 %{systemdunitdir}/qemu-pr-helper.service
 %{systemdunitdir}/qemu-pr-helper.socket
 %attr(755,root,root) %{_bindir}/elf2dmp
-%attr(755,root,root) %{_bindir}/ivshmem-client
-%attr(755,root,root) %{_bindir}/ivshmem-server
+#%attr(755,root,root) %{_bindir}/ivshmem-client
+#%attr(755,root,root) %{_bindir}/ivshmem-server
 %attr(755,root,root) %{_bindir}/qemu-edid
 %if %{with xkbcommon}
 %attr(755,root,root) %{_bindir}/qemu-keymap
@@ -1306,13 +1277,13 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-nbd
 %attr(755,root,root) %{_bindir}/qemu-pr-helper
 %attr(755,root,root) %{_bindir}/qemu-storage-daemon
-%attr(755,root,root) %{_bindir}/virtfs-proxy-helper
 %attr(755,root,root) %{_sbindir}/ksmctl
 %attr(755,root,root) %{_sbindir}/ksmtuned
 %attr(755,root,root) %{_libexecdir}/qemu-bridge-helper
 %if %{with virgl}
 %attr(755,root,root) %{_libexecdir}/vhost-user-gpu
 %endif
+%attr(755,root,root) %{_libexecdir}/virtfs-proxy-helper
 %attr(755,root,root) %{_libexecdir}/virtiofsd
 %dir %{_libdir}/%{name}
 # modules without too many external dependencies
@@ -1325,9 +1296,27 @@ fi
 %if %{with pulseaudio}
 %attr(755,root,root) %{_libdir}/%{name}/audio-pa.so
 %endif
+%attr(755,root,root) %{_libdir}/%{name}/chardev-baum.so
+%attr(755,root,root) %{_libdir}/%{name}/hw-display-qxl.so
+%attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu-pci.so
+%attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu.so
+%attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-vga.so
 %attr(755,root,root) %{_libdir}/%{name}/ui-curses.so
+%if %{with usbredir}
+%attr(755,root,root) %{_libdir}/%{name}/hw-usb-redirect.so
+%endif
+%if %{with smartcard}
+%attr(755,root,root) %{_libdir}/%{name}/hw-usb-smartcard.so
+%endif
+%if %{with opengl}
+%attr(755,root,root) %{_libdir}/%{name}/ui-egl-headless.so
+%attr(755,root,root) %{_libdir}/%{name}/ui-opengl.so
+%endif
 %if %{with spice}
+%attr(755,root,root) %{_libdir}/%{name}/audio-spice.so
+%attr(755,root,root) %{_libdir}/%{name}/chardev-spice.so
 %attr(755,root,root) %{_libdir}/%{name}/ui-spice-app.so
+%attr(755,root,root) %{_libdir}/%{name}/ui-spice-core.so
 %endif
 %dir %{_datadir}/%{name}
 %dir %{_datadir}/%{name}/firmware
@@ -1349,6 +1338,7 @@ fi
 %{_mandir}/man7/qemu-cpu-models.7*
 %{_mandir}/man7/qemu-qmp-ref.7*
 %{_mandir}/man8/qemu-nbd.8*
+%{_mandir}/man8/qemu-pr-helper.8*
 %{_docdir}/qemu
 
 %files img
@@ -1381,7 +1371,6 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-or1k
 %attr(755,root,root) %{_bindir}/qemu-ppc
 %attr(755,root,root) %{_bindir}/qemu-ppc64
-%attr(755,root,root) %{_bindir}/qemu-ppc64abi32
 %attr(755,root,root) %{_bindir}/qemu-ppc64le
 %attr(755,root,root) %{_bindir}/qemu-riscv32
 %attr(755,root,root) %{_bindir}/qemu-riscv64
@@ -1391,7 +1380,6 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-sparc
 %attr(755,root,root) %{_bindir}/qemu-sparc32plus
 %attr(755,root,root) %{_bindir}/qemu-sparc64
-%attr(755,root,root) %{_bindir}/qemu-tilegx
 %attr(755,root,root) %{_bindir}/qemu-x86_64
 %attr(755,root,root) %{_bindir}/qemu-xtensa
 %attr(755,root,root) %{_bindir}/qemu-xtensaeb
@@ -1421,7 +1409,6 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-or1k-static
 %attr(755,root,root) %{_bindir}/qemu-ppc-static
 %attr(755,root,root) %{_bindir}/qemu-ppc64-static
-%attr(755,root,root) %{_bindir}/qemu-ppc64abi32-static
 %attr(755,root,root) %{_bindir}/qemu-ppc64le-static
 %attr(755,root,root) %{_bindir}/qemu-riscv32-static
 %attr(755,root,root) %{_bindir}/qemu-riscv64-static
@@ -1431,7 +1418,6 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-sparc-static
 %attr(755,root,root) %{_bindir}/qemu-sparc32plus-static
 %attr(755,root,root) %{_bindir}/qemu-sparc64-static
-%attr(755,root,root) %{_bindir}/qemu-tilegx-static
 %attr(755,root,root) %{_bindir}/qemu-x86_64-static
 %attr(755,root,root) %{_bindir}/qemu-xtensa-static
 %attr(755,root,root) %{_bindir}/qemu-xtensaeb-static
@@ -1455,6 +1441,11 @@ fi
 %{_datadir}/%{name}/edk2-arm-code.fd
 %{_datadir}/%{name}/edk2-arm-vars.fd
 %{_datadir}/%{name}/firmware/60-edk2-arm.json
+%{_datadir}/%{name}/npcm7xx_bootrom.bin
+
+%files system-avr
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-avr
 
 %files system-cris
 %defattr(644,root,root,755)
@@ -1464,10 +1455,6 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-hppa
 %{_datadir}/%{name}/hppa-firmware.img
-
-%files system-lm32
-%defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/qemu-system-lm32
 
 %files system-m68k
 %defattr(644,root,root,755)
@@ -1515,14 +1502,14 @@ fi
 %files system-riscv32
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-riscv32
-%{_datadir}/%{name}/opensbi-riscv32-sifive_u-fw_jump.bin
-%{_datadir}/%{name}/opensbi-riscv32-virt-fw_jump.bin
+%{_datadir}/%{name}/opensbi-riscv32-generic-fw_dynamic.bin
+%{_datadir}/%{name}/opensbi-riscv32-generic-fw_dynamic.elf
 
 %files system-riscv64
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-riscv64
-%{_datadir}/%{name}/opensbi-riscv64-sifive_u-fw_jump.bin
-%{_datadir}/%{name}/opensbi-riscv64-virt-fw_jump.bin
+%{_datadir}/%{name}/opensbi-riscv64-generic-fw_dynamic.bin
+%{_datadir}/%{name}/opensbi-riscv64-generic-fw_dynamic.elf
 
 %files system-rx
 %defattr(644,root,root,755)
@@ -1551,10 +1538,6 @@ fi
 %files system-tricore
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-tricore
-
-%files system-unicore32
-%defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/qemu-system-unicore32
 
 %files system-x86
 %defattr(644,root,root,755)
@@ -1591,6 +1574,7 @@ fi
 %{_datadir}/%{name}/pxe-pcnet.rom
 %{_datadir}/%{name}/pxe-rtl8139.rom
 %{_datadir}/%{name}/pxe-virtio.rom
+%{_datadir}/%{name}/qboot.rom
 %{_datadir}/%{name}/sgabios.bin
 %{_datadir}/%{name}/vgabios.bin
 %{_datadir}/%{name}/vgabios-ati.bin

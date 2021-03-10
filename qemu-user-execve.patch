@@ -58,7 +58,7 @@ index ee12035..5951279 100644
  /* XXX: on x86 MAP_GROWSDOWN only works if ESP <= address + 32, so
     we allocate a bigger stack. Need a better solution, for example
 @@ -3828,6 +3829,11 @@ static void handle_arg_guest_base(const char *arg)
-     have_guest_base = 1;
+     have_guest_base = true;
  }
  
 +static void handle_arg_execve(const char *arg)

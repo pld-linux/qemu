@@ -1,16 +1,12 @@
---- qemu-5.0.0/configure.orig	2020-05-25 07:18:02.653298508 +0200
-+++ qemu-5.0.0/configure	2020-05-25 07:23:20.044912383 +0200
-@@ -6258,12 +6258,8 @@
- write_c_skeleton
+--- qemu-5.2.0/configure.orig	2021-03-09 22:06:14.087491054 +0100
++++ qemu-5.2.0/configure	2021-03-09 22:07:10.121515560 +0100
+@@ -5666,9 +5666,6 @@
  
  if test "$gcov" = "yes" ; then
--  QEMU_CFLAGS="-fprofile-arcs -ftest-coverage -g $QEMU_CFLAGS"
-+  QEMU_CFLAGS="-fprofile-arcs -ftest-coverage $QEMU_CFLAGS"
-   QEMU_LDFLAGS="-fprofile-arcs -ftest-coverage $QEMU_LDFLAGS"
+   :
 -elif test "$fortify_source" = "yes" ; then
--  CFLAGS="-O2 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 $CFLAGS"
--elif test "$debug" = "no"; then
--  CFLAGS="-O2 $CFLAGS"
+-  QEMU_CFLAGS="-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 $QEMU_CFLAGS"
+-  debug=no
  fi
  
- if test "$have_asan" = "yes"; then
+ case "$ARCH" in
