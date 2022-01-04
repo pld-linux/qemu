@@ -1231,16 +1231,16 @@ fi
 %systemd_trigger qemu-pr-helper.service
 
 %post user
-%systemd_service_restart systemd-binfmt.service
+%systemd_post systemd-binfmt.service
 
 %postun user
-%systemd_service_restart systemd-binfmt.service
+%systemd_post systemd-binfmt.service
 
 %post user-static
-%systemd_service_restart systemd-binfmt.service
+%systemd_post systemd-binfmt.service
 
 %postun user-static
-%systemd_service_restart systemd-binfmt.service
+%systemd_post systemd-binfmt.service
 
 %post guest-agent
 /sbin/chkconfig --add qemu-ga
