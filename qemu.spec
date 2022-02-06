@@ -1431,7 +1431,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-x86_64-static
 %attr(755,root,root) %{_bindir}/qemu-xtensa-static
 %attr(755,root,root) %{_bindir}/qemu-xtensaeb-static
-%attr(755,root,root) %{_bindir}/qemu-trace-stap-static
+%{?with_systemtap:%attr(755,root,root) %{_bindir}/qemu-trace-stap-static}
 %endif
 
 %files system-aarch64
