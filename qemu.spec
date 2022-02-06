@@ -155,7 +155,10 @@ BuildRequires:	which
 # min version is 4.2, more features up to 4.10
 %{?with_xen:BuildRequires:	xen-devel >= 4.10}
 BuildRequires:	xfsprogs-devel
-%{?with_xkbcommon:BuildRequires:	xorg-lib-libxkbcommon-devel}
+%if %{with xkbcommon}
+BuildRequires:	xkeyboard-config
+BuildRequires:	xorg-lib-libxkbcommon-devel
+%endif
 BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	xz
 BuildRequires:	zlib-devel
