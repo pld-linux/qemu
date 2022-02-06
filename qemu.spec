@@ -78,7 +78,6 @@ URL:		https://www.qemu.org/
 %{?with_sdl:BuildRequires:	SDL2-devel >= 2.0}
 %{?with_sdl:BuildRequires:	SDL2_image-devel >= 2.0}
 BuildRequires:	alsa-lib-devel
-BuildRequires:	bcc >= 0.16.21-2
 %{?with_brlapi:BuildRequires:	brlapi-devel}
 BuildRequires:	bzip2-devel
 BuildRequires:	capstone-devel >= 3.0.5
