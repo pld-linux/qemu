@@ -733,7 +733,7 @@ good emulation speed by using dynamic translation.
 
 This package provides the system emulator with TriCore CPU.
 
-%description system-sparc -l pl.UTF-8
+%description system-tricore -l pl.UTF-8
 QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
