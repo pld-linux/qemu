@@ -42,12 +42,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	5.2.0
-Release:	7
+Version:	6.0.0
+Release:	1
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	https://download.qemu.org/%{name}-%{version}.tar.xz
-# Source0-md5:	179f86928835da857c237b42f4b2df73
+# Source0-md5:	cce185dc0119546e395909e8a71a75bb
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
 # Creates /dev/kvm
@@ -70,7 +70,6 @@ Patch1:		%{name}-user-execve.patch
 Patch2:		%{name}-xattr.patch
 Patch3:		libjpeg-boolean.patch
 Patch4:		x32.patch
-Patch5:		binutils-2.36.patch
 URL:		https://www.qemu.org/
 %{?with_opengl:BuildRequires:	Mesa-libgbm-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
@@ -939,7 +938,6 @@ Sondy systemtap/dtrace dla QEMU.
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
-%patch5 -p1
 
 %{__sed} -i '1s,/usr/bin/env python3,%{__python3},' scripts/qemu-trace-stap
 
@@ -1201,7 +1199,7 @@ done
 %{__rm} $RPM_BUILD_ROOT%{_datadir}/%{name}/edk2-licenses.txt
 
 # cleanup Sphinx files
-%{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/{interop,specs,system,tools,user}/{.buildinfo,objects.inv}
+%{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/{.buildinfo,objects.inv}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -1311,6 +1309,7 @@ fi
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu-pci.so
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu.so
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-vga.so
+%attr(755,root,root) %{_libdir}/%{name}/hw-s390x-virtio-gpu-ccw.so
 %attr(755,root,root) %{_libdir}/%{name}/ui-curses.so
 %if %{with usbredir}
 %attr(755,root,root) %{_libdir}/%{name}/hw-usb-redirect.so
@@ -1342,11 +1341,13 @@ fi
 %{_iconsdir}/hicolor/32x32/apps/qemu.bmp
 %{_iconsdir}/hicolor/scalable/apps/qemu.svg
 %{_mandir}/man1/qemu.1*
+%{_mandir}/man1/qemu-storage-daemon.1*
 %{_mandir}/man1/virtfs-proxy-helper.1*
 %{_mandir}/man1/virtiofsd.1*
 %{_mandir}/man7/qemu-block-drivers.7*
 %{_mandir}/man7/qemu-cpu-models.7*
 %{_mandir}/man7/qemu-qmp-ref.7*
+%{_mandir}/man7/qemu-storage-daemon-qmp-ref.7*
 %{_mandir}/man8/qemu-nbd.8*
 %{_mandir}/man8/qemu-pr-helper.8*
 %{_docdir}/qemu
@@ -1365,6 +1366,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-arm
 %attr(755,root,root) %{_bindir}/qemu-armeb
 %attr(755,root,root) %{_bindir}/qemu-cris
+%attr(755,root,root) %{_bindir}/qemu-hexagon
 %attr(755,root,root) %{_bindir}/qemu-hppa
 %attr(755,root,root) %{_bindir}/qemu-i386
 %attr(755,root,root) %{_bindir}/qemu-io
@@ -1404,6 +1406,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-arm-static
 %attr(755,root,root) %{_bindir}/qemu-armeb-static
 %attr(755,root,root) %{_bindir}/qemu-cris-static
+%attr(755,root,root) %{_bindir}/qemu-hexagon-static
 %attr(755,root,root) %{_bindir}/qemu-hppa-static
 %attr(755,root,root) %{_bindir}/qemu-i386-static
 %attr(755,root,root) %{_bindir}/qemu-m68k-static
