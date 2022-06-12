@@ -1,0 +1,11 @@
+--- qemu-6.2.0/hw/usb/u2f-emulated.c.orig	2021-12-14 21:42:02.000000000 +0100
++++ qemu-6.2.0/hw/usb/u2f-emulated.c	2022-06-23 06:03:41.512678723 +0200
+@@ -31,7 +31,7 @@
+ #include "hw/usb.h"
+ #include "hw/qdev-properties.h"
+ 
+-#include <u2f-emu/u2f-emu.h>
++#include <u2f-emu.h>
+ 
+ #include "u2f.h"
+ 

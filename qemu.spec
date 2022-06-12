@@ -29,7 +29,7 @@
 %bcond_without	virgl		# build virgl support
 %bcond_without	xkbcommon	# xkbcommon support
 
-%if %{without gtk}
+%if %{without gtk3}
 %undefine	with_vte
 %endif
 %ifarch x32
@@ -42,12 +42,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	6.0.0
+Version:	6.2.0
 Release:	1
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	https://download.qemu.org/%{name}-%{version}.tar.xz
-# Source0-md5:	cce185dc0119546e395909e8a71a75bb
+# Source0-md5:	a077669ce58b6ee07ec355e54aad25be
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
 # Creates /dev/kvm
@@ -70,6 +70,7 @@ Patch1:		%{name}-user-execve.patch
 Patch2:		%{name}-xattr.patch
 Patch3:		libjpeg-boolean.patch
 Patch4:		x32.patch
+Patch5:		%{name}-u2f-emu.patch
 URL:		https://www.qemu.org/
 %{?with_opengl:BuildRequires:	Mesa-libgbm-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
@@ -79,22 +80,29 @@ URL:		https://www.qemu.org/
 BuildRequires:	alsa-lib-devel
 %{?with_brlapi:BuildRequires:	brlapi-devel}
 BuildRequires:	bzip2-devel
-BuildRequires:	capstone-devel >= 3.0.5
-%{?with_ceph:BuildRequires:	ceph-devel}
-BuildRequires:	curl-devel
+BuildRequires:	capstone-devel >= 4.0
+%{?with_ceph:BuildRequires:	ceph-devel >= 12}
+BuildRequires:	curl-devel >= 7.29.0
 BuildRequires:	cyrus-sasl-devel >= 2
+BuildRequires:	daxctl-devel >= 57
+BuildRequires:	gcc >= 6:7.4
 BuildRequires:	gettext-tools
-BuildRequires:	glib2-devel >= 1:2.48
+BuildRequires:	glib2-devel >= 1:2.56
 # minimal is 3.4 but new features are used up to 6
 %{?with_glusterfs:BuildRequires:	glusterfs-devel >= 6}
-BuildRequires:	gnutls-devel >= 3.1.18
+BuildRequires:	gnutls-devel >= 3.6.14
 %{?with_gtk3:BuildRequires:	gtk+3-devel >= 3.22.0}
+BuildRequires:	jack-audio-connection-kit-devel
+# for tests
+#BuildRequires:	keyutils-devel
 BuildRequires:	libaio-devel
+BuildRequires:	libbpf-devel
 %{?with_smartcard:BuildRequires:	libcacard-devel >= 2.5.1}
 BuildRequires:	libcap-ng-devel
 BuildRequires:	libdrm-devel
 %{?with_opengl:BuildRequires:	libepoxy-devel}
-BuildRequires:	libfdt-devel >= 1.4.2
+BuildRequires:	libfdt-devel >= 1.5.1
+BuildRequires:	libfuse3-devel >= 3.8
 %{?with_rdma:BuildRequires:	libibverbs-devel}
 %{?with_iscsi:BuildRequires:	libiscsi-devel >= 1.9.0}
 %{?with_rdma:BuildRequires:	libibumad-devel}
@@ -103,10 +111,12 @@ BuildRequires:	libjpeg-devel
 BuildRequires:	libpng-devel
 %{?with_rdma:BuildRequires:	librdmacm-devel}
 %{?with_seccomp:BuildRequires:	libseccomp-devel >= 2.3.0}
-BuildRequires:	libssh-devel >= 0.8
+BuildRequires:	libselinux-devel
+BuildRequires:	libssh-devel >= 0.8.7
 BuildRequires:	libslirp-devel >= 4.0.0
 # for tests only
 #BuildRequires:	libtasn1-devel
+BuildRequires:	libu2f-emu-devel
 BuildRequires:	libusb-devel >= 1.0.22
 BuildRequires:	liburing-devel
 BuildRequires:	libuuid-devel
@@ -114,11 +124,11 @@ BuildRequires:	libxml2-devel >= 2.0
 %{?with_lttng:BuildRequires:	lttng-ust-devel}
 BuildRequires:	lzfse-devel
 BuildRequires:	lzo-devel >= 2
-BuildRequires:	meson >= 0.55.0
+BuildRequires:	meson >= 0.59.3
 %{?with_multipath:BuildRequires:	multipath-tools-devel}
 BuildRequires:	ncurses-devel
-# also libgcrypt-devel >= 1.5.0 possible, but gnutls already pulls nettle
-BuildRequires:	nettle-devel >= 2.7.1
+# also libgcrypt-devel >= 1.8 possible, but gnutls already pulls nettle
+BuildRequires:	nettle-devel >= 3.4
 BuildRequires:	ninja
 %{?with_smartcard:BuildRequires:	nss-devel >= 1:3.12.8}
 BuildRequires:	numactl-devel
@@ -129,7 +139,8 @@ BuildRequires:	pixman-devel >= 0.21.8
 BuildRequires:	pkgconfig
 %{?with_pmem:BuildRequires:	pmdk-devel}
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
-BuildRequires:	python3 >= 1:3.5
+BuildRequires:	python3 >= 1:3.6
+BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 1.644
 %{?with_system_seabios:BuildRequires:	seabios}
 BuildRequires:	sed >= 4.0
@@ -151,8 +162,8 @@ BuildRequires:	which
 %{?with_virgl:BuildRequires:	virglrenderer-devel}
 %{?with_vte:BuildRequires:	vte-devel >= 0.32.0}
 # xencontrol xenstore xenguest xenforeignmemory xengnttab xenevtchn xendevicemodel; xentoolcore for xen 4.10+
-# min version is 4.2, more features up to 4.10
-%{?with_xen:BuildRequires:	xen-devel >= 4.10}
+# min version is 4.2, more features up to 4.11
+%{?with_xen:BuildRequires:	xen-devel >= 4.11}
 BuildRequires:	xfsprogs-devel
 %if %{with xkbcommon}
 BuildRequires:	xkeyboard-config
@@ -163,7 +174,7 @@ BuildRequires:	xz
 BuildRequires:	zlib-devel
 BuildRequires:	zstd-devel >= 1.4.0
 %if %{with user_static}
-BuildRequires:	glib2-static >= 1:2.48
+BuildRequires:	glib2-static >= 1:2.56
 BuildRequires:	glibc-static
 BuildRequires:	pcre-static
 BuildRequires:	zlib-static
@@ -178,7 +189,6 @@ Requires:	%{name}-system-hppa = %{version}-%{release}
 Requires:	%{name}-system-m68k = %{version}-%{release}
 Requires:	%{name}-system-microblaze = %{version}-%{release}
 Requires:	%{name}-system-mips = %{version}-%{release}
-Requires:	%{name}-system-moxie = %{version}-%{release}
 Requires:	%{name}-system-nios2 = %{version}-%{release}
 Requires:	%{name}-system-or1k = %{version}-%{release}
 Requires:	%{name}-system-ppc = %{version}-%{release}
@@ -197,9 +207,12 @@ ExcludeArch:	i386
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define	systempkg_req \
-Requires:	capstone >= 3.0.5 \
+Requires:	capstone >= 4.0 \
+Requires:	daxctl-libs >= 57 \
 %{?with_smartcard:Requires:	libcacard >= 2.5.1} \
-Requires:	libfdt >= 1.4.2 \
+Requires:	libfdt >= 1.5.1 \
+Requires:	libfuse3 >= 3.8 \
+%{?with_iscsi:Requires:	libiscsi >= 1.9.0} \
 %if %{with seccomp} \
 Requires:	libseccomp >= 2.3.0 \
 %endif \
@@ -211,8 +224,7 @@ Requires:	spice-server-libs >= 0.12.5 \
 %endif \
 %if %{with usbredir} \
 Requires:	usbredir >= 0.6 \
-%endif \
-Requires:	zstd >= 1.4.0
+%endif
 
 # don't strip/chrpath anything in there; these are boot images, roms etc
 %define		_noautostrip	.*%{_datadir}/qemu/.*
@@ -249,6 +261,18 @@ aby działał na kolejnych procesorach. QEMU ma dwa tryby pracy:
   używane do wirtualnego hostowania kilku wirtualnych pecetów na
   pojedynczym serwerze.
 
+%package devel
+Summary:	Header file for QEMU plugins development
+Summary(pl.UTF-8):	Plik nagłówkowy do tworzenia wtyczek QEMU
+Group:		Development/Libraries
+BuildArch:	noarch
+
+%description devel
+Header file for QEMU plugins development.
+
+%description devel -l pl.UTF-8
+Plik nagłówkowy do tworzenia wtyczek QEMU.
+
 %package common
 Summary:	QEMU common files needed by all QEMU targets
 Summary(pl.UTF-8):	Wspólne pliki QEMU wymagane przez wszystkie środowiska QEMU
@@ -260,16 +284,18 @@ Requires(pre):	/bin/id
 Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
-Requires:	glib2 >= 1:2.48
-Requires:	gnutls-libs >= 3.1.18
+Requires:	glib2 >= 1:2.56
+Requires:	gnutls-libs >= 3.6.14
 %{?with_gtk3:Requires:	gtk+3 >= 3.22.0}
-Requires:	nettle >= 2.7.1
+Requires:	nettle >= 3.4
 Requires:	systemd-units >= 38
 %{?with_vte:Requires:	vte >= 0.32.0}
+Requires:	zstd >= 1.4.0
 Provides:	group(qemu)
 Provides:	user(qemu)
 Obsoletes:	qemu-kvm-common < 2
 Obsoletes:	qemu-module-block-archipelago < 2.9.0
+Obsoletes:	qemu-system-moxie < 6.1
 Conflicts:	qemu < 1.0-2
 
 %description common
@@ -523,25 +549,6 @@ dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
 Ten pakiet zawiera emulator systemu z procesorem MIPS.
 
-%package system-moxie
-Summary:	QEMU system emulator for Moxie
-Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Moxie
-Group:		Applications/Emulators
-Requires:	%{name}-common = %{version}-%{release}
-%systempkg_req
-
-%description system-moxie
-QEMU is a generic and open source processor emulator which achieves a
-good emulation speed by using dynamic translation.
-
-This package provides the system emulator with Moxie CPU.
-
-%description system-moxie -l pl.UTF-8
-QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
-dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
-
-Ten pakiet zawiera emulator systemu z procesorem Moxie.
-
 %package system-nios2
 Summary:	QEMU system emulator for Nios II
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Nios II
@@ -785,7 +792,7 @@ Summary:	QEMU guest agent
 Summary(pl.UTF-8):	Agent gościa QEMU
 Group:		Daemons
 Requires(post,preun,postun):	systemd-units >= 38
-Requires:	glib2 >= 1:2.48
+Requires:	glib2 >= 1:2.56
 Requires:	systemd-units >= 38
 Obsoletes:	qemu-kvm-guest-agent < 2
 Conflicts:	SysVinit < 2.96-2
@@ -810,11 +817,24 @@ systemach-gościach, komunikującego się kanałem virtio-serial o nazwie
 
 Ten pakiet nie musi być zainstalowany w systemie hosta.
 
+%package module-audio-jack
+Summary:	QEMU module for JACK audio output
+Summary(pl.UTF-8):	Moduł QEMU z wyjściem dźwięku JACK
+Group:		Applications/Emulators
+Requires:	%{name}-common = %{version}-%{release}
+
+%description module-audio-jack
+QEMU module for JACK audio output.
+
+%description module-audio-jack -l pl.UTF-8
+Moduł QEMU z wyjściem dźwięku JACK.
+
 %package module-block-curl
 Summary:	QEMU module for 'curl' block devices
 Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'curl'
 Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
+Requires:	curl-libs >= 7.29.0
 
 %description module-block-curl
 QEMU block device support for CURL. It allows to access remote disks
@@ -872,6 +892,7 @@ Summary:	QEMU module for 'rbd' block devices
 Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'rbd'
 Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
+Requires:	ceph-libs >= 12
 
 %description module-block-rbd
 QEMU block device support for Ceph/RBD volumes.
@@ -884,7 +905,7 @@ Summary:	QEMU module for 'ssh' block devices
 Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'ssh'
 Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
-Requires:	libssh >= 0.8
+Requires:	libssh >= 0.8.7
 
 %description module-block-ssh
 QEMU block device support for accessing remote disks using the Secure
@@ -938,13 +959,15 @@ Sondy systemtap/dtrace dla QEMU.
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
+%patch5 -p1
 
 %{__sed} -i '1s,/usr/bin/env python3,%{__python3},' scripts/qemu-trace-stap
 
 %if %{with systemtap}
 # don't require stap binary during build
-%{__sed} -i -e "s/has 'stap'/true/" configure
+%{__sed} -i -e "s/stap.found()/true/" meson.build docs/meson.build scripts/meson.build
 %endif
+
 %build
 
 build() {
@@ -979,7 +1002,7 @@ build() {
 build dynamic \
 	--extra-cflags="%{rpmcflags} %{rpmcppflags}" \
 	--extra-ldflags="%{rpmldflags} -Wl,-z,relro -Wl,-z,now" \
-	--audio-drv-list="alsa%{?with_oss:,oss}%{?with_sdl:,sdl}%{?with_pulseaudio:,pa}" \
+	--audio-drv-list="alsa,jack%{?with_oss:,oss}%{?with_pulseaudio:,pa}%{?with_sdl:,sdl}" \
 	--enable-attr \
 	%{__enable_disable brlapi} \
 	--enable-cap-ng \
@@ -1173,12 +1196,6 @@ fi
 %if %{with system_seabios}
 ln -sf /usr/share/seabios/bios.bin $RPM_BUILD_ROOT%{_datadir}/%{name}/bios-256k.bin
 # bios.bin provided by qemu is stripped to 128k, with no Xen support, keep it
-for f in $RPM_BUILD_ROOT%{_datadir}/%{name}/*.aml ; do
-	bn="$(basename $f)"
-	if [ -e "/usr/share/seabios/$bn" ] ; then
-		ln -sf "/usr/share/seabios/$bn" "$f"
-	fi
-done
 %endif
 
 %if %{with gtk3}
@@ -1193,6 +1210,8 @@ for t in client server; do
 	cp -p build-dynamic/contrib/ivshmem-$t/ivshmem-$t $RPM_BUILD_ROOT%{_bindir}
 done
 
+# test modules
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/%{name}/accel-qtest-*.so
 # Windows installer icon, not used
 %{__rm} $RPM_BUILD_ROOT%{_datadir}/%{name}/qemu-nsis.bmp
 # packaged as %doc
@@ -1260,6 +1279,10 @@ fi
 %files
 %defattr(644,root,root,755)
 
+%files devel
+%defattr(644,root,root,755)
+%{_includedir}/qemu-plugin.h
+
 %files common -f %{name}.lang
 %defattr(644,root,root,755)
 %doc LICENSE README.rst pc-bios/edk2-licenses.txt
@@ -1295,6 +1318,8 @@ fi
 # modules without too many external dependencies
 %attr(755,root,root) %{_libdir}/%{name}/block-dmg-bz2.so
 %attr(755,root,root) %{_libdir}/%{name}/block-dmg-lzfse.so
+%attr(755,root,root) %{_libdir}/%{name}/accel-tcg-i386.so
+%attr(755,root,root) %{_libdir}/%{name}/accel-tcg-x86_64.so
 %attr(755,root,root) %{_libdir}/%{name}/audio-alsa.so
 %if %{with oss}
 %attr(755,root,root) %{_libdir}/%{name}/audio-oss.so
@@ -1306,10 +1331,14 @@ fi
 %attr(755,root,root) %{_libdir}/%{name}/chardev-baum.so
 %endif
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-qxl.so
-%attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu-pci.so
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu.so
+%attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu-gl.so
+%attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu-pci.so
+%attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu-pci-gl.so
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-vga.so
+%attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-vga-gl.so
 %attr(755,root,root) %{_libdir}/%{name}/hw-s390x-virtio-gpu-ccw.so
+%attr(755,root,root) %{_libdir}/%{name}/hw-usb-host.so
 %attr(755,root,root) %{_libdir}/%{name}/ui-curses.so
 %if %{with usbredir}
 %attr(755,root,root) %{_libdir}/%{name}/hw-usb-redirect.so
@@ -1485,10 +1514,6 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-system-mips64
 %attr(755,root,root) %{_bindir}/qemu-system-mips64el
 
-%files system-moxie
-%defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/qemu-system-moxie
-
 %files system-nios2
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-nios2
@@ -1580,6 +1605,7 @@ fi
 %{_datadir}/%{name}/linuxboot.bin
 %{_datadir}/%{name}/linuxboot_dma.bin
 %{_datadir}/%{name}/multiboot.bin
+%{_datadir}/%{name}/multiboot_dma.bin
 %{_datadir}/%{name}/pvh.bin
 %{_datadir}/%{name}/pxe-e1000.rom
 %{_datadir}/%{name}/pxe-eepro100.rom
@@ -1617,6 +1643,10 @@ fi
 %attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) /etc/logrotate.d/qemu-ga
 %{_mandir}/man7/qemu-ga-ref.7*
 %{_mandir}/man8/qemu-ga.8*
+
+%files module-audio-jack
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/%{name}/audio-jack.so
 
 %files module-block-curl
 %defattr(644,root,root,755)

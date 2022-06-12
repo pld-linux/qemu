@@ -9,14 +9,3 @@
          test "$targetos" != "Darwin" && test "$targetos" != "SunOS" && \
          test "$targetos" != "Haiku" && test "$softmmu" = yes ; then
      # Different host OS linkers have different ideas about the name of the ELF
---- qemu-2.6.0/include/qemu/atomic.h~	2016-07-17 18:37:57.000000000 +0200
-+++ qemu-2.6.0/include/qemu/atomic.h	2016-07-17 18:38:33.485893530 +0200
-@@ -20,7 +20,7 @@
-         (unsigned short)1,                                                         \
-       (expr)+0))))))
- 
--#ifdef __ATOMIC_RELAXED
-+#if defined(__ATOMIC_RELAXED) && !defined(__ILP32__)
- /* For C11 atomic ops */
- 
- /* Manual memory barriers
