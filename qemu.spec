@@ -1062,7 +1062,6 @@ build static \
 	--disable-slirp \
 	--disable-spice \
 	--disable-system \
-	--disable-tcmalloc \
 	--disable-tools \
 	--enable-user \
 	--disable-xkbcommon \
