@@ -140,6 +140,7 @@ BuildRequires:	pkgconfig
 %{?with_pmem:BuildRequires:	pmdk-devel}
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 BuildRequires:	python3 >= 1:3.6
+BuildRequires:	python3-sphinx_rtd_theme
 BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 1.644
 %{?with_system_seabios:BuildRequires:	seabios}
