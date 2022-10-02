@@ -296,7 +296,9 @@ Provides:	group(qemu)
 Provides:	user(qemu)
 Obsoletes:	qemu-kvm-common < 2
 Obsoletes:	qemu-module-block-archipelago < 2.9.0
+Obsoletes:	qemu-system-lm32 < 5.2
 Obsoletes:	qemu-system-moxie < 6.1
+Obsoletes:	qemu-system-unicore32 < 5.2
 Conflicts:	qemu < 1.0-2
 
 %description common
