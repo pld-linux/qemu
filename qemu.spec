@@ -176,9 +176,9 @@ BuildRequires:	xz
 BuildRequires:	zlib-devel
 BuildRequires:	zstd-devel >= 1.4.0
 %if %{with user_static}
-BuildRequires:	glib2-static >= 1:2.64
+BuildRequires:	glib2-static >= 1:2.74
 BuildRequires:	glibc-static
-BuildRequires:	pcre-static
+BuildRequires:	pcre2-8-static >= 10.32
 BuildRequires:	zlib-static
 %endif
 Requires:	%{name}-img = %{version}-%{release}
