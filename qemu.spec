@@ -42,12 +42,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	6.2.0
+Version:	7.0.0
 Release:	1
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	https://download.qemu.org/%{name}-%{version}.tar.xz
-# Source0-md5:	a077669ce58b6ee07ec355e54aad25be
+# Source0-md5:	bfb5b09a0d1f887c8c42a6d5f26971ab
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
 # Creates /dev/kvm
@@ -71,6 +71,7 @@ Patch2:		%{name}-xattr.patch
 Patch3:		libjpeg-boolean.patch
 Patch4:		x32.patch
 Patch5:		%{name}-u2f-emu.patch
+Patch6:		%{name}-linux-mount.patch
 URL:		https://www.qemu.org/
 %{?with_opengl:BuildRequires:	Mesa-libgbm-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
@@ -87,7 +88,7 @@ BuildRequires:	cyrus-sasl-devel >= 2
 BuildRequires:	daxctl-devel >= 57
 BuildRequires:	gcc >= 6:7.4
 BuildRequires:	gettext-tools
-BuildRequires:	glib2-devel >= 1:2.56
+BuildRequires:	glib2-devel >= 1:2.64
 # minimal is 3.4 but new features are used up to 6
 %{?with_glusterfs:BuildRequires:	glusterfs-devel >= 6}
 BuildRequires:	gnutls-devel >= 3.6.14
@@ -118,10 +119,10 @@ BuildRequires:	libslirp-devel >= 4.0.0
 #BuildRequires:	libtasn1-devel
 BuildRequires:	libu2f-emu-devel
 BuildRequires:	libusb-devel >= 1.0.22
-BuildRequires:	liburing-devel
+BuildRequires:	liburing-devel >= 0.3
 BuildRequires:	libuuid-devel
 BuildRequires:	libxml2-devel >= 2.0
-%{?with_lttng:BuildRequires:	lttng-ust-devel}
+%{?with_lttng:BuildRequires:	lttng-ust-devel >= 2.1}
 BuildRequires:	lzfse-devel
 BuildRequires:	lzo-devel >= 2
 BuildRequires:	meson >= 0.59.3
@@ -175,7 +176,7 @@ BuildRequires:	xz
 BuildRequires:	zlib-devel
 BuildRequires:	zstd-devel >= 1.4.0
 %if %{with user_static}
-BuildRequires:	glib2-static >= 1:2.56
+BuildRequires:	glib2-static >= 1:2.64
 BuildRequires:	glibc-static
 BuildRequires:	pcre-static
 BuildRequires:	zlib-static
@@ -285,7 +286,7 @@ Requires(pre):	/bin/id
 Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
-Requires:	glib2 >= 1:2.56
+Requires:	glib2 >= 1:2.64
 Requires:	gnutls-libs >= 3.6.14
 %{?with_gtk3:Requires:	gtk+3 >= 3.22.0}
 Requires:	nettle >= 3.4
@@ -795,7 +796,7 @@ Summary:	QEMU guest agent
 Summary(pl.UTF-8):	Agent gościa QEMU
 Group:		Daemons
 Requires(post,preun,postun):	systemd-units >= 38
-Requires:	glib2 >= 1:2.56
+Requires:	glib2 >= 1:2.64
 Requires:	systemd-units >= 38
 Obsoletes:	qemu-kvm-guest-agent < 2
 Conflicts:	SysVinit < 2.96-2
@@ -918,6 +919,18 @@ Shell (SSH) protocol.
 Moduł urządzeń blokowych QEMU do dostępu do zdalnych dysków poprzez
 protokół SSH (Secure Shell).
 
+%package module-ui-dbus
+Summary:	QEMU DBus UI driver
+Summary(pl.UTF-8):	Sterownik interfejsu użytkownika DBus dla QEMU
+Group:		Applications/Emulators
+Requires:	%{name}-common = %{version}-%{release}
+
+%description module-ui-dbus
+QEMU DBus UI driver.
+
+%description module-ui-dbus -l pl.UTF-8
+Sterownik interfejsu użytkownika DBus dla QEMU.
+
 %package module-ui-gtk
 Summary:	QEMU GTK UI driver
 Summary(pl.UTF-8):	Sterownik interfejsu użytkownika GTK dla QEMU
@@ -963,6 +976,7 @@ Sondy systemtap/dtrace dla QEMU.
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
+%patch6 -p1
 
 %{__sed} -i '1s,/usr/bin/env python3,%{__python3},' scripts/qemu-trace-stap
 
@@ -1538,18 +1552,18 @@ fi
 %{_datadir}/%{name}/slof.bin
 %{_datadir}/%{name}/u-boot.e500
 %{_datadir}/%{name}/u-boot-sam460-20100605.bin
+%{_datadir}/%{name}/vof.bin
+%{_datadir}/%{name}/vof-nvram.bin
 
 %files system-riscv32
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-riscv32
 %{_datadir}/%{name}/opensbi-riscv32-generic-fw_dynamic.bin
-%{_datadir}/%{name}/opensbi-riscv32-generic-fw_dynamic.elf
 
 %files system-riscv64
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-riscv64
 %{_datadir}/%{name}/opensbi-riscv64-generic-fw_dynamic.bin
-%{_datadir}/%{name}/opensbi-riscv64-generic-fw_dynamic.elf
 
 %files system-rx
 %defattr(644,root,root,755)
@@ -1681,6 +1695,11 @@ fi
 %files module-block-ssh
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/%{name}/block-ssh.so
+
+%files module-ui-dbus
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/%{name}/audio-dbus.so
+%attr(755,root,root) %{_libdir}/%{name}/ui-dbus.so
 
 %if %{with gtk3}
 %files module-ui-gtk

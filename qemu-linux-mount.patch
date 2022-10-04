@@ -1,0 +1,10 @@
+--- qemu-7.0.0/linux-user/syscall.c.orig	2022-04-19 21:10:27.000000000 +0200
++++ qemu-7.0.0/linux-user/syscall.c	2022-10-03 19:01:43.666712978 +0200
+@@ -29,6 +29,7 @@
+ #include <sys/msg.h>
+ #include <sys/wait.h>
+ #include <sys/mount.h>
++#define _LINUX_MOUNT_H 1
+ #include <sys/file.h>
+ #include <sys/fsuid.h>
+ #include <sys/personality.h>
