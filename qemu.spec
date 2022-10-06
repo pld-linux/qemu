@@ -1456,7 +1456,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-hexagon-static
 %attr(755,root,root) %{_bindir}/qemu-hppa-static
 %attr(755,root,root) %{_bindir}/qemu-i386-static
-%attr(755,root,root) %{_bindir}/qemu-loongarch-static
+%attr(755,root,root) %{_bindir}/qemu-loongarch64-static
 %attr(755,root,root) %{_bindir}/qemu-m68k-static
 %attr(755,root,root) %{_bindir}/qemu-microblaze-static
 %attr(755,root,root) %{_bindir}/qemu-microblazeel-static
