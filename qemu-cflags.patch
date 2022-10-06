@@ -1,12 +1,13 @@
---- qemu-5.2.0/configure.orig	2021-03-09 22:06:14.087491054 +0100
-+++ qemu-5.2.0/configure	2021-03-09 22:07:10.121515560 +0100
-@@ -5666,9 +5666,6 @@
+--- qemu-7.1.0/configure.orig	2022-10-05 06:29:01.214549869 +0200
++++ qemu-7.1.0/configure	2022-10-05 16:30:40.352312168 +0200
+@@ -2246,10 +2246,6 @@ esac
  
- if test "$gcov" = "yes" ; then
-   :
--elif test "$fortify_source" = "yes" ; then
+ write_c_skeleton
+ 
+-if test "$fortify_source" = "yes" ; then
 -  QEMU_CFLAGS="-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 $QEMU_CFLAGS"
--  debug=no
- fi
- 
- case "$ARCH" in
+-fi
+-
+ if test "$have_asan" = "yes"; then
+   QEMU_CFLAGS="-fsanitize=address $QEMU_CFLAGS"
+   QEMU_LDFLAGS="-fsanitize=address $QEMU_LDFLAGS"

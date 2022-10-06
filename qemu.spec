@@ -1,4 +1,5 @@
 # TODO:
+# canokey (BR: canokey-qemu.pc, https://github.com/canokeys/canokey-qemu)
 # plugins? (probes)
 #
 # Conditional build:
@@ -42,12 +43,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	7.0.0
+Version:	7.1.0
 Release:	1
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	https://download.qemu.org/%{name}-%{version}.tar.xz
-# Source0-md5:	bfb5b09a0d1f887c8c42a6d5f26971ab
+# Source0-md5:	3be5458a9171b4ec5220c65d5d52bdcf
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
 # Creates /dev/kvm
@@ -69,7 +70,6 @@ Patch0:		%{name}-cflags.patch
 Patch1:		%{name}-user-execve.patch
 Patch2:		%{name}-xattr.patch
 Patch3:		libjpeg-boolean.patch
-Patch4:		x32.patch
 Patch5:		%{name}-u2f-emu.patch
 Patch6:		%{name}-linux-mount.patch
 URL:		https://www.qemu.org/
@@ -109,12 +109,12 @@ BuildRequires:	libfuse3-devel >= 3.8
 %{?with_rdma:BuildRequires:	libibumad-devel}
 BuildRequires:	libjpeg-devel
 %{?with_libnfs:BuildRequires:	libnfs-devel >= 1.9.3}
-BuildRequires:	libpng-devel
+BuildRequires:	libpng-devel >= 2:1.6.34
 %{?with_rdma:BuildRequires:	librdmacm-devel}
 %{?with_seccomp:BuildRequires:	libseccomp-devel >= 2.3.0}
 BuildRequires:	libselinux-devel
 BuildRequires:	libssh-devel >= 0.8.7
-BuildRequires:	libslirp-devel >= 4.0.0
+BuildRequires:	libslirp-devel >= 4.1.0
 # for tests only
 #BuildRequires:	libtasn1-devel
 BuildRequires:	libu2f-emu-devel
@@ -215,10 +215,12 @@ Requires:	daxctl-libs >= 57 \
 Requires:	libfdt >= 1.5.1 \
 Requires:	libfuse3 >= 3.8 \
 %{?with_iscsi:Requires:	libiscsi >= 1.9.0} \
+Requires:	libpng >= 2:1.6.34 \
 %if %{with seccomp} \
 Requires:	libseccomp >= 2.3.0 \
 %endif \
-Requires:	libslirp >= 4.0.0 \
+Requires:	libslirp >= 4.1.0 \
+Requires:	liburing >= 0.3 \
 Requires:	libusb >= 1.0.22 \
 Requires:	pixman >= 0.21.8 \
 %if %{with spice} \
@@ -797,6 +799,7 @@ Summary(pl.UTF-8):	Agent gościa QEMU
 Group:		Daemons
 Requires(post,preun,postun):	systemd-units >= 38
 Requires:	glib2 >= 1:2.64
+Requires:	liburing >= 0.3
 Requires:	systemd-units >= 38
 Obsoletes:	qemu-kvm-guest-agent < 2
 Conflicts:	SysVinit < 2.96-2
@@ -974,7 +977,6 @@ Sondy systemtap/dtrace dla QEMU.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
-%patch4 -p1
 %patch5 -p1
 %patch6 -p1
 
@@ -1023,7 +1025,7 @@ build dynamic \
 	--enable-attr \
 	%{__enable_disable brlapi} \
 	--enable-cap-ng \
-	--enable-capstone=system \
+	--enable-capstone \
 	--enable-curl \
 	--enable-curses \
 	--enable-docs \
@@ -1052,7 +1054,6 @@ build dynamic \
 	%{__enable_disable virgl virglrenderer} \
 	--enable-virtfs \
 	--enable-vnc-jpeg \
-	--enable-vnc-png \
 	--enable-vnc-sasl \
 	%{!?with_vte:--disable-vte} \
 	%{__enable_disable xen} \
@@ -1415,6 +1416,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-hppa
 %attr(755,root,root) %{_bindir}/qemu-i386
 %attr(755,root,root) %{_bindir}/qemu-io
+%attr(755,root,root) %{_bindir}/qemu-loongarch64
 %attr(755,root,root) %{_bindir}/qemu-m68k
 %attr(755,root,root) %{_bindir}/qemu-microblaze
 %attr(755,root,root) %{_bindir}/qemu-microblazeel
@@ -1454,6 +1456,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-hexagon-static
 %attr(755,root,root) %{_bindir}/qemu-hppa-static
 %attr(755,root,root) %{_bindir}/qemu-i386-static
+%attr(755,root,root) %{_bindir}/qemu-loongarch-static
 %attr(755,root,root) %{_bindir}/qemu-m68k-static
 %attr(755,root,root) %{_bindir}/qemu-microblaze-static
 %attr(755,root,root) %{_bindir}/qemu-microblazeel-static
@@ -1525,6 +1528,7 @@ fi
 
 %files system-mips
 %defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-loongarch64
 %attr(755,root,root) %{_bindir}/qemu-system-mips
 %attr(755,root,root) %{_bindir}/qemu-system-mipsel
 %attr(755,root,root) %{_bindir}/qemu-system-mips64
