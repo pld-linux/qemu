@@ -60,7 +60,7 @@ start() {
 
 	checkconfig
 	msg_starting "qemu-ga"
-	daemon /usr/bin/qemu-ga -d -l /var/log/qemu-ga
+	daemon /usr/bin/qemu-ga -d
 	RETVAL=$?
 	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/qemu-ga
 }
