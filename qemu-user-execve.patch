@@ -49,15 +49,15 @@ diff --git a/linux-user/main.c b/linux-user/main.c
 index ee12035..5951279 100644
 --- a/linux-user/main.c
 +++ b/linux-user/main.c
-@@ -79,6 +79,7 @@ static void usage(int exitcode);
+@@ -123,6 +123,7 @@ static void usage(int exitcode);
  
  static const char *interp_prefix = CONFIG_QEMU_INTERP_PREFIX;
  const char *qemu_uname_release;
 +const char *qemu_execve_path;
  
+ #if !defined(TARGET_DEFAULT_STACK_SIZE)
  /* XXX: on x86 MAP_GROWSDOWN only works if ESP <= address + 32, so
-    we allocate a bigger stack. Need a better solution, for example
-@@ -3828,6 +3829,11 @@ static void handle_arg_guest_base(const char *arg)
+@@ -362,6 +363,11 @@ static void handle_arg_guest_base(const
      have_guest_base = true;
  }
  
@@ -69,7 +69,7 @@ index ee12035..5951279 100644
  static void handle_arg_reserved_va(const char *arg)
  {
      char *p;
-@@ -3913,6 +3919,8 @@ static const struct qemu_argument arg_table[] = {
+@@ -464,6 +470,8 @@ static const struct qemu_argument arg_ta
       "uname",      "set qemu uname release string to 'uname'"},
      {"B",          "QEMU_GUEST_BASE",  true,  handle_arg_guest_base,
       "address",    "set guest_base address to 'address'"},
@@ -90,7 +90,7 @@ index ee12035..5951279 100644
  typedef struct IOCTLEntry IOCTLEntry;
 --- qemu-2.12.0/linux-user/syscall.c~	2018-04-30 21:43:39.000000000 +0300
 +++ qemu-2.12.0/linux-user/syscall.c	2018-04-30 21:46:36.362935706 +0300
-@@ -5854,6 +5854,109 @@ static target_timer_t get_timer_id(abi_long arg)
+@@ -8340,6 +8340,109 @@ static target_timer_t get_timer_id(abi_l
      return timerid;
  }
  
@@ -200,17 +200,12 @@ index ee12035..5951279 100644
  static int target_to_host_cpu_mask(unsigned long *host_mask,
                                     size_t host_size,
                                     abi_ulong target_addr,
-@@ -8257,7 +8257,12 @@
-              * before the execve completes and makes it the other
-              * program's problem.
+@@ -8896,6 +8999,8 @@ static abi_long do_syscall1(CPUArchState
               */
--            ret = get_errno(safe_execve(p, argp, envp));
-+            if (qemu_execve_path && *qemu_execve_path) {
-+                ret = get_errno(qemu_execve(p, argp, envp));
-+            } else {
-+                ret = get_errno(safe_execve(p, argp, envp));
-+            }
-+
-             unlock_user(p, arg1, 0);
- 
-             goto execve_end;
+             if (is_proc_myself(p, "exe")) {
+                 ret = get_errno(safe_execve(exec_path, argp, envp));
++            } else if (qemu_execve_path && *qemu_execve_path) {
++         	ret = get_errno(qemu_execve(p, argp, envp));
+             } else {
+                 ret = get_errno(safe_execve(p, argp, envp));
+             }

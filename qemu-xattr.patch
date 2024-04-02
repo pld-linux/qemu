@@ -3,21 +3,21 @@ When including both, the latter must be included first.
 Move "qemu-xattr.h" (which includes <sys/xattr.h> to the front,
 before <sys/capability.h> (which includes <linux/xattr.h>.
 
---- qemu-7.1.0/fsdev/virtfs-proxy-helper.c.orig	2022-08-30 18:41:57.000000000 +0200
-+++ qemu-7.1.0/fsdev/virtfs-proxy-helper.c	2022-10-05 16:48:32.493170549 +0200
+--- qemu-7.2.10/fsdev/virtfs-proxy-helper.c.orig	2024-03-25 22:16:49.552502269 +0100
++++ qemu-7.2.10/fsdev/virtfs-proxy-helper.c	2024-03-25 22:36:50.349330328 +0100
 @@ -10,6 +10,7 @@
   */
  
  #include "qemu/osdep.h"
 +#include "qemu/xattr.h"
+ #include <glib/gstdio.h>
  #include <sys/resource.h>
  #include <getopt.h>
- #include <syslog.h>
-@@ -22,7 +23,6 @@
+@@ -23,7 +24,6 @@
  #endif
  #include <cap-ng.h>
  #include "qemu/sockets.h"
 -#include "qemu/xattr.h"
  #include "9p-iov-marshal.h"
  #include "hw/9pfs/9p-proxy.h"
- #include "fsdev/9p-iov-marshal.h"
+ #include "hw/9pfs/9p-util.h"

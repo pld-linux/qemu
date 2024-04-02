@@ -1,5 +1,6 @@
 # TODO:
 # canokey (BR: canokey-qemu.pc, https://github.com/canokeys/canokey-qemu)
+# vfio_user_server?
 # plugins? (probes)
 #
 # Conditional build:
@@ -43,12 +44,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	7.1.0
-Release:	3
+Version:	7.2.10
+Release:	1
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	https://download.qemu.org/%{name}-%{version}.tar.xz
-# Source0-md5:	3be5458a9171b4ec5220c65d5d52bdcf
+# Source0-md5:	a99d896cf773964422e0294015d3b98a
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
 # Creates /dev/kvm
@@ -125,12 +126,12 @@ BuildRequires:	libxml2-devel >= 2.0
 %{?with_lttng:BuildRequires:	lttng-ust-devel >= 2.1}
 BuildRequires:	lzfse-devel
 BuildRequires:	lzo-devel >= 2
-BuildRequires:	meson >= 0.59.3
+BuildRequires:	meson >= 0.61.5
 %{?with_multipath:BuildRequires:	multipath-tools-devel}
 BuildRequires:	ncurses-devel
 # also libgcrypt-devel >= 1.8 possible, but gnutls already pulls nettle
 BuildRequires:	nettle-devel >= 3.4
-BuildRequires:	ninja
+BuildRequires:	ninja >= 1.5
 %{?with_smartcard:BuildRequires:	nss-devel >= 1:3.12.8}
 BuildRequires:	numactl-devel
 BuildRequires:	pam-devel
@@ -140,7 +141,7 @@ BuildRequires:	pixman-devel >= 0.21.8
 BuildRequires:	pkgconfig
 %{?with_pmem:BuildRequires:	pmdk-devel}
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
-BuildRequires:	python3 >= 1:3.6
+BuildRequires:	python3 >= 1:3.7
 BuildRequires:	python3-sphinx_rtd_theme
 BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 1.644
@@ -1044,7 +1045,7 @@ build dynamic \
 	%{__enable_disable rdma} \
 	%{__enable_disable sdl} \
 	%{__enable_disable seccomp} \
-	--enable-slirp=system \
+	--enable-slirp \
 	%{__enable_disable spice} \
 	%{__enable_disable smartcard} \
 	%{__enable_disable snappy} \
@@ -1333,6 +1334,7 @@ fi
 %attr(755,root,root) %{_libexecdir}/virtiofsd
 %dir %{_libdir}/%{name}
 # modules without too many external dependencies
+%attr(755,root,root) %{_libdir}/%{name}/block-blkio.so
 %attr(755,root,root) %{_libdir}/%{name}/block-dmg-bz2.so
 %attr(755,root,root) %{_libdir}/%{name}/block-dmg-lzfse.so
 %attr(755,root,root) %{_libdir}/%{name}/accel-tcg-i386.so
