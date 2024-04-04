@@ -1,11 +1,11 @@
 # TODO:
-# canokey (BR: canokey-qemu.pc, https://github.com/canokeys/canokey-qemu)
 # vfio_user_server?
 # plugins? (probes)
 #
 # Conditional build:
 %bcond_without	sdl		# SDL UI and audio support
 %bcond_without	opengl		# Don't require GL deps
+%bcond_with	canokey		# CanoKey support
 %bcond_without	ceph		# Ceph/RBD support
 %bcond_without	glusterfs	# GlusterFS backend
 %bcond_without	rdma		# RDMA-based migration support
@@ -82,6 +82,7 @@ URL:		https://www.qemu.org/
 BuildRequires:	alsa-lib-devel
 %{?with_brlapi:BuildRequires:	brlapi-devel}
 BuildRequires:	bzip2-devel
+%{?with_canokey:BuildRequires:	canokey-qemu-devel}
 BuildRequires:	capstone-devel >= 4.0
 %{?with_ceph:BuildRequires:	ceph-devel >= 12}
 BuildRequires:	curl-devel >= 7.29.0
@@ -1025,6 +1026,7 @@ build dynamic \
 	--audio-drv-list="alsa,jack%{?with_oss:,oss}%{?with_pulseaudio:,pa}%{?with_sdl:,sdl}" \
 	--enable-attr \
 	%{__enable_disable brlapi} \
+	%{__enable_disable canokey} \
 	--enable-cap-ng \
 	--enable-capstone \
 	--enable-curl \
@@ -1063,6 +1065,7 @@ build dynamic \
 %if %{with user_static}
 build static \
 	--disable-brlapi \
+	--disable-canokey \
 	--disable-cap-ng \
 	--disable-capstone \
 	--disable-curl \
