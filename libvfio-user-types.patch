@@ -1,0 +1,516 @@
+--- qemu-7.2.10/subprojects/libvfio-user/lib/dma.c.orig	2024-03-04 17:26:53.000000000 +0100
++++ qemu-7.2.10/subprojects/libvfio-user/lib/dma.c	2024-04-03 21:26:55.422317782 +0200
+@@ -249,7 +249,7 @@ dma_map_region(dma_controller_t *dma, dm
+     region->info.vaddr = mmap_base + (region->offset - offset);
+ 
+     vfu_log(dma->vfu_ctx, LOG_DEBUG, "mapped DMA region iova=[%p, %p) "
+-            "vaddr=%p page_size=%#lx mapping=[%p, %p)",
++            "vaddr=%p page_size=%#zx mapping=[%p, %p)",
+             region->info.iova.iov_base, iov_end(&region->info.iova),
+             region->info.vaddr, region->info.page_size,
+             region->info.mapping.iov_base, iov_end(&region->info.mapping));
+@@ -300,8 +300,8 @@ MOCK_DEFINE(dma_controller_add_region)(d
+ 
+     assert(dma != NULL);
+ 
+-    snprintf(rstr, sizeof(rstr), "[%p, %p) fd=%d offset=%#lx prot=%#x",
+-             dma_addr, (char *)dma_addr + size, fd, offset, prot);
++    snprintf(rstr, sizeof(rstr), "[%p, %p) fd=%d offset=%#"PRIx64" prot=%#x",
++             dma_addr, (char *)dma_addr + size, fd, (int64_t)offset, prot);
+ 
+     if (size > dma->max_size) {
+         vfu_log(dma->vfu_ctx, LOG_ERR, "DMA region size %zu > max %zu",
+@@ -317,7 +317,7 @@ MOCK_DEFINE(dma_controller_add_region)(d
+             region->info.iova.iov_len == size) {
+             if (offset != region->offset) {
+                 vfu_log(dma->vfu_ctx, LOG_ERR, "bad offset for new DMA region "
+-                        "%s; existing=%#lx", rstr, region->offset);
++                        "%s; existing=%#"PRIx64, rstr, (int64_t)(region->offset));
+                 return ERROR_INT(EINVAL);
+             }
+             if (!fds_are_same_file(region->fd, fd)) {
+@@ -573,7 +573,7 @@ dma_controller_dirty_page_get(dma_contro
+     }
+ 
+     if (pgsize != dma->dirty_pgsize) {
+-        vfu_log(dma->vfu_ctx, LOG_ERR, "bad page size %ld", pgsize);
++        vfu_log(dma->vfu_ctx, LOG_ERR, "bad page size %zu", pgsize);
+         return ERROR_INT(EINVAL);
+     }
+ 
+@@ -588,7 +588,7 @@ dma_controller_dirty_page_get(dma_contro
+      * receive.
+      */
+     if (size != (size_t)bitmap_size) {
+-        vfu_log(dma->vfu_ctx, LOG_ERR, "bad bitmap size %ld != %ld", size,
++        vfu_log(dma->vfu_ctx, LOG_ERR, "bad bitmap size %zu != %zd", size,
+                 bitmap_size);
+         return ERROR_INT(EINVAL);
+     }
+--- qemu-7.2.10/subprojects/libvfio-user/lib/libvfio-user.c.orig	2024-03-04 17:26:53.000000000 +0100
++++ qemu-7.2.10/subprojects/libvfio-user/lib/libvfio-user.c	2024-04-03 22:01:11.697844648 +0200
+@@ -183,16 +183,16 @@ debug_region_access(vfu_ctx_t *vfu_ctx,
+     case 2: val = *((uint16_t *)buf); break;
+     case 1: val = *((uint8_t *)buf); break;
+     default:
+-            vfu_log(vfu_ctx, LOG_DEBUG, "region%zu: %s %zu bytes at %#lx",
++            vfu_log(vfu_ctx, LOG_DEBUG, "region%zu: %s %zu bytes at %#"PRIx64,
+                     region, verb, count, offset);
+             return;
+     }
+ 
+     if (is_write) {
+-        vfu_log(vfu_ctx, LOG_DEBUG, "region%zu: wrote %#zx to (%#lx:%zu)",
++        vfu_log(vfu_ctx, LOG_DEBUG, "region%zu: wrote %#"PRIx64" to (%#"PRIx64":%zu)",
+                 region, val, offset, count);
+     } else {
+-        vfu_log(vfu_ctx, LOG_DEBUG, "region%zu: read %#zx from (%#lx:%zu)",
++        vfu_log(vfu_ctx, LOG_DEBUG, "region%zu: read %#"PRIx64" from (%#"PRIx64":%zu)",
+                 region, val, offset, count);
+     }
+ }
+@@ -235,7 +235,7 @@ region_access(vfu_ctx_t *vfu_ctx, size_t
+ 
+ out:
+     if (ret != (ssize_t)count) {
+-        vfu_log(vfu_ctx, LOG_DEBUG, "region%zu: %s (%#lx:%zu) failed: %m",
++        vfu_log(vfu_ctx, LOG_DEBUG, "region%zu: %s (%#"PRIx64":%zu) failed: %m",
+                 region, verb, offset, count);
+     } else {
+         debug_region_access(vfu_ctx, region, buf, count, offset, is_write);
+@@ -266,7 +266,7 @@ is_valid_region_access(vfu_ctx_t *vfu_ct
+ 
+     if (cmd == VFIO_USER_REGION_WRITE && size - sizeof(*ra) != ra->count) {
+         vfu_log(vfu_ctx, LOG_ERR, "region write count too small: "
+-                "expected %lu, got %u", size - sizeof(*ra), ra->count);
++                "expected %zu, got %u", size - sizeof(*ra), ra->count);
+         return false;
+     }
+ 
+@@ -278,7 +278,7 @@ is_valid_region_access(vfu_ctx_t *vfu_ct
+     }
+ 
+     if (satadd_u64(ra->offset, ra->count) > vfu_ctx->reg_info[index].size) {
+-        vfu_log(vfu_ctx, LOG_ERR, "out of bounds region access %#lx-%#lx "
++        vfu_log(vfu_ctx, LOG_ERR, "out of bounds region access %#"PRIx64"-%"PRIx64" "
+                 "(size %u)", ra->offset, ra->offset + ra->count,
+                 vfu_ctx->reg_info[index].size);
+ 
+@@ -337,7 +337,7 @@ handle_region_access(vfu_ctx_t *vfu_ctx,
+ 
+     ret = region_access(vfu_ctx, in_ra->region, buf, in_ra->count,
+                         in_ra->offset, msg->hdr.cmd == VFIO_USER_REGION_WRITE);
+-    if (ret != in_ra->count) {
++    if ((unsigned long)ret != (unsigned long)(in_ra->count)) {
+         /* FIXME we should return whatever has been accessed, not an error */
+         if (ret >= 0) {
+             ret = ERROR_INT(EINVAL);
+@@ -671,7 +671,7 @@ handle_dma_map(vfu_ctx_t *vfu_ctx, vfu_m
+         return ERROR_INT(EINVAL);
+     }
+ 
+-    snprintf(rstr, sizeof(rstr), "[%#lx, %#lx) offset=%#lx flags=%#x",
++    snprintf(rstr, sizeof(rstr), "[%#"PRIx64", %#"PRIx64") offset=%#"PRIx64" flags=%#x",
+              dma_map->addr, dma_map->addr + dma_map->size, dma_map->offset,
+              dma_map->flags);
+ 
+@@ -700,7 +700,7 @@ handle_dma_map(vfu_ctx_t *vfu_ctx, vfu_m
+         }
+     }
+ 
+-    ret = dma_controller_add_region(vfu_ctx->dma, (void *)dma_map->addr,
++    ret = dma_controller_add_region(vfu_ctx->dma, (void *)(uintptr_t)dma_map->addr,
+                                     dma_map->size, fd, dma_map->offset,
+                                     prot);
+     if (ret < 0) {
+@@ -747,7 +747,7 @@ is_valid_unmap(vfu_ctx_t *vfu_ctx, vfu_m
+ 
+     case VFIO_DMA_UNMAP_FLAG_ALL:
+         if (dma_unmap->addr || dma_unmap->size) {
+-            vfu_log(vfu_ctx, LOG_ERR, "bad addr=%#lx or size=%#lx, expected "
++            vfu_log(vfu_ctx, LOG_ERR, "bad addr=%#"PRIx64" or size=%#"PRIx64", expected "
+                     "both to be zero", dma_unmap->addr, dma_unmap->size);
+             errno = EINVAL;
+             return false;
+@@ -791,7 +791,7 @@ handle_dma_unmap(vfu_ctx_t *vfu_ctx, vfu
+         return -1;
+     }
+ 
+-    snprintf(rstr, sizeof(rstr), "[%#lx, %#lx) flags=%#x",
++    snprintf(rstr, sizeof(rstr), "[%#"PRIx64", %#"PRIx64") flags=%#x",
+              dma_unmap->addr, dma_unmap->addr + dma_unmap->size, dma_unmap->flags);
+ 
+     vfu_log(vfu_ctx, LOG_DEBUG, "removing DMA region %s", rstr);
+@@ -817,7 +817,7 @@ handle_dma_unmap(vfu_ctx_t *vfu_ctx, vfu
+     if (dma_unmap->flags & VFIO_DMA_UNMAP_FLAG_GET_DIRTY_BITMAP) {
+         memcpy(msg->out.iov.iov_base + sizeof(*dma_unmap), dma_unmap->bitmap, sizeof(*dma_unmap->bitmap));
+         ret = dma_controller_dirty_page_get(vfu_ctx->dma,
+-                                            (vfu_dma_addr_t)dma_unmap->addr,
++                                            (vfu_dma_addr_t)(uintptr_t)dma_unmap->addr,
+                                             dma_unmap->size,
+                                             dma_unmap->bitmap->pgsize,
+                                             dma_unmap->bitmap->size,
+@@ -829,7 +829,7 @@ handle_dma_unmap(vfu_ctx_t *vfu_ctx, vfu
+     }
+ 
+     ret = dma_controller_remove_region(vfu_ctx->dma,
+-                                       (void *)dma_unmap->addr,
++                                       (void *)(uintptr_t)dma_unmap->addr,
+                                        dma_unmap->size,
+                                        vfu_ctx->dma_unregister,
+                                        vfu_ctx);
+@@ -924,7 +924,7 @@ handle_dirty_pages_get(vfu_ctx_t *vfu_ct
+         range_out = msg->out.iov.iov_base + sizeof(*dirty_pages_out);
+         memcpy(range_out, range_in, sizeof(*range_out));
+         ret = dma_controller_dirty_page_get(vfu_ctx->dma,
+-                                            (vfu_dma_addr_t)range_in->iova,
++                                            (vfu_dma_addr_t)(uintptr_t)range_in->iova,
+                                             range_in->size,
+                                             range_in->bitmap.pgsize,
+                                             range_in->bitmap.size, bitmap_out);
+@@ -939,7 +939,7 @@ handle_dirty_pages_get(vfu_ctx_t *vfu_ct
+         }
+     } else {
+         vfu_log(vfu_ctx, LOG_ERR,
+-                "dirty pages: get [%#lx, %#lx): buffer too small (%u < %lu)",
++                "dirty pages: get [%#"PRIx64", %#"PRIx64"): buffer too small (%u < %zu)",
+                 range_in->iova, range_in->iova + range_in->size,
+                 dirty_pages_in->argsz, argsz);
+     }
+@@ -2124,7 +2124,7 @@ vfu_dma_transfer(vfu_ctx_t *vfu_ctx, enu
+     while (remaining > 0) {
+         int ret;
+ 
+-        dma_req->addr = (uint64_t)sg->dma_addr + count;
++        dma_req->addr = (uint64_t)(uintptr_t)sg->dma_addr + count;
+         dma_req->count = MIN(remaining, vfu_ctx->client_max_data_xfer_size);
+ 
+         if (cmd == VFIO_USER_DMA_WRITE) {
+@@ -2154,7 +2154,7 @@ vfu_dma_transfer(vfu_ctx_t *vfu_ctx, enu
+         if (dma_reply->addr != dma_req->addr ||
+             dma_reply->count != dma_req->count) {
+             vfu_log(vfu_ctx, LOG_ERR, "bad reply to DMA transfer: "
+-                    "request:%#lx,%lu reply:%#lx,%lu",
++                    "request:%#"PRIx64",%"PRIu64" reply:%#"PRIx64",%"PRIu64,
+                     dma_req->addr, dma_req->count,
+                     dma_reply->addr, dma_reply->count);
+             free(rbuf);
+--- qemu-7.2.10/subprojects/libvfio-user/lib/migration.c.orig	2024-03-04 17:26:53.000000000 +0100
++++ qemu-7.2.10/subprojects/libvfio-user/lib/migration.c	2024-04-03 22:17:23.329247535 +0200
+@@ -413,7 +413,7 @@ MOCK_DEFINE(migration_region_access_regi
+     case offsetof(struct vfio_user_migration_info, device_state):
+         if (count != sizeof(migr->info.device_state)) {
+             vfu_log(vfu_ctx, LOG_ERR,
+-                    "bad device_state access size %ld", count);
++                    "bad device_state access size %zd", count);
+             return ERROR_INT(EINVAL);
+         }
+         device_state = (uint32_t *)buf;
+@@ -443,7 +443,7 @@ MOCK_DEFINE(migration_region_access_regi
+     case offsetof(struct vfio_user_migration_info, pending_bytes):
+         if (count != sizeof(migr->info.pending_bytes)) {
+             vfu_log(vfu_ctx, LOG_ERR,
+-                    "bad pending_bytes access size %ld", count);
++                    "bad pending_bytes access size %zd", count);
+             return ERROR_INT(EINVAL);
+         }
+         ret = handle_pending_bytes(vfu_ctx, migr, (uint64_t *)buf, is_write);
+@@ -451,7 +451,7 @@ MOCK_DEFINE(migration_region_access_regi
+     case offsetof(struct vfio_user_migration_info, data_offset):
+         if (count != sizeof(migr->info.data_offset)) {
+             vfu_log(vfu_ctx, LOG_ERR,
+-                    "bad data_offset access size %ld", count);
++                    "bad data_offset access size %zd", count);
+             return ERROR_INT(EINVAL);
+         }
+         ret = handle_data_offset(vfu_ctx, migr, (uint64_t *)buf, is_write);
+@@ -459,14 +459,14 @@ MOCK_DEFINE(migration_region_access_regi
+     case offsetof(struct vfio_user_migration_info, data_size):
+         if (count != sizeof(migr->info.data_size)) {
+             vfu_log(vfu_ctx, LOG_ERR,
+-                    "bad data_size access size %ld", count);
++                    "bad data_size access size %zd", count);
+             return ERROR_INT(EINVAL);
+         }
+         ret = handle_data_size(vfu_ctx, migr, (uint64_t *)buf, is_write);
+         break;
+     default:
+-        vfu_log(vfu_ctx, LOG_ERR, "bad migration region register offset %#lx",
+-               pos);
++        vfu_log(vfu_ctx, LOG_ERR, "bad migration region register offset %#"PRIx64,
++               (int64_t)pos);
+         return ERROR_INT(EINVAL);
+     }
+     return ret;
+@@ -502,8 +502,8 @@ migration_region_access(vfu_ctx_t *vfu_c
+              * any access to the data region properly.
+              */
+             vfu_log(vfu_ctx, LOG_WARNING,
+-                    "bad access to dead space %#lx-%#lx in migration region",
+-                    pos, pos + count - 1);
++                    "bad access to dead space %#"PRIx64"-%#"PRIx64" in migration region",
++                    (int64_t)pos, (int64_t)(pos + count - 1));
+             return ERROR_INT(EINVAL);
+         }
+ 
+--- qemu-7.2.10/subprojects/libvfio-user/lib/pci.c.orig	2024-03-04 17:26:53.000000000 +0100
++++ qemu-7.2.10/subprojects/libvfio-user/lib/pci.c	2024-04-03 22:39:07.265516839 +0200
+@@ -264,8 +264,8 @@ pci_hdr_write(vfu_ctx_t *vfu_ctx, const
+         ret = handle_erom_write(vfu_ctx, cfg_space, buf);
+         break;
+     default:
+-        vfu_log(vfu_ctx, LOG_ERR, "PCI config write %#lx not handled",
+-                offset);
++        vfu_log(vfu_ctx, LOG_ERR, "PCI config write %#"PRIx64" not handled",
++                (int64_t)offset);
+         ret = ERROR_INT(EINVAL);
+     }
+ 
+@@ -315,7 +315,7 @@ pci_nonstd_access(vfu_ctx_t *vfu_ctx, ch
+ 
+     if (is_write) {
+         vfu_log(vfu_ctx, LOG_ERR, "no callback for write to config space "
+-                "offset %lu size %zu", offset, count);
++                "offset %"PRId64" size %zu", (int64_t)offset, count);
+         return ERROR_INT(EINVAL);
+     }
+ 
+@@ -429,8 +429,8 @@ pci_config_space_access(vfu_ctx_t *vfu_c
+         size = pci_config_space_next_segment(vfu_ctx, count, offset, is_write,
+                                              &cb);
+         if (cb == NULL) {
+-            vfu_log(vfu_ctx, LOG_ERR, "bad write to PCI config space %#lx-%#lx",
+-                    offset, offset + count - 1);
++            vfu_log(vfu_ctx, LOG_ERR, "bad write to PCI config space %#"PRIx64"-%#"PRIx64,
++                    (int64_t)offset, (int64_t)(offset + count - 1));
+             return size;
+         }
+ 
+--- qemu-7.2.10/subprojects/libvfio-user/lib/pci_caps.c.orig	2024-03-04 17:26:53.000000000 +0100
++++ qemu-7.2.10/subprojects/libvfio-user/lib/pci_caps.c	2024-04-03 22:41:43.031339650 +0200
+@@ -483,7 +483,7 @@ cap_place(vfu_ctx_t *vfu_ctx, struct pci
+ 
+     if (cap->off != 0) {
+         if (cap->off < PCI_STD_HEADER_SIZEOF) {
+-            vfu_log(vfu_ctx, LOG_ERR, "invalid offset %#lx for capability "
++            vfu_log(vfu_ctx, LOG_ERR, "invalid offset %#zx for capability "
+                     "%u (%s)", cap->off, cap->id, cap->name);
+             return ERROR_INT(EINVAL);
+         }
+@@ -516,7 +516,7 @@ cap_place(vfu_ctx_t *vfu_ctx, struct pci
+ 
+     if (cap->off + cap->size > pci_config_space_size(vfu_ctx)) {
+         vfu_log(vfu_ctx, LOG_ERR, "no config space left for capability "
+-                "%u (%s) of size %zu bytes at offset %#lx", cap->id,
++                "%u (%s) of size %zu bytes at offset %#zx", cap->id,
+                 cap->name, cap->size, cap->off);
+         return ERROR_INT(ENOSPC);
+     }
+@@ -547,7 +547,7 @@ ext_cap_place(vfu_ctx_t *vfu_ctx, struct
+ 
+     if (cap->off != 0) {
+         if (cap->off < PCI_CFG_SPACE_SIZE) {
+-            vfu_log(vfu_ctx, LOG_ERR, "invalid offset %#lx for capability "
++            vfu_log(vfu_ctx, LOG_ERR, "invalid offset %#zx for capability "
+                     "%u (%s)", cap->off, cap->id, cap->name);
+             return ERROR_INT(EINVAL);
+         }
+@@ -581,7 +581,7 @@ ext_cap_place(vfu_ctx_t *vfu_ctx, struct
+ 
+     if (cap->off + cap->size > pci_config_space_size(vfu_ctx)) {
+         vfu_log(vfu_ctx, LOG_ERR, "no config space left for capability "
+-                "%u (%s) of size %zu bytes at offset %#lx", cap->id,
++                "%u (%s) of size %zu bytes at offset %#zx", cap->id,
+                 cap->name, cap->size, cap->off);
+         return ERROR_INT(ENOSPC);
+     }
+@@ -700,7 +700,7 @@ vfu_pci_add_capability(vfu_ctx_t *vfu_ct
+ 
+         if (cap.off + cap.size >= pci_config_space_size(vfu_ctx)) {
+                 vfu_log(vfu_ctx, LOG_DEBUG,
+-                        "PCI capability past end of config space, %#lx >= %#lx",
++                        "PCI capability past end of config space, %#zx >= %#zx",
+                         cap.off + cap.size, pci_config_space_size(vfu_ctx));
+             return ERROR_INT(EINVAL);
+         }
+--- qemu-7.2.10/subprojects/libvfio-user/lib/tran.c.orig	2024-03-04 17:26:53.000000000 +0100
++++ qemu-7.2.10/subprojects/libvfio-user/lib/tran.c	2024-04-03 22:42:30.844413958 +0200
+@@ -176,7 +176,7 @@ recv_version(vfu_ctx_t *vfu_ctx, uint16_
+ 
+     if (msg.in.iov.iov_len < sizeof(*cversion)) {
+         vfu_log(vfu_ctx, LOG_ERR,
+-                "msg%#hx: VFIO_USER_VERSION: invalid size %lu",
++                "msg%#hx: VFIO_USER_VERSION: invalid size %zu",
+                 *msg_idp, msg.in.iov.iov_len);
+         ret = EINVAL;
+         goto out;
+--- qemu-7.2.10/subprojects/libvfio-user/samples/client.c.orig	2024-03-04 17:26:53.000000000 +0100
++++ qemu-7.2.10/subprojects/libvfio-user/samples/client.c	2024-04-04 06:27:19.254657097 +0200
+@@ -110,7 +110,7 @@ send_version(int sock)
+                 "\"max_msg_fds\":%u,"
+                 "\"max_data_xfer_size\":%u,"
+                 "\"migration\":{"
+-                    "\"pgsize\":%zu"
++                    "\"pgsize\":%lu"
+                 "}"
+             "}"
+          "}", CLIENT_MAX_FDS, CLIENT_MAX_DATA_XFER_SIZE, sysconf(_SC_PAGESIZE));
+@@ -155,7 +155,7 @@ recv_version(int sock, int *server_max_f
+     }
+ 
+     if (vlen < sizeof(*sversion)) {
+-        errx(EXIT_FAILURE, "VFIO_USER_VERSION: invalid size %lu", vlen);
++        errx(EXIT_FAILURE, "VFIO_USER_VERSION: invalid size %zu", vlen);
+     }
+ 
+     if (sversion->major != LIB_VFIO_USER_MAJOR) {
+@@ -290,7 +290,7 @@ mmap_sparse_areas(int *fds, struct vfio_
+                     sparse->areas[i].offset);
+         if (addr == MAP_FAILED) {
+             err(EXIT_FAILURE,
+-                "failed to mmap sparse region #%lu in %s (%#llx-%#llx)",
++                "failed to mmap sparse region #%zu in %s (%#llx-%#llx)",
+                 i, buf, sparse->areas[i].offset,
+                 sparse->areas[i].offset + sparse->areas[i].size - 1);
+         }
+@@ -330,7 +330,7 @@ get_device_region_info(int sock, uint32_
+ 
+     cap_sz = region_info->argsz - sizeof(struct vfio_region_info);
+     printf("client: %s: region_info[%d] offset %#llx flags %#x size %llu "
+-           "cap_sz %lu #FDs %lu\n", __func__, index, region_info->offset,
++           "cap_sz %zu #FDs %zu\n", __func__, index, region_info->offset,
+            region_info->flags, region_info->size, cap_sz, nr_fds);
+     if (cap_sz) {
+         struct vfio_region_info_cap_sparse_mmap *sparse = NULL;
+@@ -487,14 +487,14 @@ access_region(int sock, int region, bool
+                               recv_data, recv_data_len, NULL, 0);
+     pthread_mutex_unlock(&mutex);
+     if (ret != 0) {
+-        warn("failed to %s region %d %#lx-%#lx",
++        warn("failed to %s region %d %#"PRIx64"-%#"PRIx64,
+              is_write ? "write to" : "read from", region, offset,
+              offset + data_len - 1);
+         free(recv_data);
+         return ret;
+     }
+     if (recv_data->count != data_len) {
+-        warnx("bad %s data count, expected=%lu, actual=%d",
++        warnx("bad %s data count, expected=%zu, actual=%d",
+              is_write ? "write" : "read", data_len,
+              recv_data->count);
+         free(recv_data);
+@@ -585,8 +585,8 @@ handle_dma_write(int sock, struct vfio_u
+         c = pwrite(dma_region_fds[i], data, dma_access.count, offset);
+ 
+         if (c != (ssize_t)dma_access.count) {
+-            err(EXIT_FAILURE, "failed to write to fd=%d at [%#lx-%#lx)",
+-                    dma_region_fds[i], offset, offset + dma_access.count);
++            err(EXIT_FAILURE, "failed to write to fd=%d at [%#"PRIx64"-%#"PRIx64")",
++                    dma_region_fds[i], (int64_t)offset, (int64_t)(offset + dma_access.count));
+         }
+         break;
+     }
+@@ -640,8 +640,8 @@ handle_dma_read(int sock, struct vfio_us
+         c = pread(dma_region_fds[i], data, dma_access.count, offset);
+ 
+         if (c != (ssize_t)dma_access.count) {
+-            err(EXIT_FAILURE, "failed to read from fd=%d at [%#lx-%#lx)",
+-                    dma_region_fds[i], offset, offset + dma_access.count);
++            err(EXIT_FAILURE, "failed to read from fd=%d at [%#"PRIx64"-%#"PRIx64")",
++                    dma_region_fds[i], (int64_t)offset, (int64_t)(offset + dma_access.count));
+         }
+         break;
+     }
+@@ -706,7 +706,7 @@ get_dirty_bitmap(int sock, struct vfio_u
+         err(EXIT_FAILURE, "failed to get dirty page bitmap");
+     }
+ 
+-    printf("client: %s: %#lx-%#lx\t%#x\n", __func__, range->iova,
++    printf("client: %s: %#"PRIx64"-%#"PRIx64"\t%#x\n", __func__, range->iova,
+            range->iova + range->size - 1, bitmap[0]);
+ 
+     free(data);
+@@ -900,7 +900,7 @@ migrate_from(int sock, size_t *nr_iters,
+     _nr_iters += do_migrate(sock, 1, (*migr_iters) + _nr_iters);
+     if (_nr_iters != 2) {
+         errx(EXIT_FAILURE,
+-             "expected 2 iterations instead of %ld while in stop-and-copy state",
++             "expected 2 iterations instead of %zd while in stop-and-copy state",
+              _nr_iters);
+     }
+ 
+@@ -1000,7 +1000,7 @@ migrate_to(char *old_sock_path, int *ser
+          * TODO write half of migration data via regular write and other half via
+          * memopy map.
+          */
+-        printf("client: writing migration device data %#lx-%#lx\n",
++        printf("client: writing migration device data %#"PRIx64"-%#"PRIx64"\n",
+                data_offset, data_offset + migr_iters[i].iov_len - 1);
+         ret = access_region(sock, VFU_PCI_DEV_MIGR_REGION_IDX, true,
+                             data_offset, migr_iters[i].iov_base,
+--- qemu-7.2.10/subprojects/libvfio-user/samples/server.c.orig	2024-03-04 17:26:53.000000000 +0100
++++ qemu-7.2.10/subprojects/libvfio-user/samples/server.c	2024-04-04 16:58:57.346435682 +0200
+@@ -93,8 +93,8 @@ bar0_access(vfu_ctx_t *vfu_ctx, char * c
+     struct server_data *server_data = vfu_get_private(vfu_ctx);
+ 
+     if (count != sizeof(time_t) || offset != 0) {
+-        vfu_log(vfu_ctx, LOG_ERR, "bad BAR0 access %#lx-%#lx",
+-                offset, offset + count - 1);
++        vfu_log(vfu_ctx, LOG_ERR, "bad BAR0 access %#"PRIx64"-%#"PRIx64,
++                (int64_t)offset, (int64_t)(offset + count - 1));
+         errno = EINVAL;
+         return -1;
+     }
+@@ -123,8 +123,8 @@ bar1_access(vfu_ctx_t *vfu_ctx, char * c
+     struct server_data *server_data = vfu_get_private(vfu_ctx);
+ 
+     if (offset + count > server_data->bar1_size) {
+-        vfu_log(vfu_ctx, LOG_ERR, "bad BAR1 access %#lx-%#lx",
+-                offset, offset + count - 1);
++        vfu_log(vfu_ctx, LOG_ERR, "bad BAR1 access %#"PRIx64"-%#"PRIx64,
++                (int64_t)offset, (int64_t)(offset + count - 1));
+         errno = EINVAL;
+         return -1;
+     }
+@@ -353,7 +353,7 @@ migration_write_data(vfu_ctx_t *vfu_ctx,
+     assert(data != NULL);
+ 
+     if (offset != 0 || size < server_data->bar1_size) {
+-        vfu_log(vfu_ctx, LOG_DEBUG, "XXX bad migration data write %#lx-%#lx",
++        vfu_log(vfu_ctx, LOG_DEBUG, "XXX bad migration data write %#"PRIx64"-%#"PRIx64,
+                 offset, offset + size - 1);
+         errno = EINVAL;
+         return -1;
+--- qemu-7.2.10/subprojects/libvfio-user/test/unit-tests.c.orig	2024-03-04 17:26:53.000000000 +0100
++++ qemu-7.2.10/subprojects/libvfio-user/test/unit-tests.c	2024-04-04 16:59:18.846711984 +0200
+@@ -161,8 +161,8 @@ static int
+ check_dma_info(const LargestIntegralType value,
+                const LargestIntegralType cvalue)
+ {
+-    vfu_dma_info_t *info = (vfu_dma_info_t *)value;
+-    vfu_dma_info_t *cinfo = (vfu_dma_info_t *)cvalue;
++    vfu_dma_info_t *info = (vfu_dma_info_t *)(uintptr_t)value;
++    vfu_dma_info_t *cinfo = (vfu_dma_info_t *)(uintptr_t)cvalue;
+ 
+     return info->iova.iov_base == cinfo->iova.iov_base &&
+         info->iova.iov_len == cinfo->iova.iov_len &&
+@@ -330,7 +330,7 @@ test_dma_addr_to_sgl(void **state UNUSED
+     assert_int_equal(1, ret);
+     assert_int_equal(r->info.iova.iov_base, sg[0].dma_addr);
+     assert_int_equal(0, sg[0].region);
+-    assert_int_equal(0x2000 - (unsigned long long)r->info.iova.iov_base,
++    assert_int_equal(0x2000 - (unsigned long long)(uintptr_t)r->info.iova.iov_base,
+                      sg[0].offset);
+     assert_int_equal(0x400, sg[0].length);
+     assert_true(vfu_sg_is_mappable(&vfu_ctx, &sg[0]));
+--- qemu-7.2.10/subprojects/libvfio-user/lib/tran_pipe.c.orig	2024-03-04 17:26:53.000000000 +0100
++++ qemu-7.2.10/subprojects/libvfio-user/lib/tran_pipe.c	2024-04-04 17:01:32.872219201 +0200
+@@ -83,7 +83,7 @@ tran_pipe_send_iovec(int fd, uint16_t ms
+             return ERROR_INT(ECONNRESET);
+         }
+         return -1;
+-    } else if (ret < hdr.msg_size) {
++    } else if ((uint32_t)ret < hdr.msg_size) {
+         return ERROR_INT(ECONNRESET);
+     }
+ 

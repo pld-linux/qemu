@@ -1,0 +1,35 @@
+--- qemu-7.2.10/subprojects/libvfio-user/samples/client.c.orig	2024-04-04 06:27:19.254657097 +0200
++++ qemu-7.2.10/subprojects/libvfio-user/samples/client.c	2024-04-04 16:55:35.883734463 +0200
+@@ -310,7 +310,10 @@ get_device_region_info(int sock, uint32_
+     size_t nr_fds = ARRAY_SIZE(fds);
+ 
+ 
+-    region_info = alloca(size);
++    region_info = malloc(size);
++    if (region_info == NULL) {
++        err(EXIT_FAILURE, "%m\n");
++    }
+     memset(region_info, 0, size);
+     region_info->argsz = size;
+     region_info->index = index;
+@@ -318,7 +321,11 @@ get_device_region_info(int sock, uint32_
+     do_get_device_region_info(sock, region_info, NULL, 0);
+     if (region_info->argsz > size) {
+         size = region_info->argsz;
+-        region_info = alloca(size);
++        free(region_info);
++        region_info = malloc(size);
++        if (region_info == NULL) {
++            err(EXIT_FAILURE, "%m\n");
++        }
+         memset(region_info, 0, size);
+         region_info->argsz = size;
+         region_info->index = index;
+@@ -344,6 +351,7 @@ get_device_region_info(int sock, uint32_
+             }
+         }
+     }
++    free(region_info);
+ }
+ 
+ static void

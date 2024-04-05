@@ -1,5 +1,4 @@
 # TODO:
-# vfio_user_server?
 # plugins? (probes)
 #
 # Conditional build:
@@ -26,6 +25,7 @@
 %bcond_without	system_seabios	# system seabios binary
 %bcond_without	snappy		# snappy compression library
 %bcond_without	user_static	# build linux-user static packages
+%bcond_with	vfio_user	# vfio-user server support
 %bcond_with	lttng		# lttng-ust trace backend support [needs update]
 %bcond_without	systemtap	# SystemTap/dtrace trace backend support
 %bcond_without	virgl		# build virgl support
@@ -73,6 +73,8 @@ Patch2:		%{name}-xattr.patch
 Patch3:		libjpeg-boolean.patch
 Patch5:		%{name}-u2f-emu.patch
 Patch6:		%{name}-linux-mount.patch
+Patch7:		libvfio-user-types.patch
+Patch8:		libvfio-user-alloca.patch
 URL:		https://www.qemu.org/
 %{?with_opengl:BuildRequires:	Mesa-libgbm-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
@@ -96,6 +98,7 @@ BuildRequires:	glib2-devel >= 1:2.64
 BuildRequires:	gnutls-devel >= 3.6.14
 %{?with_gtk3:BuildRequires:	gtk+3-devel >= 3.22.0}
 BuildRequires:	jack-audio-connection-kit-devel
+%{?with_vfio_user:BuildRequires:	json-c-devel >= 0.11}
 # for tests
 #BuildRequires:	keyutils-devel
 BuildRequires:	libaio-devel
@@ -213,6 +216,7 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %define	systempkg_req \
 Requires:	capstone >= 4.0 \
 Requires:	daxctl-libs >= 57 \
+%{?with_vfio_user:Requires:	json-c >= 0.11} \
 %{?with_smartcard:Requires:	libcacard >= 2.5.1} \
 Requires:	libfdt >= 1.5.1 \
 Requires:	libfuse3 >= 3.8 \
@@ -758,6 +762,7 @@ Summary:	QEMU system emulator for x86
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem x86
 Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
+%{?with_vfio_user:Requires:	libvfio-user = %{version}-%{release}}
 %{?with_system_seabios:Requires:	seabios}
 %systempkg_req
 Obsoletes:	kvm < 89
@@ -973,6 +978,35 @@ systemtap/dtrace probes for QEMU.
 %description -n systemtap-qemu -l pl.UTF-8
 Sondy systemtap/dtrace dla QEMU.
 
+%package -n libvfio-user
+Summary:	vfio-user library
+Summary(pl.UTF-8):	Biblioteka vfio-user
+Group:		Libraries
+Requires:	json-c >= 0.11
+
+%description -n libvfio-user
+vfio-user is a framework that allows implementing PCI devices in
+userspace. Clients (such as qemu) talk the vfio-user protocol over a
+UNIX socket to a server. This library, libvfio-user, provides an API
+for implementing such servers.
+
+%description -n libvfio-user -l pl.UTF-8
+vfio-user to szkielet pozwalający implementować urządzenia PCI w
+przestrzeni użytkownika. Klienci (jak qemu) komunikują się z serwerem
+protokołem vfio-user przez gniazdo uniksowe.
+
+%package -n libvfio-user-devel
+Summary:	Header files for vfio-user library
+Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki vfio-user
+Group:		Development/Libraries
+Requires:	libvfio-user = %{version}-%{release}
+
+%description -n libvfio-user-devel
+Header files for vfio-user library.
+
+%description -n libvfio-user-devel -l pl.UTF-8
+Pliki nagłówkowe biblioteki vfio-user.
+
 %prep
 %setup -q
 %patch0 -p1
@@ -981,6 +1015,8 @@ Sondy systemtap/dtrace dla QEMU.
 %patch3 -p1
 %patch5 -p1
 %patch6 -p1
+%patch7 -p1
+%patch8 -p1
 
 %{__sed} -i '1s,/usr/bin/env python3,%{__python3},' scripts/qemu-trace-stap
 
@@ -1054,6 +1090,7 @@ build dynamic \
 	--enable-tpm \
 	%{__enable_disable usbredir usb-redir} \
 	--enable-vde \
+	%{?with_vfio_user:--enable-vfio-user-server} \
 	%{__enable_disable virgl virglrenderer} \
 	--enable-virtfs \
 	--enable-vnc-jpeg \
@@ -1296,6 +1333,9 @@ fi
 
 %postun guest-agent
 %systemd_reload
+
+%post	-n libvfio-user -p /sbin/ldconfig
+%postun	-n libvfio-user -p /sbin/ldconfig
 
 %files
 %defattr(644,root,root,755)
@@ -1729,4 +1769,16 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-trace-stap
 %{_datadir}/systemtap/tapset/qemu-*.stp
 %{_mandir}/man1/qemu-trace-stap.1*
+%endif
+
+%if %{with vfio_user}
+%files -n libvfio-user
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libvfio-user.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libvfio-user.so.0
+
+%files -n libvfio-user-devel
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libvfio-user.so
+%{_includedir}/vfio-user
 %endif
