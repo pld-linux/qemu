@@ -216,7 +216,6 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %define	systempkg_req \
 Requires:	capstone >= 4.0 \
 Requires:	daxctl-libs >= 57 \
-%{?with_vfio_user:Requires:	json-c >= 0.11} \
 %{?with_smartcard:Requires:	libcacard >= 2.5.1} \
 Requires:	libfdt >= 1.5.1 \
 Requires:	libfuse3 >= 3.8 \
