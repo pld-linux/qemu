@@ -44,12 +44,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	7.2.10
+Version:	8.0.5
 Release:	1
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	https://download.qemu.org/%{name}-%{version}.tar.xz
-# Source0-md5:	a99d896cf773964422e0294015d3b98a
+# Source0-md5:	c803c9a643131013bef6c3b9b541c5a4
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
 # Creates /dev/kvm
@@ -75,6 +75,7 @@ Patch5:		%{name}-u2f-emu.patch
 Patch6:		%{name}-linux-mount.patch
 Patch7:		libvfio-user-types.patch
 Patch8:		libvfio-user-alloca.patch
+Patch9:		%{name}-capstone.patch
 URL:		https://www.qemu.org/
 %{?with_opengl:BuildRequires:	Mesa-libgbm-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
@@ -119,7 +120,8 @@ BuildRequires:	libpng-devel >= 2:1.6.34
 %{?with_seccomp:BuildRequires:	libseccomp-devel >= 2.3.0}
 BuildRequires:	libselinux-devel
 BuildRequires:	libssh-devel >= 0.8.7
-BuildRequires:	libslirp-devel >= 4.1.0
+BuildRequires:	libslirp-devel >= 4.7
+BuildRequires:	libstdc++-devel >= 6:4.7
 # for tests only
 #BuildRequires:	libtasn1-devel
 BuildRequires:	libu2f-emu-devel
@@ -154,8 +156,8 @@ BuildRequires:	sed >= 4.0
 %{?with_snappy:BuildRequires:	snappy-devel}
 BuildRequires:	sphinx-pdg
 %if %{with spice}
-BuildRequires:	spice-protocol >= 0.12.3
-BuildRequires:	spice-server-devel >= 0.12.5
+BuildRequires:	spice-protocol >= 0.14.0
+BuildRequires:	spice-server-devel >= 0.14.0
 %endif
 %{?with_systemtap:BuildRequires:	systemtap-sdt-devel}
 BuildRequires:	tar >= 1:1.22
@@ -224,12 +226,12 @@ Requires:	libpng >= 2:1.6.34 \
 %if %{with seccomp} \
 Requires:	libseccomp >= 2.3.0 \
 %endif \
-Requires:	libslirp >= 4.1.0 \
+Requires:	libslirp >= 4.7 \
 Requires:	liburing >= 0.3 \
 Requires:	libusb >= 1.0.22 \
 Requires:	pixman >= 0.21.8 \
 %if %{with spice} \
-Requires:	spice-server-libs >= 0.12.5 \
+Requires:	spice-server-libs >= 0.14.0 \
 %endif \
 %if %{with usbredir} \
 Requires:	usbredir >= 0.6 \
@@ -300,6 +302,7 @@ Requires:	nettle >= 3.4
 Requires:	systemd-units >= 38
 %{?with_vte:Requires:	vte >= 0.32.0}
 Requires:	zstd >= 1.4.0
+Suggests:	virtiofsd
 Provides:	group(qemu)
 Provides:	user(qemu)
 Obsoletes:	qemu-kvm-common < 2
@@ -762,7 +765,7 @@ Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem x86
 Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
 %{?with_vfio_user:Requires:	libvfio-user = %{version}-%{release}}
-%{?with_system_seabios:Requires:	seabios}
+%{?with_system_seabios:Requires:	seabios >= 1.11.0}
 %systempkg_req
 Obsoletes:	kvm < 89
 Obsoletes:	qemu-kvm-system-x86 < 2
@@ -1016,6 +1019,7 @@ Pliki nagłówkowe biblioteki vfio-user.
 %patch6 -p1
 %patch7 -p1
 %patch8 -p1
+%patch9 -p1
 
 %{__sed} -i '1s,/usr/bin/env python3,%{__python3},' scripts/qemu-trace-stap
 
@@ -1373,7 +1377,6 @@ fi
 %attr(755,root,root) %{_libexecdir}/vhost-user-gpu
 %endif
 %attr(755,root,root) %{_libexecdir}/virtfs-proxy-helper
-%attr(755,root,root) %{_libexecdir}/virtiofsd
 %dir %{_libdir}/%{name}
 # modules without too many external dependencies
 %attr(755,root,root) %{_libdir}/%{name}/block-blkio.so
@@ -1425,7 +1428,6 @@ fi
 %if %{with virgl}
 %{_datadir}/%{name}/vhost-user/50-qemu-gpu.json
 %endif
-%{_datadir}/%{name}/vhost-user/50-qemu-virtiofsd.json
 %{_desktopdir}/qemu.desktop
 %{_iconsdir}/hicolor/*x*/apps/qemu.png
 %{_iconsdir}/hicolor/32x32/apps/qemu.bmp
@@ -1433,7 +1435,6 @@ fi
 %{_mandir}/man1/qemu.1*
 %{_mandir}/man1/qemu-storage-daemon.1*
 %{_mandir}/man1/virtfs-proxy-helper.1*
-%{_mandir}/man1/virtiofsd.1*
 %{_mandir}/man7/qemu-block-drivers.7*
 %{_mandir}/man7/qemu-cpu-models.7*
 %{_mandir}/man7/qemu-qmp-ref.7*
@@ -1678,7 +1679,6 @@ fi
 %{_datadir}/%{name}/pxe-rtl8139.rom
 %{_datadir}/%{name}/pxe-virtio.rom
 %{_datadir}/%{name}/qboot.rom
-%{_datadir}/%{name}/sgabios.bin
 %{_datadir}/%{name}/vgabios.bin
 %{_datadir}/%{name}/vgabios-ati.bin
 %{_datadir}/%{name}/vgabios-bochs-display.bin

@@ -88,10 +88,10 @@ index ee12035..5951279 100644
  extern unsigned long mmap_min_addr;
  
  typedef struct IOCTLEntry IOCTLEntry;
---- qemu-2.12.0/linux-user/syscall.c~	2018-04-30 21:43:39.000000000 +0300
-+++ qemu-2.12.0/linux-user/syscall.c	2018-04-30 21:46:36.362935706 +0300
-@@ -8340,6 +8340,109 @@ static target_timer_t get_timer_id(abi_l
-     return timerid;
+--- qemu-8.0.5/linux-user/syscall.c.orig	2023-09-21 22:19:33.000000000 +0200
++++ qemu-8.0.5/linux-user/syscall.c	2024-04-28 08:04:44.168009553 +0200
+@@ -8408,6 +8408,109 @@ static int do_openat(CPUArchState *cpu_e
+     return safe_openat(dirfd, path(pathname), flags, mode);
  }
  
 +#define BINPRM_BUF_SIZE 128
@@ -197,15 +197,22 @@ index ee12035..5951279 100644
 +    return get_errno(safe_execve(qemu_execve_path, new_argp, envp));
 +}
 +
- static int target_to_host_cpu_mask(unsigned long *host_mask,
-                                    size_t host_size,
-                                    abi_ulong target_addr,
-@@ -8896,6 +8999,8 @@ static abi_long do_syscall1(CPUArchState
-              */
-             if (is_proc_myself(p, "exe")) {
-                 ret = get_errno(safe_execve(exec_path, argp, envp));
-+            } else if (qemu_execve_path && *qemu_execve_path) {
-+         	ret = get_errno(qemu_execve(p, argp, envp));
-             } else {
-                 ret = get_errno(safe_execve(p, argp, envp));
-             }
+ static int do_execv(CPUArchState *cpu_env, int dirfd,
+                     abi_long pathname, abi_long guest_argp,
+                     abi_long guest_envp, int flags, bool is_execveat)
+@@ -8493,9 +8596,12 @@ static int do_execv(CPUArchState *cpu_en
+     if (is_proc_myself(p, "exe")) {
+         exe = exec_path;
+     }
+-    ret = is_execveat
+-        ? safe_execveat(dirfd, exe, argp, envp, flags)
+-        : safe_execve(exe, argp, envp);
++    if (is_execveat)
++        ret = safe_execveat(dirfd, exe, argp, envp, flags);
++    else if (qemu_execve_path && *qemu_execve_path)
++        ret = qemu_execve(exe, argp, envp);
++    else
++        ret = safe_execve(exe, argp, envp);
+     ret = get_errno(ret);
+ 
+     unlock_user(p, pathname, 0);
