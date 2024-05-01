@@ -83,6 +83,7 @@ URL:		https://www.qemu.org/
 %{?with_sdl:BuildRequires:	SDL2-devel >= 2.0}
 %{?with_sdl:BuildRequires:	SDL2_image-devel >= 2.0}
 BuildRequires:	alsa-lib-devel
+BuildRequires:	bison
 %{?with_brlapi:BuildRequires:	brlapi-devel}
 BuildRequires:	bzip2-devel
 %{?with_canokey:BuildRequires:	canokey-qemu-devel}
@@ -91,6 +92,7 @@ BuildRequires:	capstone-devel >= 4.0
 BuildRequires:	curl-devel >= 7.29.0
 BuildRequires:	cyrus-sasl-devel >= 2
 BuildRequires:	daxctl-devel >= 57
+BuildRequires:	flex
 BuildRequires:	gcc >= 6:7.4
 BuildRequires:	gettext-tools
 BuildRequires:	glib2-devel >= 1:2.64
@@ -185,6 +187,7 @@ BuildRequires:	zstd-devel >= 1.4.0
 %if %{with user_static}
 BuildRequires:	glib2-static >= 1:2.74
 BuildRequires:	glibc-static
+BuildRequires:	libstdc++-static >= 6:4.7
 BuildRequires:	pcre2-8-static >= 10.32
 BuildRequires:	zlib-static
 %endif
