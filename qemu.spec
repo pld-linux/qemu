@@ -1399,9 +1399,9 @@ fi
 %endif
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-qxl.so
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu.so
-%attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu-gl.so
+%{?with_virgl:%attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu-gl.so}
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu-pci.so
-%attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu-pci-gl.so
+%{?with_virgl:%attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu-pci-gl.so}
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-vga.so
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-vga-gl.so
 %attr(755,root,root) %{_libdir}/%{name}/hw-s390x-virtio-gpu-ccw.so
@@ -1427,8 +1427,8 @@ fi
 %dir %{_datadir}/%{name}/firmware
 %{_datadir}/%{name}/keymaps
 %{_datadir}/%{name}/trace-events-all
-%dir %{_datadir}/%{name}/vhost-user
 %if %{with virgl}
+%dir %{_datadir}/%{name}/vhost-user
 %{_datadir}/%{name}/vhost-user/50-qemu-gpu.json
 %endif
 %{_desktopdir}/qemu.desktop
