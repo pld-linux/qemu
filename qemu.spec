@@ -105,6 +105,7 @@ BuildRequires:	jack-audio-connection-kit-devel
 # for tests
 #BuildRequires:	keyutils-devel
 BuildRequires:	libaio-devel
+BuildRequires:	libblkio-devel
 BuildRequires:	libbpf-devel
 %{?with_smartcard:BuildRequires:	libcacard-devel >= 2.5.1}
 BuildRequires:	libcap-ng-devel
