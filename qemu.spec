@@ -1032,6 +1032,14 @@ Pliki nagłówkowe biblioteki vfio-user.
 %{__sed} -i -e "s/stap.found()/true/" meson.build docs/meson.build scripts/meson.build
 %endif
 
+%if %{without smartcard}
+%{__sed} -i -e '/^config USB_SMARTCARD/,/^$/ s/default y/default n/' hw/usb/Kconfig
+%endif
+%ifarch x32
+# xen-emu supports only LP64 __x86_64__ case
+%{__sed} -i -e '/^config XEN_EMU/,$ s/default y/default n/' hw/i386/Kconfig
+%endif
+
 %build
 
 build() {
@@ -1057,8 +1065,7 @@ build() {
 	"$@"
 
 	%{__make} \
-		V=1 \
-		%{!?with_smartcard:CONFIG_USB_SMARTCARD=n}
+		V=1
 
 	cd ..
 }
@@ -1145,7 +1152,6 @@ install -d $RPM_BUILD_ROOT{%{systemdunitdir},/usr/lib/binfmt.d} \
 
 %if %{with user_static}
 %{__make} -C build-static install \
-	%{!?with_smartcard:CONFIG_USB_SMARTCARD=n} \
 	DESTDIR=$RPM_BUILD_ROOT
 
 # Give all QEMU user emulators a -static suffix
@@ -1156,7 +1162,6 @@ done
 %endif
 
 %{__make} -C build-dynamic install \
-	%{!?with_smartcard:CONFIG_USB_SMARTCARD=n} \
 	DESTDIR=$RPM_BUILD_ROOT
 
 # let rpm generate dependencies
