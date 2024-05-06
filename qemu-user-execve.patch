@@ -88,10 +88,10 @@ index ee12035..5951279 100644
  extern unsigned long mmap_min_addr;
  
  typedef struct IOCTLEntry IOCTLEntry;
---- qemu-8.0.5/linux-user/syscall.c.orig	2023-09-21 22:19:33.000000000 +0200
-+++ qemu-8.0.5/linux-user/syscall.c	2024-04-28 08:04:44.168009553 +0200
-@@ -8408,6 +8408,109 @@ static int do_openat(CPUArchState *cpu_e
-     return safe_openat(dirfd, path(pathname), flags, mode);
+--- qemu-8.1.5/linux-user/syscall.c.orig	2024-01-29 19:31:43.000000000 +0100
++++ qemu-8.1.5/linux-user/syscall.c	2024-05-06 19:05:26.075673131 +0200
+@@ -8680,6 +8680,109 @@ ssize_t do_guest_readlink(const char *pa
+     return ret;
  }
  
 +#define BINPRM_BUF_SIZE 128
@@ -200,7 +200,7 @@ index ee12035..5951279 100644
  static int do_execv(CPUArchState *cpu_env, int dirfd,
                      abi_long pathname, abi_long guest_argp,
                      abi_long guest_envp, int flags, bool is_execveat)
-@@ -8493,9 +8596,12 @@ static int do_execv(CPUArchState *cpu_en
+@@ -8765,9 +8868,12 @@ static int do_execv(CPUArchState *cpu_en
      if (is_proc_myself(p, "exe")) {
          exe = exec_path;
      }

@@ -1,13 +1,19 @@
---- qemu-7.1.0/configure.orig	2022-10-05 06:29:01.214549869 +0200
-+++ qemu-7.1.0/configure	2022-10-05 16:30:40.352312168 +0200
-@@ -2246,10 +2246,6 @@ esac
+--- qemu-8.1.5/meson.build.orig	2024-01-29 19:31:43.000000000 +0100
++++ qemu-8.1.5/meson.build	2024-05-06 18:19:10.780261171 +0200
+@@ -478,16 +478,6 @@ if 'cpp' in all_languages
+   qemu_cxxflags = ['-D__STDC_LIMIT_MACROS', '-D__STDC_CONSTANT_MACROS', '-D__STDC_FORMAT_MACROS'] + qemu_cflags
+ endif
  
- write_c_skeleton
- 
--if test "$fortify_source" = "yes" ; then
--  QEMU_CFLAGS="-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2 $QEMU_CFLAGS"
--fi
+-# clang does not support glibc + FORTIFY_SOURCE (is it still true?)
+-if get_option('optimization') != '0' and targetos == 'linux'
+-  if cc.get_id() == 'gcc'
+-    qemu_cflags += ['-U_FORTIFY_SOURCE', '-D_FORTIFY_SOURCE=2']
+-  endif
+-  if 'cpp' in all_languages and cxx.get_id() == 'gcc'
+-    qemu_cxxflags += ['-U_FORTIFY_SOURCE', '-D_FORTIFY_SOURCE=2']
+-  endif
+-endif
 -
- if test "$have_asan" = "yes"; then
-   QEMU_CFLAGS="-fsanitize=address $QEMU_CFLAGS"
-   QEMU_LDFLAGS="-fsanitize=address $QEMU_LDFLAGS"
+ add_project_arguments(qemu_cflags, native: false, language: 'c')
+ add_project_arguments(cc.get_supported_arguments(warn_flags), native: false, language: 'c')
+ if 'cpp' in all_languages

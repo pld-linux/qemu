@@ -44,12 +44,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	8.0.5
+Version:	8.1.5
 Release:	1
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	https://download.qemu.org/%{name}-%{version}.tar.xz
-# Source0-md5:	c803c9a643131013bef6c3b9b541c5a4
+# Source0-md5:	2434331a1e32cb919f02897865a2e927
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
 # Creates /dev/kvm
@@ -75,7 +75,6 @@ Patch5:		%{name}-u2f-emu.patch
 Patch6:		%{name}-linux-mount.patch
 Patch7:		libvfio-user-types.patch
 Patch8:		libvfio-user-alloca.patch
-Patch9:		%{name}-capstone.patch
 URL:		https://www.qemu.org/
 %{?with_opengl:BuildRequires:	Mesa-libgbm-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
@@ -95,17 +94,16 @@ BuildRequires:	daxctl-devel >= 57
 BuildRequires:	flex
 BuildRequires:	gcc >= 6:7.4
 BuildRequires:	gettext-tools
-BuildRequires:	glib2-devel >= 1:2.64
+BuildRequires:	glib2-devel >= 1:2.75.3
 # minimal is 3.4 but new features are used up to 6
 %{?with_glusterfs:BuildRequires:	glusterfs-devel >= 6}
 BuildRequires:	gnutls-devel >= 3.6.14
 %{?with_gtk3:BuildRequires:	gtk+3-devel >= 3.22.0}
 BuildRequires:	jack-audio-connection-kit-devel
 %{?with_vfio_user:BuildRequires:	json-c-devel >= 0.11}
-# for tests
-#BuildRequires:	keyutils-devel
+BuildRequires:	keyutils-devel
 BuildRequires:	libaio-devel
-BuildRequires:	libblkio-devel
+BuildRequires:	libblkio-devel >= 1.3.0
 BuildRequires:	libbpf-devel
 %{?with_smartcard:BuildRequires:	libcacard-devel >= 2.5.1}
 BuildRequires:	libcap-ng-devel
@@ -135,7 +133,7 @@ BuildRequires:	libxml2-devel >= 2.0
 %{?with_lttng:BuildRequires:	lttng-ust-devel >= 2.1}
 BuildRequires:	lzfse-devel
 BuildRequires:	lzo-devel >= 2
-BuildRequires:	meson >= 0.61.5
+BuildRequires:	meson >= 0.63.0
 %{?with_multipath:BuildRequires:	multipath-tools-devel}
 BuildRequires:	ncurses-devel
 # also libgcrypt-devel >= 1.8 possible, but gnutls already pulls nettle
@@ -146,6 +144,7 @@ BuildRequires:	numactl-devel
 BuildRequires:	pam-devel
 BuildRequires:	perl-Encode
 BuildRequires:	perl-tools-pod
+BuildRequires:	pipewire-devel >= 0.3.60
 BuildRequires:	pixman-devel >= 0.21.8
 BuildRequires:	pkgconfig
 %{?with_pmem:BuildRequires:	pmdk-devel}
@@ -186,7 +185,7 @@ BuildRequires:	xz
 BuildRequires:	zlib-devel
 BuildRequires:	zstd-devel >= 1.4.0
 %if %{with user_static}
-BuildRequires:	glib2-static >= 1:2.74
+BuildRequires:	glib2-static >= 1:2.75.3
 BuildRequires:	glibc-static
 BuildRequires:	libstdc++-static >= 6:4.7
 BuildRequires:	pcre2-8-static >= 10.32
@@ -299,9 +298,10 @@ Requires(pre):	/bin/id
 Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
-Requires:	glib2 >= 1:2.64
+Requires:	glib2 >= 1:2.75.3
 Requires:	gnutls-libs >= 3.6.14
 %{?with_gtk3:Requires:	gtk+3 >= 3.22.0}
+Requires:	libblkio >= 1.3.0
 Requires:	nettle >= 3.4
 Requires:	systemd-units >= 38
 %{?with_vte:Requires:	vte >= 0.32.0}
@@ -811,7 +811,7 @@ Summary:	QEMU guest agent
 Summary(pl.UTF-8):	Agent gościa QEMU
 Group:		Daemons
 Requires(post,preun,postun):	systemd-units >= 38
-Requires:	glib2 >= 1:2.64
+Requires:	glib2 >= 1:2.75.3
 Requires:	liburing >= 0.3
 Requires:	systemd-units >= 38
 Obsoletes:	qemu-kvm-guest-agent < 2
@@ -848,6 +848,19 @@ QEMU module for JACK audio output.
 
 %description module-audio-jack -l pl.UTF-8
 Moduł QEMU z wyjściem dźwięku JACK.
+
+%package module-audio-pipewire
+Summary:	QEMU module for PipeWire audio output
+Summary(pl.UTF-8):	Moduł QEMU z wyjściem dźwięku PipeWire
+Group:		Applications/Emulators
+Requires:	%{name}-common = %{version}-%{release}
+Requires:	pipewire-libs >= 0.3.60
+
+%description module-audio-pipewire
+QEMU module for PipeWire audio output.
+
+%description module-audio-pipewire -l pl.UTF-8
+Moduł QEMU z wyjściem dźwięku PipeWire.
 
 %package module-block-curl
 Summary:	QEMU module for 'curl' block devices
@@ -1023,7 +1036,6 @@ Pliki nagłówkowe biblioteki vfio-user.
 %patch6 -p1
 %patch7 -p1
 %patch8 -p1
-%patch9 -p1
 
 %{__sed} -i '1s,/usr/bin/env python3,%{__python3},' scripts/qemu-trace-stap
 
@@ -1720,6 +1732,10 @@ fi
 %files module-audio-jack
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/%{name}/audio-jack.so
+
+%files module-audio-pipewire
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/%{name}/audio-pipewire.so
 
 %files module-block-curl
 %defattr(644,root,root,755)
