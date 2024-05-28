@@ -44,12 +44,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	8.1.5
+Version:	8.2.4
 Release:	1
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	https://download.qemu.org/%{name}-%{version}.tar.xz
-# Source0-md5:	2434331a1e32cb919f02897865a2e927
+# Source0-md5:	aa5c2f004d513b746f25a00cfec8eaa5
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
 # Creates /dev/kvm
@@ -129,6 +129,7 @@ BuildRequires:	libu2f-emu-devel
 BuildRequires:	libusb-devel >= 1.0.22
 BuildRequires:	liburing-devel >= 0.3
 BuildRequires:	libuuid-devel
+BuildRequires:	libxdp-devel >= 1.4.0
 BuildRequires:	libxml2-devel >= 2.0
 %{?with_lttng:BuildRequires:	lttng-ust-devel >= 2.1}
 BuildRequires:	lzfse-devel
@@ -150,13 +151,14 @@ BuildRequires:	pkgconfig
 %{?with_pmem:BuildRequires:	pmdk-devel}
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 BuildRequires:	python3 >= 1:3.7
-BuildRequires:	python3-sphinx_rtd_theme
+BuildRequires:	python3-sphinx_rtd_theme >= 0.5
+BuildRequires:	python3-tomli >= 1.2.0
 BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 1.644
 %{?with_system_seabios:BuildRequires:	seabios}
 BuildRequires:	sed >= 4.0
 %{?with_snappy:BuildRequires:	snappy-devel}
-BuildRequires:	sphinx-pdg
+BuildRequires:	sphinx-pdg >= 1.6
 %if %{with spice}
 BuildRequires:	spice-protocol >= 0.14.0
 BuildRequires:	spice-server-devel >= 0.14.0
@@ -232,6 +234,7 @@ Requires:	libseccomp >= 2.3.0 \
 Requires:	libslirp >= 4.7 \
 Requires:	liburing >= 0.3 \
 Requires:	libusb >= 1.0.22 \
+Requires:	libxdp >= 1.4.0 \
 Requires:	pixman >= 0.21.8 \
 %if %{with spice} \
 Requires:	spice-server-libs >= 0.14.0 \
@@ -1050,6 +1053,9 @@ Pliki nagłówkowe biblioteki vfio-user.
 %ifarch x32
 # xen-emu supports only LP64 __x86_64__ case
 %{__sed} -i -e '/^config XEN_EMU/,$ s/default y/default n/' hw/i386/Kconfig
+
+# plain x32 doesn't provide __sync_bool_compare_and_swap_16 - fail int128_t/ATOMIC128 tests earlier
+%{__sed} -i -e '/^has_int128_type = / s/$/FAILME/' meson.build
 %endif
 
 %build

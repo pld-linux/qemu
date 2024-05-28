@@ -1,19 +1,13 @@
---- qemu-8.1.5/meson.build.orig	2024-01-29 19:31:43.000000000 +0100
-+++ qemu-8.1.5/meson.build	2024-05-06 18:19:10.780261171 +0200
-@@ -478,16 +478,6 @@ if 'cpp' in all_languages
-   qemu_cxxflags = ['-D__STDC_LIMIT_MACROS', '-D__STDC_CONSTANT_MACROS', '-D__STDC_FORMAT_MACROS'] + qemu_cflags
- endif
+--- qemu-8.2.4/include/qemu/osdep.h.orig	2024-05-13 21:19:44.000000000 +0200
++++ qemu-8.2.4/include/qemu/osdep.h	2024-05-28 21:35:11.927464569 +0200
+@@ -27,10 +27,6 @@
+ #ifndef QEMU_OSDEP_H
+ #define QEMU_OSDEP_H
  
--# clang does not support glibc + FORTIFY_SOURCE (is it still true?)
--if get_option('optimization') != '0' and targetos == 'linux'
--  if cc.get_id() == 'gcc'
--    qemu_cflags += ['-U_FORTIFY_SOURCE', '-D_FORTIFY_SOURCE=2']
--  endif
--  if 'cpp' in all_languages and cxx.get_id() == 'gcc'
--    qemu_cxxflags += ['-U_FORTIFY_SOURCE', '-D_FORTIFY_SOURCE=2']
--  endif
--endif
+-#if !defined _FORTIFY_SOURCE && defined __OPTIMIZE__ && __OPTIMIZE__ && defined __linux__
+-# define _FORTIFY_SOURCE 2
+-#endif
 -
- add_project_arguments(qemu_cflags, native: false, language: 'c')
- add_project_arguments(cc.get_supported_arguments(warn_flags), native: false, language: 'c')
- if 'cpp' in all_languages
+ #include "config-host.h"
+ #ifdef NEED_CPU_H
+ #include CONFIG_TARGET
