@@ -44,12 +44,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	8.2.4
+Version:	8.2.7
 Release:	1
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	https://download.qemu.org/%{name}-%{version}.tar.xz
-# Source0-md5:	aa5c2f004d513b746f25a00cfec8eaa5
+# Source0-md5:	f3602805fa1e80fd7b9b82fd2d6080a2
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
 # Creates /dev/kvm
