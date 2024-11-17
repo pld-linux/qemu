@@ -189,7 +189,7 @@ BuildRequires:	zstd-devel >= 1.4.0
 %if %{with user_static}
 BuildRequires:	glib2-static >= 1:2.75.3
 BuildRequires:	glibc-static
-BuildRequires:	libatomic-devel
+BuildRequires:	libatomic-static
 BuildRequires:	libstdc++-static >= 6:4.7
 BuildRequires:	pcre2-8-static >= 10.32
 BuildRequires:	zlib-static
