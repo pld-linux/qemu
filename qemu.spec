@@ -75,6 +75,7 @@ Patch5:		%{name}-u2f-emu.patch
 Patch6:		%{name}-linux-mount.patch
 Patch7:		libvfio-user-types.patch
 Patch8:		libvfio-user-alloca.patch
+Patch9:		glibc2.41.patch
 URL:		https://www.qemu.org/
 %{?with_opengl:BuildRequires:	Mesa-libgbm-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
@@ -1040,6 +1041,7 @@ Pliki nagłówkowe biblioteki vfio-user.
 %patch -P6 -p1
 %patch -P7 -p1
 %patch -P8 -p1
+%patch -P9 -p1
 
 %{__sed} -i '1s,/usr/bin/env python3,%{__python3},' scripts/qemu-trace-stap
 
