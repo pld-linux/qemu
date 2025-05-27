@@ -77,7 +77,7 @@ index ee12035..5951279 100644
 +     "path",       "use interpreter at 'path' when a process calls execve()"},
      {"R",          "QEMU_RESERVED_VA", true,  handle_arg_reserved_va,
       "size",       "reserve 'size' bytes for guest virtual address space"},
-     {"d",          "QEMU_LOG",         true,  handle_arg_log,
+     {"t",          "QEMU_RTSIG_MAP",   true,  handle_arg_rtsig_map,
 --- qemu-6.2.0/linux-user/user-internals.h.orig
 +++ qemu-6.2.0/linux-user/user-internals.h
 @@ -28,6 +28,7 @@ void init_task_state(TaskState *ts);

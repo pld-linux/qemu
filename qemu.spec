@@ -44,12 +44,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	8.2.7
-Release:	1
+Version:	10.0.0
+Release:	0.1
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	https://download.qemu.org/%{name}-%{version}.tar.xz
-# Source0-md5:	f3602805fa1e80fd7b9b82fd2d6080a2
+# Source0-md5:	0616ad4c49210ae33ca7aeb5091cb4e0
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
 # Creates /dev/kvm
@@ -69,13 +69,11 @@ Source15:	%{name}-pr-helper.service
 Source16:	%{name}-pr-helper.socket
 Patch0:		%{name}-cflags.patch
 Patch1:		%{name}-user-execve.patch
-Patch2:		%{name}-xattr.patch
 Patch3:		libjpeg-boolean.patch
 Patch5:		%{name}-u2f-emu.patch
 Patch6:		%{name}-linux-mount.patch
 Patch7:		libvfio-user-types.patch
 Patch8:		libvfio-user-alloca.patch
-Patch9:		glibc2.41.patch
 URL:		https://www.qemu.org/
 %{?with_opengl:BuildRequires:	Mesa-libgbm-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
@@ -200,12 +198,10 @@ Requires:	%{name}-system-aarch64 = %{version}-%{release}
 Requires:	%{name}-system-alpha = %{version}-%{release}
 Requires:	%{name}-system-arm = %{version}-%{release}
 Requires:	%{name}-system-avr = %{version}-%{release}
-Requires:	%{name}-system-cris = %{version}-%{release}
 Requires:	%{name}-system-hppa = %{version}-%{release}
 Requires:	%{name}-system-m68k = %{version}-%{release}
 Requires:	%{name}-system-microblaze = %{version}-%{release}
 Requires:	%{name}-system-mips = %{version}-%{release}
-Requires:	%{name}-system-nios2 = %{version}-%{release}
 Requires:	%{name}-system-or1k = %{version}-%{release}
 Requires:	%{name}-system-ppc = %{version}-%{release}
 Requires:	%{name}-system-riscv32 = %{version}-%{release}
@@ -248,6 +244,9 @@ Requires:	usbredir >= 0.6 \
 # don't strip/chrpath anything in there; these are boot images, roms etc
 %define		_noautostrip	.*%{_datadir}/qemu/.*
 %define		_noautochrpath	.*%{_datadir}/qemu/.*
+
+# include/qemu/osdep.h:290: #error building with NDEBUG is not supported
+%define		filterout	-DNDEBUG
 
 %description
 QEMU is a FAST! processor emulator. By using dynamic translation it
@@ -319,6 +318,8 @@ Obsoletes:	qemu-module-block-archipelago < 2.9.0
 Obsoletes:	qemu-system-lm32 < 5.2
 Obsoletes:	qemu-system-moxie < 6.1
 Obsoletes:	qemu-system-unicore32 < 5.2
+Obsoletes:	qemu-system-cris < 10.0.0
+Obsoletes:	qemu-system-nios2 < 10.0.0
 Conflicts:	qemu < 1.0-2
 
 %description common
@@ -471,26 +472,6 @@ dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
 Ten pakiet zawiera emulator systemu z procesorem AVR.
 
-%package system-cris
-Summary:	QEMU system emulator for CRIS
-Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem CRIS
-Group:		Applications/Emulators
-Requires:	%{name}-common = %{version}-%{release}
-%systempkg_req
-Obsoletes:	qemu-kvm-system-cris < 2
-
-%description system-cris
-QEMU is a generic and open source processor emulator which achieves a
-good emulation speed by using dynamic translation.
-
-This package provides the system emulator with CRIS CPU.
-
-%description system-cris -l pl.UTF-8
-QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
-dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
-
-Ten pakiet zawiera emulator systemu z procesorem CRIS.
-
 %package system-hppa
 Summary:	QEMU system emulator for HP/PA
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem HP/PA
@@ -571,25 +552,6 @@ QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
 Ten pakiet zawiera emulator systemu z procesorem MIPS.
-
-%package system-nios2
-Summary:	QEMU system emulator for Nios II
-Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Nios II
-Group:		Applications/Emulators
-Requires:	%{name}-common = %{version}-%{release}
-%systempkg_req
-
-%description system-nios2
-QEMU is a generic and open source processor emulator which achieves a
-good emulation speed by using dynamic translation.
-
-This package provides the system emulator with Nios II CPU.
-
-%description system-nios2 -l pl.UTF-8
-QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
-dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
-
-Ten pakiet zawiera emulator systemu z procesorem Nios II.
 
 %package system-or1k
 Summary:	QEMU system emulator for OpenRISC
@@ -1035,13 +997,11 @@ Pliki nagłówkowe biblioteki vfio-user.
 %setup -q
 %patch -P0 -p1
 %patch -P1 -p1
-%patch -P2 -p1
 %patch -P3 -p1
 %patch -P5 -p1
 %patch -P6 -p1
 %patch -P7 -p1
 %patch -P8 -p1
-%patch -P9 -p1
 
 %{__sed} -i '1s,/usr/bin/env python3,%{__python3},' scripts/qemu-trace-stap
 
@@ -1406,14 +1366,11 @@ fi
 %if %{with virgl}
 %attr(755,root,root) %{_libexecdir}/vhost-user-gpu
 %endif
-%attr(755,root,root) %{_libexecdir}/virtfs-proxy-helper
 %dir %{_libdir}/%{name}
 # modules without too many external dependencies
 %attr(755,root,root) %{_libdir}/%{name}/block-blkio.so
 %attr(755,root,root) %{_libdir}/%{name}/block-dmg-bz2.so
 %attr(755,root,root) %{_libdir}/%{name}/block-dmg-lzfse.so
-%attr(755,root,root) %{_libdir}/%{name}/accel-tcg-i386.so
-%attr(755,root,root) %{_libdir}/%{name}/accel-tcg-x86_64.so
 %attr(755,root,root) %{_libdir}/%{name}/audio-alsa.so
 %if %{with oss}
 %attr(755,root,root) %{_libdir}/%{name}/audio-oss.so
@@ -1464,7 +1421,6 @@ fi
 %{_iconsdir}/hicolor/scalable/apps/qemu.svg
 %{_mandir}/man1/qemu.1*
 %{_mandir}/man1/qemu-storage-daemon.1*
-%{_mandir}/man1/virtfs-proxy-helper.1*
 %{_mandir}/man7/qemu-block-drivers.7*
 %{_mandir}/man7/qemu-cpu-models.7*
 %{_mandir}/man7/qemu-qmp-ref.7*
@@ -1486,7 +1442,6 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-alpha
 %attr(755,root,root) %{_bindir}/qemu-arm
 %attr(755,root,root) %{_bindir}/qemu-armeb
-%attr(755,root,root) %{_bindir}/qemu-cris
 %attr(755,root,root) %{_bindir}/qemu-hexagon
 %attr(755,root,root) %{_bindir}/qemu-hppa
 %attr(755,root,root) %{_bindir}/qemu-i386
@@ -1501,7 +1456,6 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-mips64el
 %attr(755,root,root) %{_bindir}/qemu-mipsn32
 %attr(755,root,root) %{_bindir}/qemu-mipsn32el
-%attr(755,root,root) %{_bindir}/qemu-nios2
 %attr(755,root,root) %{_bindir}/qemu-or1k
 %attr(755,root,root) %{_bindir}/qemu-ppc
 %attr(755,root,root) %{_bindir}/qemu-ppc64
@@ -1527,7 +1481,6 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-alpha-static
 %attr(755,root,root) %{_bindir}/qemu-arm-static
 %attr(755,root,root) %{_bindir}/qemu-armeb-static
-%attr(755,root,root) %{_bindir}/qemu-cris-static
 %attr(755,root,root) %{_bindir}/qemu-hexagon-static
 %attr(755,root,root) %{_bindir}/qemu-hppa-static
 %attr(755,root,root) %{_bindir}/qemu-i386-static
@@ -1541,7 +1494,6 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-mipsel-static
 %attr(755,root,root) %{_bindir}/qemu-mipsn32-static
 %attr(755,root,root) %{_bindir}/qemu-mipsn32el-static
-%attr(755,root,root) %{_bindir}/qemu-nios2-static
 %attr(755,root,root) %{_bindir}/qemu-or1k-static
 %attr(755,root,root) %{_bindir}/qemu-ppc-static
 %attr(755,root,root) %{_bindir}/qemu-ppc64-static
@@ -1583,10 +1535,6 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-avr
 
-%files system-cris
-%defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/qemu-system-cris
-
 %files system-hppa
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-hppa
@@ -1608,10 +1556,6 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-system-mipsel
 %attr(755,root,root) %{_bindir}/qemu-system-mips64
 %attr(755,root,root) %{_bindir}/qemu-system-mips64el
-
-%files system-nios2
-%defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/qemu-system-nios2
 
 %files system-or1k
 %defattr(644,root,root,755)
@@ -1652,7 +1596,6 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-s390x
 %{_datadir}/%{name}/s390-ccw.img
-%{_datadir}/%{name}/s390-netboot.img
 
 %files system-sh4
 %defattr(644,root,root,755)
