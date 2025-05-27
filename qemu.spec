@@ -194,20 +194,21 @@ BuildRequires:	pcre2-8-static >= 10.32
 BuildRequires:	zlib-static
 %endif
 Requires:	%{name}-img = %{version}-%{release}
+%ifnarch %{ix86} x32
 Requires:	%{name}-system-aarch64 = %{version}-%{release}
 Requires:	%{name}-system-alpha = %{version}-%{release}
+Requires:	%{name}-system-hppa = %{version}-%{release}
+Requires:	%{name}-system-microblaze = %{version}-%{release}
+Requires:	%{name}-system-s390x = %{version}-%{release}
+%endif
 Requires:	%{name}-system-arm = %{version}-%{release}
 Requires:	%{name}-system-avr = %{version}-%{release}
-Requires:	%{name}-system-hppa = %{version}-%{release}
 Requires:	%{name}-system-m68k = %{version}-%{release}
-Requires:	%{name}-system-microblaze = %{version}-%{release}
 Requires:	%{name}-system-mips = %{version}-%{release}
 Requires:	%{name}-system-or1k = %{version}-%{release}
 Requires:	%{name}-system-ppc = %{version}-%{release}
-Requires:	%{name}-system-riscv32 = %{version}-%{release}
-Requires:	%{name}-system-riscv64 = %{version}-%{release}
+Requires:	%{name}-system-riscv = %{version}-%{release}
 Requires:	%{name}-system-rx = %{version}-%{release}
-Requires:	%{name}-system-s390x = %{version}-%{release}
 Requires:	%{name}-system-sh4 = %{version}-%{release}
 Requires:	%{name}-system-sparc = %{version}-%{release}
 Requires:	%{name}-system-tricore = %{version}-%{release}
@@ -1426,38 +1427,40 @@ fi
 %files user
 %defattr(644,root,root,755)
 /usr/lib/binfmt.d/qemu-*-dynamic.conf
+%ifnarch %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-aarch64
 %attr(755,root,root) %{_bindir}/qemu-aarch64_be
 %attr(755,root,root) %{_bindir}/qemu-alpha
+%attr(755,root,root) %{_bindir}/qemu-hppa
+%attr(755,root,root) %{_bindir}/qemu-loongarch64
+%attr(755,root,root) %{_bindir}/qemu-mips64
+%attr(755,root,root) %{_bindir}/qemu-mips64el
+%attr(755,root,root) %{_bindir}/qemu-mipsn32
+%attr(755,root,root) %{_bindir}/qemu-mipsn32el
+%attr(755,root,root) %{_bindir}/qemu-ppc64
+%attr(755,root,root) %{_bindir}/qemu-ppc64le
+%attr(755,root,root) %{_bindir}/qemu-riscv64
+%attr(755,root,root) %{_bindir}/qemu-s390x
+%attr(755,root,root) %{_bindir}/qemu-sparc32plus
+%attr(755,root,root) %{_bindir}/qemu-sparc64
+%attr(755,root,root) %{_bindir}/qemu-x86_64
+%endif
 %attr(755,root,root) %{_bindir}/qemu-arm
 %attr(755,root,root) %{_bindir}/qemu-armeb
 %attr(755,root,root) %{_bindir}/qemu-hexagon
-%attr(755,root,root) %{_bindir}/qemu-hppa
 %attr(755,root,root) %{_bindir}/qemu-i386
 %attr(755,root,root) %{_bindir}/qemu-io
-%attr(755,root,root) %{_bindir}/qemu-loongarch64
 %attr(755,root,root) %{_bindir}/qemu-m68k
 %attr(755,root,root) %{_bindir}/qemu-microblaze
 %attr(755,root,root) %{_bindir}/qemu-microblazeel
 %attr(755,root,root) %{_bindir}/qemu-mips
 %attr(755,root,root) %{_bindir}/qemu-mipsel
-%attr(755,root,root) %{_bindir}/qemu-mips64
-%attr(755,root,root) %{_bindir}/qemu-mips64el
-%attr(755,root,root) %{_bindir}/qemu-mipsn32
-%attr(755,root,root) %{_bindir}/qemu-mipsn32el
 %attr(755,root,root) %{_bindir}/qemu-or1k
 %attr(755,root,root) %{_bindir}/qemu-ppc
-%attr(755,root,root) %{_bindir}/qemu-ppc64
-%attr(755,root,root) %{_bindir}/qemu-ppc64le
 %attr(755,root,root) %{_bindir}/qemu-riscv32
-%attr(755,root,root) %{_bindir}/qemu-riscv64
-%attr(755,root,root) %{_bindir}/qemu-s390x
 %attr(755,root,root) %{_bindir}/qemu-sh4
 %attr(755,root,root) %{_bindir}/qemu-sh4eb
 %attr(755,root,root) %{_bindir}/qemu-sparc
-%attr(755,root,root) %{_bindir}/qemu-sparc32plus
-%attr(755,root,root) %{_bindir}/qemu-sparc64
-%attr(755,root,root) %{_bindir}/qemu-x86_64
 %attr(755,root,root) %{_bindir}/qemu-xtensa
 %attr(755,root,root) %{_bindir}/qemu-xtensaeb
 
@@ -1465,42 +1468,45 @@ fi
 %files user-static
 %defattr(644,root,root,755)
 /usr/lib/binfmt.d/qemu-*-static.conf
+%ifnarch %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-aarch64-static
 %attr(755,root,root) %{_bindir}/qemu-aarch64_be-static
 %attr(755,root,root) %{_bindir}/qemu-alpha-static
+%attr(755,root,root) %{_bindir}/qemu-hppa-static
+%attr(755,root,root) %{_bindir}/qemu-loongarch64-static
+%attr(755,root,root) %{_bindir}/qemu-mips64-static
+%attr(755,root,root) %{_bindir}/qemu-mips64el-static
+%attr(755,root,root) %{_bindir}/qemu-mipsn32-static
+%attr(755,root,root) %{_bindir}/qemu-mipsn32el-static
+%attr(755,root,root) %{_bindir}/qemu-ppc64-static
+%attr(755,root,root) %{_bindir}/qemu-ppc64le-static
+%attr(755,root,root) %{_bindir}/qemu-riscv64-static
+%attr(755,root,root) %{_bindir}/qemu-s390x-static
+%attr(755,root,root) %{_bindir}/qemu-sparc32plus-static
+%attr(755,root,root) %{_bindir}/qemu-sparc64-static
+%attr(755,root,root) %{_bindir}/qemu-x86_64-static
+%endif
 %attr(755,root,root) %{_bindir}/qemu-arm-static
 %attr(755,root,root) %{_bindir}/qemu-armeb-static
 %attr(755,root,root) %{_bindir}/qemu-hexagon-static
-%attr(755,root,root) %{_bindir}/qemu-hppa-static
 %attr(755,root,root) %{_bindir}/qemu-i386-static
-%attr(755,root,root) %{_bindir}/qemu-loongarch64-static
 %attr(755,root,root) %{_bindir}/qemu-m68k-static
 %attr(755,root,root) %{_bindir}/qemu-microblaze-static
 %attr(755,root,root) %{_bindir}/qemu-microblazeel-static
 %attr(755,root,root) %{_bindir}/qemu-mips-static
-%attr(755,root,root) %{_bindir}/qemu-mips64-static
-%attr(755,root,root) %{_bindir}/qemu-mips64el-static
 %attr(755,root,root) %{_bindir}/qemu-mipsel-static
-%attr(755,root,root) %{_bindir}/qemu-mipsn32-static
-%attr(755,root,root) %{_bindir}/qemu-mipsn32el-static
 %attr(755,root,root) %{_bindir}/qemu-or1k-static
 %attr(755,root,root) %{_bindir}/qemu-ppc-static
-%attr(755,root,root) %{_bindir}/qemu-ppc64-static
-%attr(755,root,root) %{_bindir}/qemu-ppc64le-static
 %attr(755,root,root) %{_bindir}/qemu-riscv32-static
-%attr(755,root,root) %{_bindir}/qemu-riscv64-static
-%attr(755,root,root) %{_bindir}/qemu-s390x-static
 %attr(755,root,root) %{_bindir}/qemu-sh4-static
 %attr(755,root,root) %{_bindir}/qemu-sh4eb-static
 %attr(755,root,root) %{_bindir}/qemu-sparc-static
-%attr(755,root,root) %{_bindir}/qemu-sparc32plus-static
-%attr(755,root,root) %{_bindir}/qemu-sparc64-static
-%attr(755,root,root) %{_bindir}/qemu-x86_64-static
 %attr(755,root,root) %{_bindir}/qemu-xtensa-static
 %attr(755,root,root) %{_bindir}/qemu-xtensaeb-static
 %{?with_systemtap:%attr(755,root,root) %{_bindir}/qemu-trace-stap-static}
 %endif
 
+%ifnarch %{ix86} x32
 %files system-aarch64
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-aarch64
@@ -1511,6 +1517,7 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-alpha
 %{_datadir}/%{name}/palcode-clipper
+%endif
 
 %files system-arm
 %defattr(644,root,root,755)
@@ -1525,28 +1532,34 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-avr
 
+%ifnarch %{ix86} x32
 %files system-hppa
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-hppa
 %{_datadir}/%{name}/hppa-firmware.img
 %{_datadir}/%{name}/hppa-firmware64.img
+%endif
 
 %files system-m68k
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-m68k
 
+%ifnarch %{ix86} x32
 %files system-microblaze
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-microblaze
 %attr(755,root,root) %{_bindir}/qemu-system-microblazeel
+%endif
 
 %files system-mips
 %defattr(644,root,root,755)
+%ifnarch %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-system-loongarch64
-%attr(755,root,root) %{_bindir}/qemu-system-mips
-%attr(755,root,root) %{_bindir}/qemu-system-mipsel
 %attr(755,root,root) %{_bindir}/qemu-system-mips64
 %attr(755,root,root) %{_bindir}/qemu-system-mips64el
+%endif
+%attr(755,root,root) %{_bindir}/qemu-system-mips
+%attr(755,root,root) %{_bindir}/qemu-system-mipsel
 %{_datadir}/%{name}/edk2-loongarch64-code.fd
 %{_datadir}/%{name}/edk2-loongarch64-vars.fd
 %{_datadir}/%{name}/firmware/60-edk2-loongarch64.json
@@ -1558,7 +1571,9 @@ fi
 %files system-ppc
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-ppc
+%ifnarch %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-system-ppc64
+%endif
 %{_datadir}/%{name}/bamboo.dtb
 %{_datadir}/%{name}/canyonlands.dtb
 %{_datadir}/%{name}/openbios-ppc
@@ -1576,7 +1591,9 @@ fi
 %files system-riscv
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-riscv32
+%ifnarch %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-system-riscv64
+%endif
 %{_datadir}/%{name}/edk2-riscv-code.fd
 %{_datadir}/%{name}/edk2-riscv-vars.fd
 %{_datadir}/%{name}/firmware/60-edk2-riscv64.json
@@ -1587,10 +1604,12 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-rx
 
+%ifnarch %{ix86} x32
 %files system-s390x
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-s390x
 %{_datadir}/%{name}/s390-ccw.img
+%endif
 
 %files system-sh4
 %defattr(644,root,root,755)
@@ -1600,7 +1619,9 @@ fi
 %files system-sparc
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-sparc
+%ifnarch %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-system-sparc64
+%endif
 %{_datadir}/%{name}/QEMU,cgthree.bin
 %{_datadir}/%{name}/QEMU,tcx.bin
 %{_datadir}/%{name}/openbios-sparc32
@@ -1613,7 +1634,9 @@ fi
 %files system-x86
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-i386
+%ifnarch %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-system-x86_64
+%endif
 %ifarch %{ix86} %{x8664} x32
 %config(noreplace) %verify(not md5 mtime size) /etc/modules-load.d/kvm.conf
 /lib/udev/rules.d/80-kvm.rules
