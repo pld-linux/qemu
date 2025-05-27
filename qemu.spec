@@ -110,23 +110,23 @@ BuildRequires:	libdrm-devel
 %{?with_opengl:BuildRequires:	libepoxy-devel}
 BuildRequires:	libfdt-devel >= 1.5.1
 BuildRequires:	libfuse3-devel >= 3.8
+%{?with_rdma:BuildRequires:	libibumad-devel}
 %{?with_rdma:BuildRequires:	libibverbs-devel}
 %{?with_iscsi:BuildRequires:	libiscsi-devel >= 1.9.0}
-%{?with_rdma:BuildRequires:	libibumad-devel}
 BuildRequires:	libjpeg-devel
 %{?with_libnfs:BuildRequires:	libnfs-devel >= 1.9.3}
 BuildRequires:	libpng-devel >= 2:1.6.34
 %{?with_rdma:BuildRequires:	librdmacm-devel}
 %{?with_seccomp:BuildRequires:	libseccomp-devel >= 2.3.0}
 BuildRequires:	libselinux-devel
-BuildRequires:	libssh-devel >= 0.8.7
 BuildRequires:	libslirp-devel >= 4.7
+BuildRequires:	libssh-devel >= 0.8.7
 BuildRequires:	libstdc++-devel >= 6:4.7
 # for tests only
 #BuildRequires:	libtasn1-devel
 BuildRequires:	libu2f-emu-devel
-BuildRequires:	libusb-devel >= 1.0.22
 BuildRequires:	liburing-devel >= 0.3
+BuildRequires:	libusb-devel >= 1.0.22
 BuildRequires:	libuuid-devel
 BuildRequires:	libxdp-devel >= 1.4.0
 BuildRequires:	libxml2-devel >= 2.0
@@ -170,9 +170,9 @@ BuildRequires:	texinfo
 %{?with_usbredir:BuildRequires:	usbredir-devel >= 0.6}
 %{?with_lttng:BuildRequires:	userspace-rcu-devel}
 BuildRequires:	vde2-devel
-BuildRequires:	which
 %{?with_virgl:BuildRequires:	virglrenderer-devel}
 %{?with_vte:BuildRequires:	vte-devel >= 0.32.0}
+BuildRequires:	which
 # xencontrol xenstore xenguest xenforeignmemory xengnttab xenevtchn xendevicemodel; xentoolcore for xen 4.10+
 # min version is 4.2, more features up to 4.11
 %{?with_xen:BuildRequires:	xen-devel >= 4.11}
@@ -315,11 +315,11 @@ Provides:	group(qemu)
 Provides:	user(qemu)
 Obsoletes:	qemu-kvm-common < 2
 Obsoletes:	qemu-module-block-archipelago < 2.9.0
+Obsoletes:	qemu-system-cris < 10.0.0
 Obsoletes:	qemu-system-lm32 < 5.2
 Obsoletes:	qemu-system-moxie < 6.1
-Obsoletes:	qemu-system-unicore32 < 5.2
-Obsoletes:	qemu-system-cris < 10.0.0
 Obsoletes:	qemu-system-nios2 < 10.0.0
+Obsoletes:	qemu-system-unicore32 < 5.2
 Conflicts:	qemu < 1.0-2
 
 %description common
@@ -594,43 +594,26 @@ dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
 Ten pakiet zawiera emulator systemu z procesorem PowerPC.
 
-%package system-riscv32
-Summary:	QEMU system emulator for RISC-V (32 bit)
-Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem RISC-V (32 bit)
+%package system-riscv
+Summary:	QEMU system emulator for RISC-V
+Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem RISC-V
 Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
+Obsoletes:	qemu-system-riscv32 < 10.0.0
+Obsoletes:	qemu-system-riscv64 < 10.0.0
 %systempkg_req
 
-%description system-riscv32
+%description system-riscv
 QEMU is a generic and open source processor emulator which achieves a
 good emulation speed by using dynamic translation.
 
-This package provides the system emulator with RISC-V (32 bit) CPU.
+This package provides the system emulator with RISC-V CPUs.
 
-%description system-riscv32 -l pl.UTF-8
+%description system-riscv -l pl.UTF-8
 QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
-Ten pakiet zawiera emulator systemu z procesorem RISC-V (32 bit).
-
-%package system-riscv64
-Summary:	QEMU system emulator for RISC-V (64 bit)
-Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem RISC-V (64 bitowym)
-Group:		Applications/Emulators
-Requires:	%{name}-common = %{version}-%{release}
-%systempkg_req
-
-%description system-riscv64
-QEMU is a generic and open source processor emulator which achieves a
-good emulation speed by using dynamic translation.
-
-This package provides the system emulator with RISC-V (64 bit) CPU.
-
-%description system-riscv64 -l pl.UTF-8
-QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
-dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
-
-Ten pakiet zawiera emulator systemu z procesorem RISC-V (64-bitowym).
+Ten pakiet zawiera emulator systemu z procesorami RISC-V.
 
 %package system-rx
 Summary:	QEMU system emulator for Renesas RX
@@ -1181,6 +1164,8 @@ install -p %{SOURCE14} $RPM_BUILD_ROOT/etc/logrotate.d/qemu-ga
 
 cp -p %{SOURCE15} %{SOURCE16} $RPM_BUILD_ROOT%{systemdunitdir}
 
+cp -p contrib/systemd/qemu-vmsr-helper.{service,socket} $RPM_BUILD_ROOT%{systemdunitdir}
+
 # Install binfmt
 BINFMT_CPUS=" \
 %ifnarch %{ix86} %{x8664} x32
@@ -1350,6 +1335,8 @@ fi
 %{systemdunitdir}/ksmtuned.service
 %{systemdunitdir}/qemu-pr-helper.service
 %{systemdunitdir}/qemu-pr-helper.socket
+%{systemdunitdir}/qemu-vmsr-helper.service
+%{systemdunitdir}/qemu-vmsr-helper.socket
 %attr(755,root,root) %{_bindir}/elf2dmp
 %attr(755,root,root) %{_bindir}/ivshmem-client
 %attr(755,root,root) %{_bindir}/ivshmem-server
@@ -1360,6 +1347,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-nbd
 %attr(755,root,root) %{_bindir}/qemu-pr-helper
 %attr(755,root,root) %{_bindir}/qemu-storage-daemon
+%attr(755,root,root) %{_bindir}/qemu-vmsr-helper
 %attr(755,root,root) %{_sbindir}/ksmctl
 %attr(755,root,root) %{_sbindir}/ksmtuned
 %attr(755,root,root) %{_libexecdir}/qemu-bridge-helper
@@ -1389,6 +1377,7 @@ fi
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-vga.so
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-vga-gl.so
 %attr(755,root,root) %{_libdir}/%{name}/hw-s390x-virtio-gpu-ccw.so
+%attr(755,root,root) %{_libdir}/%{name}/hw-uefi-vars.so
 %attr(755,root,root) %{_libdir}/%{name}/hw-usb-host.so
 %attr(755,root,root) %{_libdir}/%{name}/ui-curses.so
 %if %{with usbredir}
@@ -1530,6 +1519,7 @@ fi
 %{_datadir}/%{name}/edk2-arm-vars.fd
 %{_datadir}/%{name}/firmware/60-edk2-arm.json
 %{_datadir}/%{name}/npcm7xx_bootrom.bin
+%{_datadir}/%{name}/npcm8xx_bootrom.bin
 
 %files system-avr
 %defattr(644,root,root,755)
@@ -1539,6 +1529,7 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-hppa
 %{_datadir}/%{name}/hppa-firmware.img
+%{_datadir}/%{name}/hppa-firmware64.img
 
 %files system-m68k
 %defattr(644,root,root,755)
@@ -1556,6 +1547,9 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-system-mipsel
 %attr(755,root,root) %{_bindir}/qemu-system-mips64
 %attr(755,root,root) %{_bindir}/qemu-system-mips64el
+%{_datadir}/%{name}/edk2-loongarch64-code.fd
+%{_datadir}/%{name}/edk2-loongarch64-vars.fd
+%{_datadir}/%{name}/firmware/60-edk2-loongarch64.json
 
 %files system-or1k
 %defattr(644,root,root,755)
@@ -1570,6 +1564,7 @@ fi
 %{_datadir}/%{name}/openbios-ppc
 %{_datadir}/%{name}/petalogix-ml605.dtb
 %{_datadir}/%{name}/petalogix-s3adsp1800.dtb
+%{_datadir}/%{name}/pnv-pnor.bin
 %{_datadir}/%{name}/qemu_vga.ndrv
 %{_datadir}/%{name}/skiboot.lid
 %{_datadir}/%{name}/slof.bin
@@ -1578,14 +1573,14 @@ fi
 %{_datadir}/%{name}/vof.bin
 %{_datadir}/%{name}/vof-nvram.bin
 
-%files system-riscv32
+%files system-riscv
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-riscv32
-%{_datadir}/%{name}/opensbi-riscv32-generic-fw_dynamic.bin
-
-%files system-riscv64
-%defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-riscv64
+%{_datadir}/%{name}/edk2-riscv-code.fd
+%{_datadir}/%{name}/edk2-riscv-vars.fd
+%{_datadir}/%{name}/firmware/60-edk2-riscv64.json
+%{_datadir}/%{name}/opensbi-riscv32-generic-fw_dynamic.bin
 %{_datadir}/%{name}/opensbi-riscv64-generic-fw_dynamic.bin
 
 %files system-rx
