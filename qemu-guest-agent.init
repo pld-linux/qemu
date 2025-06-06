@@ -85,7 +85,7 @@ condrestart() {
 	fi
 
 	checkconfig
-	stop
+	stop && sleep 0.3
 	start
 }
 
@@ -100,7 +100,7 @@ case "$1" in
 	;;
   restart)
 	checkconfig
-	stop
+	stop && sleep 0.3
 	start
 	;;
   try-restart)
