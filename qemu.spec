@@ -45,7 +45,7 @@ Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
 Version:	10.0.2
-Release:	1
+Release:	2
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	https://download.qemu.org/%{name}-%{version}.tar.xz
