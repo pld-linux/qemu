@@ -1403,7 +1403,7 @@ fi
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu-pci.so
 %{?with_virgl:%attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu-pci-gl.so}
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-vga.so
-%attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-vga-gl.so
+%{?with_virgl:%attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-vga-gl.so}
 %attr(755,root,root) %{_libdir}/%{name}/hw-s390x-virtio-gpu-ccw.so
 %attr(755,root,root) %{_libdir}/%{name}/hw-uefi-vars.so
 %attr(755,root,root) %{_libdir}/%{name}/hw-usb-host.so
