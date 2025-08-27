@@ -1186,7 +1186,9 @@ install -p %{SOURCE14} $RPM_BUILD_ROOT/etc/logrotate.d/qemu-ga
 
 cp -p %{SOURCE15} %{SOURCE16} $RPM_BUILD_ROOT%{systemdunitdir}
 
+%ifarch %{ix86} %{x8664} x32
 cp -p contrib/systemd/qemu-vmsr-helper.{service,socket} $RPM_BUILD_ROOT%{systemdunitdir}
+%endif
 
 # Install binfmt
 BINFMT_CPUS=" \
@@ -1357,8 +1359,10 @@ fi
 %{systemdunitdir}/ksmtuned.service
 %{systemdunitdir}/qemu-pr-helper.service
 %{systemdunitdir}/qemu-pr-helper.socket
+%ifarch %{ix86} %{x8664} x32
 %{systemdunitdir}/qemu-vmsr-helper.service
 %{systemdunitdir}/qemu-vmsr-helper.socket
+%endif
 %attr(755,root,root) %{_bindir}/elf2dmp
 %attr(755,root,root) %{_bindir}/ivshmem-client
 %attr(755,root,root) %{_bindir}/ivshmem-server
@@ -1369,7 +1373,9 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-nbd
 %attr(755,root,root) %{_bindir}/qemu-pr-helper
 %attr(755,root,root) %{_bindir}/qemu-storage-daemon
+%ifarch %{ix86} %{x8664} x32
 %attr(755,root,root) %{_bindir}/qemu-vmsr-helper
+%endif
 %attr(755,root,root) %{_sbindir}/ksmctl
 %attr(755,root,root) %{_sbindir}/ksmtuned
 %attr(755,root,root) %{_libexecdir}/qemu-bridge-helper
