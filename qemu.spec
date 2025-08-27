@@ -30,6 +30,7 @@
 %bcond_without	systemtap	# SystemTap/dtrace trace backend support
 %bcond_without	virgl		# build virgl support
 %bcond_without	xkbcommon	# xkbcommon support
+%bcond_without	qatzip	# QATzip support
 
 %if %{without gtk3}
 %undefine	with_vte
@@ -39,6 +40,9 @@
 %endif
 %ifnarch %{x8664} aarch64
 %undefine	with_pmem
+%endif
+%ifnarch %{ix86} %{x8664} x32
+%undefine	with_qatzip
 %endif
 
 Summary:	QEMU CPU Emulator
@@ -78,6 +82,7 @@ URL:		https://www.qemu.org/
 %{?with_opengl:BuildRequires:	Mesa-libgbm-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
 %{?with_opengl:BuildRequires:	OpenGL-devel}
+%{?with_qatzip:BuildRequires:	QATzip-devel}
 %{?with_sdl:BuildRequires:	SDL2-devel >= 2.0}
 %{?with_sdl:BuildRequires:	SDL2_image-devel >= 2.0}
 BuildRequires:	alsa-lib-devel
@@ -101,11 +106,12 @@ BuildRequires:	gnutls-devel >= 3.6.14
 BuildRequires:	jack-audio-connection-kit-devel
 %{?with_vfio_user:BuildRequires:	json-c-devel >= 0.11}
 BuildRequires:	keyutils-devel
-BuildRequires:	libaio-devel
+BuildRequires:	libaio-devel >= 0.3.111
 BuildRequires:	libblkio-devel >= 1.3.0
-BuildRequires:	libbpf-devel
+BuildRequires:	libbpf-devel >= 1.1.0
 %{?with_smartcard:BuildRequires:	libcacard-devel >= 2.5.1}
 BuildRequires:	libcap-ng-devel
+BuildRequires:	libcbor-devel >= 0.7.0
 BuildRequires:	libdrm-devel
 %{?with_opengl:BuildRequires:	libepoxy-devel}
 BuildRequires:	libfdt-devel >= 1.5.1
@@ -125,7 +131,7 @@ BuildRequires:	libstdc++-devel >= 6:4.7
 # for tests only
 #BuildRequires:	libtasn1-devel
 BuildRequires:	libu2f-emu-devel
-BuildRequires:	liburing-devel >= 0.3
+BuildRequires:	liburing-devel >= 2.2
 BuildRequires:	libusb-devel >= 1.0.22
 BuildRequires:	libuuid-devel
 BuildRequires:	libxdp-devel >= 1.4.0
@@ -133,11 +139,11 @@ BuildRequires:	libxml2-devel >= 2.0
 %{?with_lttng:BuildRequires:	lttng-ust-devel >= 2.1}
 BuildRequires:	lzfse-devel
 BuildRequires:	lzo-devel >= 2
-BuildRequires:	meson >= 0.63.0
+BuildRequires:	meson >= 1.5.0
 %{?with_multipath:BuildRequires:	multipath-tools-devel}
 BuildRequires:	ncurses-devel
 # also libgcrypt-devel >= 1.8 possible, but gnutls already pulls nettle
-BuildRequires:	nettle-devel >= 3.4
+BuildRequires:	nettle-devel >= 3.9
 BuildRequires:	ninja >= 1.5
 %{?with_smartcard:BuildRequires:	nss-devel >= 1:3.12.8}
 BuildRequires:	numactl-devel
@@ -150,6 +156,8 @@ BuildRequires:	pkgconfig
 %{?with_pmem:BuildRequires:	pmdk-devel}
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 BuildRequires:	python3 >= 1:3.7
+BuildRequires:	python3-distlib
+BuildRequires:	python3-pycotap >= 1.1.0
 BuildRequires:	python3-sphinx_rtd_theme >= 0.5
 BuildRequires:	python3-tomli >= 1.2.0
 BuildRequires:	rpm-build >= 4.6
@@ -157,7 +165,7 @@ BuildRequires:	rpmbuild(macros) >= 1.644
 %{?with_system_seabios:BuildRequires:	seabios}
 BuildRequires:	sed >= 4.0
 %{?with_snappy:BuildRequires:	snappy-devel}
-BuildRequires:	sphinx-pdg >= 1.6
+BuildRequires:	sphinx-pdg >= 3.4.3
 %if %{with spice}
 BuildRequires:	spice-protocol >= 0.14.0
 BuildRequires:	spice-server-devel >= 0.14.0
@@ -222,6 +230,8 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %define	systempkg_req \
 Requires:	capstone >= 4.0 \
 Requires:	daxctl-libs >= 57 \
+Requires:	libaio >= 0.3.111 \
+Requires:	libbpf >= 1.1.0 \
 %{?with_smartcard:Requires:	libcacard >= 2.5.1} \
 Requires:	libfdt >= 1.5.1 \
 Requires:	libfuse3 >= 3.8 \
@@ -231,7 +241,7 @@ Requires:	libpng >= 2:1.6.34 \
 Requires:	libseccomp >= 2.3.0 \
 %endif \
 Requires:	libslirp >= 4.7 \
-Requires:	liburing >= 0.3 \
+Requires:	liburing >= 2.2 \
 Requires:	libusb >= 1.0.22 \
 Requires:	libxdp >= 1.4.0 \
 Requires:	pixman >= 0.21.8 \
@@ -306,8 +316,10 @@ Requires(pre):	/usr/sbin/useradd
 Requires:	glib2 >= 1:2.75.3
 Requires:	gnutls-libs >= 3.6.14
 %{?with_gtk3:Requires:	gtk+3 >= 3.22.0}
+Requires:	libaio >= 0.3.111
 Requires:	libblkio >= 1.3.0
-Requires:	nettle >= 3.4
+Requires:	liburing >= 2.2
+Requires:	nettle >= 3.9
 Requires:	systemd-units >= 38
 %{?with_vte:Requires:	vte >= 0.32.0}
 Requires:	zstd >= 1.4.0
@@ -340,6 +352,8 @@ Ten pakiet udostępnia wspólne pliki wymagane przez wszystkie
 Summary:	QEMU command line tool for manipulating disk images
 Summary(pl.UTF-8):	Narzędzie QEMU do operacji na obrazach dysków
 Group:		Applications/Emulators
+Requires:	libaio >= 0.3.111
+Requires:	liburing >= 2.2
 Obsoletes:	qemu-kvm-img < 2
 Conflicts:	qemu < 1.0-2
 
@@ -355,8 +369,10 @@ na obrazach dysków.
 Summary:	QEMU user mode emulation of qemu targets
 Summary(pl.UTF-8):	QEMU - emulacja trybu użytkownika środowisk qemu
 Group:		Applications/Emulators
-Requires:	%{name}-common = %{version}-%{release}
 Requires(post,postun):	systemd-units >= 38
+Requires:	%{name}-common = %{version}-%{release}
+Requires:	libaio >= 0.3.111
+Requires:	liburing >= 2.2
 Requires:	systemd-units >= 38
 Obsoletes:	qemu-kvm-user < 2
 
@@ -719,6 +735,7 @@ Summary:	QEMU system emulator for x86
 Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem x86
 Group:		Applications/Emulators
 Requires:	%{name}-common = %{version}-%{release}
+Requires:	libcbor >= 0.7.0
 %{?with_vfio_user:Requires:	libvfio-user = %{version}-%{release}}
 %{?with_system_seabios:Requires:	seabios >= 1.11.0}
 %systempkg_req
@@ -763,7 +780,7 @@ Summary(pl.UTF-8):	Agent gościa QEMU
 Group:		Daemons
 Requires(post,preun,postun):	systemd-units >= 38
 Requires:	glib2 >= 1:2.75.3
-Requires:	liburing >= 0.3
+Requires:	liburing >= 2.2
 Requires:	systemd-units >= 38
 Obsoletes:	qemu-kvm-guest-agent < 2
 Conflicts:	SysVinit < 2.96-2
@@ -1051,6 +1068,7 @@ build dynamic \
 	%{__enable_disable glusterfs} \
 	%{!?with_gtk3:--disable-gtk} \
 	%{__enable_disable iscsi libiscsi} \
+	--enable-libcbor \
 	%{__enable_disable libnfs} \
 	%{__enable_disable pmem libpmem} \
 	--enable-lzo \
@@ -1058,6 +1076,7 @@ build dynamic \
 	--enable-modules \
 	--disable-netmap \
 	--enable-nettle \
+	%{__enable_disable qatzip} \
 	%{__enable_disable ceph rbd} \
 	%{__enable_disable rdma} \
 	%{__enable_disable sdl} \
@@ -1091,11 +1110,13 @@ build static \
 	--disable-gtk \
 	--disable-guest-agent \
 	--disable-guest-agent-msi \
+	--disable-libcbor \
 	--disable-libnfs \
 	--disable-linux-io-uring \
 	--disable-mpath \
 	--disable-nettle \
 	--disable-pie \
+	--disable-qatzip \
 	--disable-sdl \
 	--disable-slirp \
 	--disable-spice \
