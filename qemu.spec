@@ -31,6 +31,7 @@
 %bcond_without	virgl		# build virgl support
 %bcond_without	xkbcommon	# xkbcommon support
 %bcond_without	qatzip	# QATzip support
+%bcond_without	vde	# vde network backend support
 
 %if %{without gtk3}
 %undefine	with_vte
@@ -177,7 +178,7 @@ BuildRequires:	texinfo
 %{?with_multipath:BuildRequires:	udev-devel}
 %{?with_usbredir:BuildRequires:	usbredir-devel >= 0.6}
 %{?with_lttng:BuildRequires:	userspace-rcu-devel}
-BuildRequires:	vde2-devel
+%{?with_vde:BuildRequires:	vde2-devel}
 %{?with_virgl:BuildRequires:	virglrenderer-devel}
 %{?with_vte:BuildRequires:	vte-devel >= 0.32.0}
 BuildRequires:	which
@@ -1088,7 +1089,7 @@ build dynamic \
 	%{__enable_disable snappy} \
 	--enable-tpm \
 	%{__enable_disable usbredir usb-redir} \
-	--enable-vde \
+	%{__enable_disable vde} \
 	%{?with_vfio_user:--enable-vfio-user-server} \
 	%{__enable_disable virgl virglrenderer} \
 	--enable-virtfs \
