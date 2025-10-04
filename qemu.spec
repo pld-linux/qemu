@@ -778,6 +778,7 @@ Ten pakiet zawiera emulator systemu z procesorem Xtensa.
 Summary:	QEMU guest agent
 Summary(pl.UTF-8):	Agent gościa QEMU
 Group:		Daemons
+Requires(post,preun):		/sbin/chkconfig
 Requires(post,preun,postun):	systemd-units >= 38
 Requires:	glib2 >= 1:2.75.3
 Requires:	liburing >= 2.2
