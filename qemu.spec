@@ -1407,7 +1407,7 @@ fi
 %if %{with brlapi}
 %attr(755,root,root) %{_libdir}/%{name}/chardev-baum.so
 %endif
-%attr(755,root,root) %{_libdir}/%{name}/hw-display-qxl.so
+%{?with_spice:%attr(755,root,root) %{_libdir}/%{name}/hw-display-qxl.so}
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu.so
 %{?with_virgl:%attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu-gl.so}
 %attr(755,root,root) %{_libdir}/%{name}/hw-display-virtio-gpu-pci.so
