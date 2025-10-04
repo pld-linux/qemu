@@ -203,7 +203,7 @@ BuildRequires:	pcre2-8-static >= 10.32
 BuildRequires:	zlib-static
 %endif
 Requires:	%{name}-img = %{version}-%{release}
-%ifnarch %{ix86} x32
+%ifnarch %{arm} %{ix86} x32
 Requires:	%{name}-system-aarch64 = %{version}-%{release}
 Requires:	%{name}-system-alpha = %{version}-%{release}
 Requires:	%{name}-system-hppa = %{version}-%{release}
@@ -1466,7 +1466,7 @@ fi
 %files user
 %defattr(644,root,root,755)
 /usr/lib/binfmt.d/qemu-*-dynamic.conf
-%ifnarch %{ix86} x32
+%ifnarch %{arm} %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-aarch64
 %attr(755,root,root) %{_bindir}/qemu-aarch64_be
 %attr(755,root,root) %{_bindir}/qemu-alpha
@@ -1507,7 +1507,7 @@ fi
 %files user-static
 %defattr(644,root,root,755)
 /usr/lib/binfmt.d/qemu-*-static.conf
-%ifnarch %{ix86} x32
+%ifnarch %{arm} %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-aarch64-static
 %attr(755,root,root) %{_bindir}/qemu-aarch64_be-static
 %attr(755,root,root) %{_bindir}/qemu-alpha-static
@@ -1545,7 +1545,7 @@ fi
 %{?with_systemtap:%attr(755,root,root) %{_bindir}/qemu-trace-stap-static}
 %endif
 
-%ifnarch %{ix86} x32
+%ifnarch %{arm} %{ix86} x32
 %files system-aarch64
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-aarch64
@@ -1571,7 +1571,7 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-avr
 
-%ifnarch %{ix86} x32
+%ifnarch %{arm} %{ix86} x32
 %files system-hppa
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-hppa
@@ -1583,7 +1583,7 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-m68k
 
-%ifnarch %{ix86} x32
+%ifnarch %{arm} %{ix86} x32
 %files system-microblaze
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-microblaze
@@ -1592,7 +1592,7 @@ fi
 
 %files system-mips
 %defattr(644,root,root,755)
-%ifnarch %{ix86} x32
+%ifnarch %{arm} %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-system-loongarch64
 %attr(755,root,root) %{_bindir}/qemu-system-mips64
 %attr(755,root,root) %{_bindir}/qemu-system-mips64el
@@ -1610,7 +1610,7 @@ fi
 %files system-ppc
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-ppc
-%ifnarch %{ix86} x32
+%ifnarch %{arm} %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-system-ppc64
 %endif
 %{_datadir}/%{name}/bamboo.dtb
@@ -1630,7 +1630,7 @@ fi
 %files system-riscv
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-riscv32
-%ifnarch %{ix86} x32
+%ifnarch %{arm} %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-system-riscv64
 %endif
 %{_datadir}/%{name}/edk2-riscv-code.fd
@@ -1643,7 +1643,7 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-rx
 
-%ifnarch %{ix86} x32
+%ifnarch %{arm} %{ix86} x32
 %files system-s390x
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-s390x
@@ -1658,7 +1658,7 @@ fi
 %files system-sparc
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-sparc
-%ifnarch %{ix86} x32
+%ifnarch %{arm} %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-system-sparc64
 %endif
 %{_datadir}/%{name}/QEMU,cgthree.bin
@@ -1673,7 +1673,7 @@ fi
 %files system-x86
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-i386
-%ifnarch %{ix86} x32
+%ifnarch %{arm} %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-system-x86_64
 %endif
 %ifarch %{ix86} %{x8664} x32
