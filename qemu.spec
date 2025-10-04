@@ -1437,7 +1437,9 @@ fi
 %dir %{_datadir}/%{name}
 %dir %{_datadir}/%{name}/firmware
 %{_datadir}/%{name}/keymaps
+%if %{with lttng} || %{with systemtap}
 %{_datadir}/%{name}/trace-events-all
+%endif
 %if %{with virgl}
 %dir %{_datadir}/%{name}/vhost-user
 %{_datadir}/%{name}/vhost-user/50-qemu-gpu.json
