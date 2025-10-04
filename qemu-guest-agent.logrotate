@@ -1,6 +1,6 @@
 /var/log/qemu-ga
 {
 	postrotate
-		/sbin/service qemu-ga restart >/dev/null
+		/sbin/service qemu-guest-agent restart >/dev/null
 	endscript
 }

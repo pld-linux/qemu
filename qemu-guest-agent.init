@@ -1,10 +1,10 @@
 #!/bin/sh
 #
-# qemu-ga	qemu-ga	QEMU Guest Agent
+# qemu-guest-agent	qemu-ga	QEMU Guest Agent
 #
-# chkconfig:	345 12 88
+# chkconfig:		345 12 88
 #
-# description:	qemu-ga QEMU Guest Agent
+# description:		qemu-ga QEMU Guest Agent
 
 # Source function library
 . /etc/rc.d/init.d/functions
@@ -28,7 +28,7 @@ checkconfig() {
 
 	if [ $details = 1 ]; then
 		# run config test and display report (status action)
-		show "Checking %s configuration" "qemu-ga"; busy
+		show "Checking %s configuration" "qemu-guest-agent"; busy
 		local out
 		out=$(configtest 2>&1)
 		RETVAL=$?
@@ -44,7 +44,7 @@ checkconfig() {
 		configtest >/dev/null 2>&1
 		RETVAL=$?
 		if [ $RETVAL != 0 ]; then
-			show "Checking %s configuration" "qemu-ga"; fail
+			show "Checking %s configuration" "qemu-guest-agent"; fail
 			nls 'Configuration test failed. See details with %s "checkconfig"' $0
 			exit $RETVAL
 		fi
@@ -53,33 +53,33 @@ checkconfig() {
 
 start() {
 	# Check if the service is already running?
-	if [ -f /var/lock/subsys/qemu-ga ]; then
-		msg_already_running "qemu-ga"
+	if [ -f /var/lock/subsys/qemu-guest-agent ]; then
+		msg_already_running "qemu-guest-agent"
 		return
 	fi
 
 	checkconfig
-	msg_starting "qemu-ga"
+	msg_starting "qemu-guest-agent"
 	daemon /usr/bin/qemu-ga -d
 	RETVAL=$?
-	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/qemu-ga
+	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/qemu-guest-agent
 }
 
 stop() {
-	if [ ! -f /var/lock/subsys/qemu-ga ]; then
-		msg_not_running "qemu-ga"
+	if [ ! -f /var/lock/subsys/qemu-guest-agent ]; then
+		msg_not_running "qemu-guest-agent"
 		return
 	fi
 
 	# Stop daemons.
-	msg_stopping "qemu-ga"
+	msg_stopping "qemu-guest-agent"
 	killproc --pidfile $pidfile qemu-ga -TERM
-	rm -f /var/lock/subsys/qemu-ga
+	rm -f /var/lock/subsys/qemu-guest-agent
 }
 
 condrestart() {
-	if [ ! -f /var/lock/subsys/qemu-ga ]; then
-		msg_not_running "qemu-ga"
+	if [ ! -f /var/lock/subsys/qemu-guest-agent ]; then
+		msg_not_running "qemu-guest-agent"
 		RETVAL=$1
 		return
 	fi
@@ -113,7 +113,7 @@ case "$1" in
 	checkconfig 1
 	;;
   status)
-	status --pidfile $pidfile qemu-ga
+	status --pidfile $pidfile qemu-guest-agent qemu-ga
 	RETVAL=$?
 	;;
   *)

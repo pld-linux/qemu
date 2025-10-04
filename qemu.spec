@@ -49,7 +49,7 @@ Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
 Version:	10.0.3
-Release:	2
+Release:	3
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	https://download.qemu.org/%{name}-%{version}.tar.xz
@@ -1181,7 +1181,7 @@ install -p %{SOURCE10} $RPM_BUILD_ROOT%{_sysconfdir}/ksmtuned.conf
 install -p %{SOURCE11} $RPM_BUILD_ROOT%{systemdunitdir}
 install -p %{SOURCE12} $RPM_BUILD_ROOT/lib/udev/rules.d
 
-install -p %{SOURCE13} $RPM_BUILD_ROOT/etc/rc.d/init.d/qemu-ga
+install -p %{SOURCE13} $RPM_BUILD_ROOT/etc/rc.d/init.d/qemu-guest-agent
 install -p %{SOURCE14} $RPM_BUILD_ROOT/etc/logrotate.d/qemu-ga
 
 cp -p %{SOURCE15} %{SOURCE16} $RPM_BUILD_ROOT%{systemdunitdir}
@@ -1322,19 +1322,27 @@ fi
 %systemd_post systemd-binfmt.service
 
 %post guest-agent
-/sbin/chkconfig --add qemu-ga
-%service qemu-ga restart "qemu-ga"
+/sbin/chkconfig --add qemu-guest-agent
+%service qemu-guest-agent restart "qemu-guest-agent"
 %systemd_reload
 
 %preun guest-agent
 if [ "$1" = "0" ]; then
-	%service qemu-ga stop
-	/sbin/chkconfig --del qemu-ga
+	%service qemu-guest-agent stop
+	/sbin/chkconfig --del qemu-guest-agent
 fi
 %systemd_preun qemu-guest-agent.service
 
 %postun guest-agent
 %systemd_reload
+
+%triggerun guest-agent -- qemu-guest-agent < 10.0.3-3
+if [ $1 -eq 2 ]; then
+	if [ -f /etc/init.d/qemu-ga ]; then
+		%service qemu-ga stop
+		/sbin/chkconfig --del qemu-ga
+	fi
+fi
 
 %post	-n libvfio-user -p /sbin/ldconfig
 %postun	-n libvfio-user -p /sbin/ldconfig
@@ -1721,7 +1729,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-ga
 /lib/udev/rules.d/99-qemu-guest-agent.rules
 %{systemdunitdir}/qemu-guest-agent.service
-%attr(754,root,root) /etc/rc.d/init.d/qemu-ga
+%attr(754,root,root) /etc/rc.d/init.d/qemu-guest-agent
 %attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) /etc/logrotate.d/qemu-ga
 %{_mandir}/man7/qemu-ga-ref.7*
 %{_mandir}/man8/qemu-ga.8*
