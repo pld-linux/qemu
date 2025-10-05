@@ -1435,11 +1435,33 @@ fi
 %attr(755,root,root) %{_libdir}/%{name}/ui-spice-core.so
 %endif
 %dir %{_datadir}/%{name}
+%{_datadir}/%{name}/efi-e1000e.rom
+%{_datadir}/%{name}/efi-e1000.rom
+%{_datadir}/%{name}/efi-eepro100.rom
+%{_datadir}/%{name}/efi-ne2k_pci.rom
+%{_datadir}/%{name}/efi-pcnet.rom
+%{_datadir}/%{name}/efi-rtl8139.rom
+%{_datadir}/%{name}/efi-virtio.rom
+%{_datadir}/%{name}/efi-vmxnet3.rom
 %dir %{_datadir}/%{name}/firmware
 %{_datadir}/%{name}/keymaps
+%{_datadir}/%{name}/pxe-e1000.rom
+%{_datadir}/%{name}/pxe-eepro100.rom
+%{_datadir}/%{name}/pxe-ne2k_pci.rom
+%{_datadir}/%{name}/pxe-pcnet.rom
+%{_datadir}/%{name}/pxe-rtl8139.rom
+%{_datadir}/%{name}/pxe-virtio.rom
 %if %{with lttng} || %{with systemtap}
 %{_datadir}/%{name}/trace-events-all
 %endif
+%{_datadir}/%{name}/vgabios-ati.bin
+%{_datadir}/%{name}/vgabios-bochs-display.bin
+%{_datadir}/%{name}/vgabios-cirrus.bin
+%{_datadir}/%{name}/vgabios-qxl.bin
+%{_datadir}/%{name}/vgabios-ramfb.bin
+%{_datadir}/%{name}/vgabios-stdvga.bin
+%{_datadir}/%{name}/vgabios-virtio.bin
+%{_datadir}/%{name}/vgabios-vmware.bin
 %if %{with virgl}
 %dir %{_datadir}/%{name}/vhost-user
 %{_datadir}/%{name}/vhost-user/50-qemu-gpu.json
@@ -1688,36 +1710,14 @@ fi
 %{_datadir}/%{name}/edk2-i386-vars.fd
 %{_datadir}/%{name}/edk2-x86_64-code.fd
 %{_datadir}/%{name}/edk2-x86_64-secure-code.fd
-%{_datadir}/%{name}/efi-e1000e.rom
-%{_datadir}/%{name}/efi-e1000.rom
-%{_datadir}/%{name}/efi-eepro100.rom
-%{_datadir}/%{name}/efi-ne2k_pci.rom
-%{_datadir}/%{name}/efi-pcnet.rom
-%{_datadir}/%{name}/efi-rtl8139.rom
-%{_datadir}/%{name}/efi-virtio.rom
-%{_datadir}/%{name}/efi-vmxnet3.rom
 %{_datadir}/%{name}/kvmvapic.bin
 %{_datadir}/%{name}/linuxboot.bin
 %{_datadir}/%{name}/linuxboot_dma.bin
 %{_datadir}/%{name}/multiboot.bin
 %{_datadir}/%{name}/multiboot_dma.bin
 %{_datadir}/%{name}/pvh.bin
-%{_datadir}/%{name}/pxe-e1000.rom
-%{_datadir}/%{name}/pxe-eepro100.rom
-%{_datadir}/%{name}/pxe-ne2k_pci.rom
-%{_datadir}/%{name}/pxe-pcnet.rom
-%{_datadir}/%{name}/pxe-rtl8139.rom
-%{_datadir}/%{name}/pxe-virtio.rom
 %{_datadir}/%{name}/qboot.rom
 %{_datadir}/%{name}/vgabios.bin
-%{_datadir}/%{name}/vgabios-ati.bin
-%{_datadir}/%{name}/vgabios-bochs-display.bin
-%{_datadir}/%{name}/vgabios-cirrus.bin
-%{_datadir}/%{name}/vgabios-qxl.bin
-%{_datadir}/%{name}/vgabios-ramfb.bin
-%{_datadir}/%{name}/vgabios-stdvga.bin
-%{_datadir}/%{name}/vgabios-virtio.bin
-%{_datadir}/%{name}/vgabios-vmware.bin
 %{_datadir}/%{name}/firmware/50-edk2-i386-secure.json
 %{_datadir}/%{name}/firmware/50-edk2-x86_64-secure.json
 %{_datadir}/%{name}/firmware/60-edk2-i386.json
