@@ -49,12 +49,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	10.0.3
-Release:	4
+Version:	10.2.1
+Release:	1
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	https://download.qemu.org/%{name}-%{version}.tar.xz
-# Source0-md5:	4a244f485c9d7ac3d40f958f13eae298
+# Source0-md5:	35ddfb6690f75db207924a9fdb30f0ed
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
 # Creates /dev/kvm
@@ -102,7 +102,7 @@ BuildRequires:	gettext-tools
 BuildRequires:	glib2-devel >= 1:2.75.3
 # minimal is 3.4 but new features are used up to 6
 %{?with_glusterfs:BuildRequires:	glusterfs-devel >= 6}
-BuildRequires:	gnutls-devel >= 3.6.14
+BuildRequires:	gnutls-devel >= 3.7.5
 %{?with_gtk3:BuildRequires:	gtk+3-devel >= 3.22.0}
 BuildRequires:	jack-audio-connection-kit-devel
 %{?with_vfio_user:BuildRequires:	json-c-devel >= 0.11}
@@ -156,7 +156,7 @@ BuildRequires:	pixman-devel >= 0.21.8
 BuildRequires:	pkgconfig
 %{?with_pmem:BuildRequires:	pmdk-devel}
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
-BuildRequires:	python3 >= 1:3.7
+BuildRequires:	python3 >= 1:3.9
 BuildRequires:	python3-distlib
 BuildRequires:	python3-pycotap >= 1.1.0
 BuildRequires:	python3-sphinx_rtd_theme >= 0.5
@@ -315,7 +315,7 @@ Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
 Requires:	glib2 >= 1:2.75.3
-Requires:	gnutls-libs >= 3.6.14
+Requires:	gnutls-libs >= 3.7.5
 %{?with_gtk3:Requires:	gtk+3 >= 3.22.0}
 Requires:	libaio >= 0.3.111
 Requires:	libblkio >= 1.3.0
@@ -1435,6 +1435,7 @@ fi
 %attr(755,root,root) %{_libdir}/%{name}/ui-spice-core.so
 %endif
 %dir %{_datadir}/%{name}
+%dir %{_datadir}/%{name}/dtb
 %{_datadir}/%{name}/efi-e1000e.rom
 %{_datadir}/%{name}/efi-e1000.rom
 %{_datadir}/%{name}/efi-eepro100.rom
@@ -1571,6 +1572,7 @@ fi
 %files system-aarch64
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-aarch64
+%{_datadir}/%{name}/ast27x0_bootrom.bin
 %{_datadir}/%{name}/edk2-aarch64-code.fd
 %{_datadir}/%{name}/firmware/60-edk2-aarch64.json
 
@@ -1635,17 +1637,19 @@ fi
 %ifnarch %{arm} %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-system-ppc64
 %endif
-%{_datadir}/%{name}/bamboo.dtb
-%{_datadir}/%{name}/canyonlands.dtb
+%{_datadir}/%{name}/dtb/bamboo.dtb
+%{_datadir}/%{name}/dtb/canyonlands.dtb
+%{_datadir}/%{name}/dtb/petalogix-ml605.dtb
+%{_datadir}/%{name}/dtb/pegasos1.dtb
+%{_datadir}/%{name}/dtb/pegasos2.dtb
+%{_datadir}/%{name}/dtb/petalogix-s3adsp1800.dtb
 %{_datadir}/%{name}/openbios-ppc
-%{_datadir}/%{name}/petalogix-ml605.dtb
-%{_datadir}/%{name}/petalogix-s3adsp1800.dtb
 %{_datadir}/%{name}/pnv-pnor.bin
 %{_datadir}/%{name}/qemu_vga.ndrv
 %{_datadir}/%{name}/skiboot.lid
 %{_datadir}/%{name}/slof.bin
 %{_datadir}/%{name}/u-boot.e500
-%{_datadir}/%{name}/u-boot-sam460-20100605.bin
+%{_datadir}/%{name}/u-boot-sam460.bin
 %{_datadir}/%{name}/vof.bin
 %{_datadir}/%{name}/vof-nvram.bin
 
