@@ -45,11 +45,9 @@ Reviewed-by: Laurent Vivier <laurent@vivier.eu>
 v3 changes:
 	- rebase the patchset against current code
 
-diff --git a/linux-user/main.c b/linux-user/main.c
-index ee12035..5951279 100644
 --- a/linux-user/main.c
 +++ b/linux-user/main.c
-@@ -123,6 +123,7 @@ static void usage(int exitcode);
+@@ -126,6 +126,7 @@
  
  static const char *interp_prefix = CONFIG_QEMU_INTERP_PREFIX;
  const char *qemu_uname_release;
@@ -57,7 +55,7 @@ index ee12035..5951279 100644
  
  #if !defined(TARGET_DEFAULT_STACK_SIZE)
  /* XXX: on x86 MAP_GROWSDOWN only works if ESP <= address + 32, so
-@@ -362,6 +363,11 @@ static void handle_arg_guest_base(const
+@@ -367,6 +368,11 @@
      have_guest_base = true;
  }
  
@@ -69,7 +67,7 @@ index ee12035..5951279 100644
  static void handle_arg_reserved_va(const char *arg)
  {
      char *p;
-@@ -464,6 +470,8 @@ static const struct qemu_argument arg_ta
+@@ -497,6 +503,8 @@
       "uname",      "set qemu uname release string to 'uname'"},
      {"B",          "QEMU_GUEST_BASE",  true,  handle_arg_guest_base,
       "address",    "set guest_base address to 'address'"},
@@ -78,19 +76,19 @@ index ee12035..5951279 100644
      {"R",          "QEMU_RESERVED_VA", true,  handle_arg_reserved_va,
       "size",       "reserve 'size' bytes for guest virtual address space"},
      {"t",          "QEMU_RTSIG_MAP",   true,  handle_arg_rtsig_map,
---- qemu-6.2.0/linux-user/user-internals.h.orig
-+++ qemu-6.2.0/linux-user/user-internals.h
-@@ -28,6 +28,7 @@ void init_task_state(TaskState *ts);
+--- a/linux-user/user-internals.h
++++ b/linux-user/user-internals.h
+@@ -30,6 +30,7 @@
  void task_settid(TaskState *);
  void stop_all_tasks(void);
  extern const char *qemu_uname_release;
 +extern const char *qemu_execve_path;
- extern unsigned long mmap_min_addr;
  
  typedef struct IOCTLEntry IOCTLEntry;
---- qemu-8.1.5/linux-user/syscall.c.orig	2024-01-29 19:31:43.000000000 +0100
-+++ qemu-8.1.5/linux-user/syscall.c	2024-05-06 19:05:26.075673131 +0200
-@@ -8680,6 +8680,109 @@ ssize_t do_guest_readlink(const char *pa
+ 
+--- a/linux-user/syscall.c
++++ b/linux-user/syscall.c
+@@ -9021,6 +9021,109 @@
      return ret;
  }
  
@@ -200,9 +198,9 @@ index ee12035..5951279 100644
  static int do_execv(CPUArchState *cpu_env, int dirfd,
                      abi_long pathname, abi_long guest_argp,
                      abi_long guest_envp, int flags, bool is_execveat)
-@@ -8765,9 +8868,12 @@ static int do_execv(CPUArchState *cpu_en
+@@ -9106,9 +9209,12 @@
      if (is_proc_myself(p, "exe")) {
-         exe = exec_path;
+         exe = real_exec_path;
      }
 -    ret = is_execveat
 -        ? safe_execveat(dirfd, exe, argp, envp, flags)

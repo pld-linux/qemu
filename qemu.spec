@@ -6,7 +6,6 @@
 %bcond_without	opengl		# Don't require GL deps
 %bcond_with	canokey		# CanoKey support
 %bcond_without	ceph		# Ceph/RBD support
-%bcond_without	glusterfs	# GlusterFS backend
 %bcond_without	rdma		# RDMA-based migration support
 %bcond_without	gtk3		# Do not build GTK+ UI
 %bcond_without	vte		# VTE support in GTK+ UI
@@ -36,25 +35,22 @@
 %if %{without gtk3}
 %undefine	with_vte
 %endif
-%ifarch x32
-%undefine	with_xen
-%endif
 %ifnarch %{x8664} aarch64
 %undefine	with_pmem
 %endif
-%ifnarch %{ix86} %{x8664} x32
+%ifnarch %{x8664}
 %undefine	with_qatzip
 %endif
 
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	10.2.1
-Release:	2
+Version:	11.1.2
+Release:	1
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	https://download.qemu.org/%{name}-%{version}.tar.xz
-# Source0-md5:	35ddfb6690f75db207924a9fdb30f0ed
+# Source0-md5:	f37a3842afa91df8bd602e0f29dca6d9
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
 # Creates /dev/kvm
@@ -75,10 +71,8 @@ Source16:	%{name}-pr-helper.socket
 Patch0:		%{name}-cflags.patch
 Patch1:		%{name}-user-execve.patch
 Patch3:		libjpeg-boolean.patch
-Patch5:		%{name}-u2f-emu.patch
 Patch6:		%{name}-linux-mount.patch
-Patch7:		libvfio-user-types.patch
-Patch8:		libvfio-user-alloca.patch
+Patch7:		%{name}-vnc-install.patch
 URL:		https://www.qemu.org/
 %{?with_opengl:BuildRequires:	Mesa-libgbm-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
@@ -97,11 +91,9 @@ BuildRequires:	curl-devel >= 7.29.0
 BuildRequires:	cyrus-sasl-devel >= 2
 BuildRequires:	daxctl-devel >= 57
 BuildRequires:	flex
-BuildRequires:	gcc >= 6:7.4
+BuildRequires:	gcc >= 6:10.4
 BuildRequires:	gettext-tools
 BuildRequires:	glib2-devel >= 1:2.75.3
-# minimal is 3.4 but new features are used up to 6
-%{?with_glusterfs:BuildRequires:	glusterfs-devel >= 6}
 BuildRequires:	gnutls-devel >= 3.7.5
 %{?with_gtk3:BuildRequires:	gtk+3-devel >= 3.22.0}
 BuildRequires:	jack-audio-connection-kit-devel
@@ -158,9 +150,12 @@ BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
 BuildRequires:	python3 >= 1:3.9
 BuildRequires:	python3-distlib
+BuildRequires:	python3-pip
 BuildRequires:	python3-pycotap >= 1.1.0
+BuildRequires:	python3-setuptools
 BuildRequires:	python3-sphinx_rtd_theme >= 0.5
 BuildRequires:	python3-tomli >= 1.2.0
+BuildRequires:	python3-wheel
 BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 1.644
 %{?with_system_seabios:BuildRequires:	seabios}
@@ -168,8 +163,8 @@ BuildRequires:	sed >= 4.0
 %{?with_snappy:BuildRequires:	snappy-devel}
 BuildRequires:	sphinx-pdg >= 3.4.3
 %if %{with spice}
-BuildRequires:	spice-protocol >= 0.14.0
-BuildRequires:	spice-server-devel >= 0.14.0
+BuildRequires:	spice-protocol >= 0.14.3
+BuildRequires:	spice-server-devel >= 0.15.0
 %endif
 %{?with_systemtap:BuildRequires:	systemtap-sdt-devel}
 BuildRequires:	tar >= 1:1.22
@@ -203,15 +198,14 @@ BuildRequires:	pcre2-8-static >= 10.32
 BuildRequires:	zlib-static
 %endif
 Requires:	%{name}-img = %{version}-%{release}
-%ifnarch %{arm} %{ix86} x32
 Requires:	%{name}-system-aarch64 = %{version}-%{release}
 Requires:	%{name}-system-alpha = %{version}-%{release}
 Requires:	%{name}-system-hppa = %{version}-%{release}
 Requires:	%{name}-system-microblaze = %{version}-%{release}
 Requires:	%{name}-system-s390x = %{version}-%{release}
-%endif
 Requires:	%{name}-system-arm = %{version}-%{release}
 Requires:	%{name}-system-avr = %{version}-%{release}
+Requires:	%{name}-system-hexagon = %{version}-%{release}
 Requires:	%{name}-system-m68k = %{version}-%{release}
 Requires:	%{name}-system-mips = %{version}-%{release}
 Requires:	%{name}-system-or1k = %{version}-%{release}
@@ -225,7 +219,8 @@ Requires:	%{name}-system-x86 = %{version}-%{release}
 Requires:	%{name}-system-xtensa = %{version}-%{release}
 Requires:	%{name}-user = %{version}-%{release}
 Obsoletes:	qemu-kvm < 2
-ExcludeArch:	i386
+# QEMU 11 supports 64-bit hosts only
+ExcludeArch:	%{ix86} %{arm} x32
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define	systempkg_req \
@@ -247,7 +242,7 @@ Requires:	libusb >= 1.0.22 \
 Requires:	libxdp >= 1.4.0 \
 Requires:	pixman >= 0.21.8 \
 %if %{with spice} \
-Requires:	spice-server-libs >= 0.14.0 \
+Requires:	spice-server-libs >= 0.15.0 \
 %endif \
 %if %{with usbredir} \
 Requires:	usbredir >= 0.6 \
@@ -329,6 +324,7 @@ Provides:	group(qemu)
 Provides:	user(qemu)
 Obsoletes:	qemu-kvm-common < 2
 Obsoletes:	qemu-module-block-archipelago < 2.9.0
+Obsoletes:	qemu-module-block-gluster < 11.1.0
 Obsoletes:	qemu-system-cris < 10.0.0
 Obsoletes:	qemu-system-lm32 < 5.2
 Obsoletes:	qemu-system-moxie < 6.1
@@ -489,6 +485,25 @@ QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
 dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
 
 Ten pakiet zawiera emulator systemu z procesorem AVR.
+
+%package system-hexagon
+Summary:	QEMU system emulator for Hexagon
+Summary(pl.UTF-8):	QEMU - emulator systemu z procesorem Hexagon
+Group:		Applications/Emulators
+Requires:	%{name}-common = %{version}-%{release}
+%systempkg_req
+
+%description system-hexagon
+QEMU is a generic and open source processor emulator which achieves a
+good emulation speed by using dynamic translation.
+
+This package provides the system emulator with Hexagon CPU.
+
+%description system-hexagon -l pl.UTF-8
+QEMU to ogólny, mający otwarte źródła emulator procesora, osiągający
+dobrą szybkość emulacji dzięki użyciu translacji dynamicznej.
+
+Ten pakiet zawiera emulator systemu z procesorem Hexagon.
 
 %package system-hppa
 Summary:	QEMU system emulator for HP/PA
@@ -849,20 +864,6 @@ Moduł QEMU dla urządeń blokowych CURL. Pozwala na dostęp do zdalnych
 dysków poprzez http, https, ftp i inne protokoły obsługiwane przez
 bibliotekę CURL.
 
-%package module-block-gluster
-Summary:	QEMU module for 'gluster' block devices
-Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'gluster'
-Group:		Applications/Emulators
-Requires:	%{name}-common = %{version}-%{release}
-Requires:	glusterfs-libs >= 6
-
-%description module-block-gluster
-QEMU block device support for remote Gluster storage.
-
-%description module-block-gluster -l pl.UTF-8
-Moduł urządzeń blokowych QEMU do dostępu do zdalnej przestrzeni
-dyskowej Gluster.
-
 %package module-block-iscsi
 Summary:	QEMU module for 'iscsi' block devices
 Summary(pl.UTF-8):	Moduł QEMU dla urządeń blokowych typu 'iscsi'
@@ -954,6 +955,23 @@ QEMU SDL UI and audio driver.
 %description module-ui-sdl -l pl.UTF-8
 Sterownik interfejsu użytkownika i dźwięku SDL dla QEMU.
 
+%package vnc
+Summary:	QEMU standalone VNC server
+Summary(pl.UTF-8):	Samodzielny serwer VNC dla QEMU
+Group:		Applications/Emulators
+Requires:	%{name}-common = %{version}-%{release}
+Suggests:	%{name}-module-ui-dbus = %{version}-%{release}
+
+%description vnc
+QEMU standalone VNC server. It connects to a running QEMU instance
+through the D-Bus display interface and serves the guest display,
+input, audio, clipboard and serial console over the VNC protocol.
+
+%description vnc -l pl.UTF-8
+Samodzielny serwer VNC dla QEMU. Łączy się z działającą instancją QEMU
+przez interfejs wyświetlania D-Bus i udostępnia ekran, wejście, dźwięk,
+schowek oraz konsolę szeregową gościa po protokole VNC.
+
 %package -n systemtap-qemu
 Summary:	systemtap/dtrace probes for QEMU
 Summary(pl.UTF-8):	Sondy systemtap/dtrace dla QEMU
@@ -1001,10 +1019,8 @@ Pliki nagłówkowe biblioteki vfio-user.
 %patch -P0 -p1
 %patch -P1 -p1
 %patch -P3 -p1
-%patch -P5 -p1
 %patch -P6 -p1
 %patch -P7 -p1
-%patch -P8 -p1
 
 %{__sed} -i '1s,/usr/bin/env python3,%{__python3},' scripts/qemu-trace-stap
 
@@ -1015,13 +1031,6 @@ Pliki nagłówkowe biblioteki vfio-user.
 
 %if %{without smartcard}
 %{__sed} -i -e '/^config USB_SMARTCARD/,/^$/ s/default y/default n/' hw/usb/Kconfig
-%endif
-%ifarch x32
-# xen-emu supports only LP64 __x86_64__ case
-%{__sed} -i -e '/^config XEN_EMU/,$ s/default y/default n/' hw/i386/Kconfig
-
-# plain x32 doesn't provide __sync_bool_compare_and_swap_16 - fail int128_t/ATOMIC128 tests earlier
-%{__sed} -i -e '/^has_int128_type = / s/$/FAILME/' meson.build
 %endif
 
 %build
@@ -1054,6 +1063,7 @@ build() {
 	cd ..
 }
 
+# rust: crates are fetched from the network at build time and it only replaces the C pl011 and HPET devices
 build dynamic \
 	--extra-cflags="%{rpmcflags} %{rpmcppflags}" \
 	--extra-ldflags="%{rpmldflags} -Wl,-z,relro -Wl,-z,now" \
@@ -1067,7 +1077,6 @@ build dynamic \
 	--enable-curses \
 	--enable-docs \
 	--enable-fdt \
-	%{__enable_disable glusterfs} \
 	%{!?with_gtk3:--disable-gtk} \
 	%{__enable_disable iscsi libiscsi} \
 	--enable-libcbor \
@@ -1087,6 +1096,8 @@ build dynamic \
 	%{__enable_disable spice} \
 	%{__enable_disable smartcard} \
 	%{__enable_disable snappy} \
+	--enable-qemu-vnc \
+	--disable-rust \
 	--enable-tpm \
 	%{__enable_disable usbredir usb-redir} \
 	%{__enable_disable vde} \
@@ -1165,7 +1176,7 @@ EOF
 
 install -p qemu.sasl $RPM_BUILD_ROOT%{_sysconfdir}/sasl/qemu.conf
 
-%ifarch %{ix86} %{x8664} x32
+%ifarch %{x8664}
 install -p %{SOURCE3} $RPM_BUILD_ROOT/etc/modules-load.d/kvm.conf
 install -p %{SOURCE4} $RPM_BUILD_ROOT/lib/udev/rules.d
 %endif
@@ -1188,13 +1199,13 @@ install -p %{SOURCE14} $RPM_BUILD_ROOT/etc/logrotate.d/qemu-ga
 
 cp -p %{SOURCE15} %{SOURCE16} $RPM_BUILD_ROOT%{systemdunitdir}
 
-%ifarch %{ix86} %{x8664} x32
+%ifarch %{x8664}
 cp -p contrib/systemd/qemu-vmsr-helper.{service,socket} $RPM_BUILD_ROOT%{systemdunitdir}
 %endif
 
 # Install binfmt
 BINFMT_CPUS=" \
-%ifnarch %{ix86} %{x8664} x32
+%ifnarch %{x8664}
 	i386 x86_64 \
 %endif
 %ifnarch aarch64
@@ -1203,9 +1214,7 @@ BINFMT_CPUS=" \
 %ifnarch alpha
 	alpha \
 %endif
-%ifnarch %{arm}
 	arm \
-%endif
 	aarch64_be \
 	armeb \
 	microblaze microblazeel \
@@ -1273,7 +1282,7 @@ for t in client server; do
 done
 
 # test modules
-%{__rm} $RPM_BUILD_ROOT%{_libdir}/%{name}/accel-qtest-*.so
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/%{name}/accel-qtest.so
 # Windows installer icon, not used
 %{__rm} $RPM_BUILD_ROOT%{_datadir}/%{name}/qemu-nsis.bmp
 # packaged as %doc
@@ -1369,7 +1378,7 @@ fi
 %{systemdunitdir}/ksmtuned.service
 %{systemdunitdir}/qemu-pr-helper.service
 %{systemdunitdir}/qemu-pr-helper.socket
-%ifarch %{ix86} %{x8664} x32
+%ifarch %{x8664}
 %{systemdunitdir}/qemu-vmsr-helper.service
 %{systemdunitdir}/qemu-vmsr-helper.socket
 %endif
@@ -1383,7 +1392,7 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-nbd
 %attr(755,root,root) %{_bindir}/qemu-pr-helper
 %attr(755,root,root) %{_bindir}/qemu-storage-daemon
-%ifarch %{ix86} %{x8664} x32
+%ifarch %{x8664}
 %attr(755,root,root) %{_bindir}/qemu-vmsr-helper
 %endif
 %attr(755,root,root) %{_sbindir}/ksmctl
@@ -1489,7 +1498,6 @@ fi
 %files user
 %defattr(644,root,root,755)
 /usr/lib/binfmt.d/qemu-*-dynamic.conf
-%ifnarch %{arm} %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-aarch64
 %attr(755,root,root) %{_bindir}/qemu-aarch64_be
 %attr(755,root,root) %{_bindir}/qemu-alpha
@@ -1506,7 +1514,6 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-sparc32plus
 %attr(755,root,root) %{_bindir}/qemu-sparc64
 %attr(755,root,root) %{_bindir}/qemu-x86_64
-%endif
 %attr(755,root,root) %{_bindir}/qemu-arm
 %attr(755,root,root) %{_bindir}/qemu-armeb
 %attr(755,root,root) %{_bindir}/qemu-hexagon
@@ -1530,7 +1537,6 @@ fi
 %files user-static
 %defattr(644,root,root,755)
 /usr/lib/binfmt.d/qemu-*-static.conf
-%ifnarch %{arm} %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-aarch64-static
 %attr(755,root,root) %{_bindir}/qemu-aarch64_be-static
 %attr(755,root,root) %{_bindir}/qemu-alpha-static
@@ -1547,7 +1553,6 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-sparc32plus-static
 %attr(755,root,root) %{_bindir}/qemu-sparc64-static
 %attr(755,root,root) %{_bindir}/qemu-x86_64-static
-%endif
 %attr(755,root,root) %{_bindir}/qemu-arm-static
 %attr(755,root,root) %{_bindir}/qemu-armeb-static
 %attr(755,root,root) %{_bindir}/qemu-hexagon-static
@@ -1568,7 +1573,6 @@ fi
 %{?with_systemtap:%attr(755,root,root) %{_bindir}/qemu-trace-stap-static}
 %endif
 
-%ifnarch %{arm} %{ix86} x32
 %files system-aarch64
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-aarch64
@@ -1580,7 +1584,6 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-alpha
 %{_datadir}/%{name}/palcode-clipper
-%endif
 
 %files system-arm
 %defattr(644,root,root,755)
@@ -1595,32 +1598,29 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-avr
 
-%ifnarch %{arm} %{ix86} x32
+%files system-hexagon
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-system-hexagon
+
 %files system-hppa
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-hppa
 %{_datadir}/%{name}/hppa-firmware.img
 %{_datadir}/%{name}/hppa-firmware64.img
-%endif
 
 %files system-m68k
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-m68k
 
-%ifnarch %{arm} %{ix86} x32
 %files system-microblaze
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-microblaze
-%attr(755,root,root) %{_bindir}/qemu-system-microblazeel
-%endif
 
 %files system-mips
 %defattr(644,root,root,755)
-%ifnarch %{arm} %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-system-loongarch64
 %attr(755,root,root) %{_bindir}/qemu-system-mips64
 %attr(755,root,root) %{_bindir}/qemu-system-mips64el
-%endif
 %attr(755,root,root) %{_bindir}/qemu-system-mips
 %attr(755,root,root) %{_bindir}/qemu-system-mipsel
 %{_datadir}/%{name}/edk2-loongarch64-code.fd
@@ -1634,9 +1634,7 @@ fi
 %files system-ppc
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-ppc
-%ifnarch %{arm} %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-system-ppc64
-%endif
 %{_datadir}/%{name}/dtb/bamboo.dtb
 %{_datadir}/%{name}/dtb/canyonlands.dtb
 %{_datadir}/%{name}/dtb/petalogix-ml605.dtb
@@ -1656,9 +1654,7 @@ fi
 %files system-riscv
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-riscv32
-%ifnarch %{arm} %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-system-riscv64
-%endif
 %{_datadir}/%{name}/edk2-riscv-code.fd
 %{_datadir}/%{name}/edk2-riscv-vars.fd
 %{_datadir}/%{name}/firmware/60-edk2-riscv64.json
@@ -1669,12 +1665,10 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-rx
 
-%ifnarch %{arm} %{ix86} x32
 %files system-s390x
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-s390x
 %{_datadir}/%{name}/s390-ccw.img
-%endif
 
 %files system-sh4
 %defattr(644,root,root,755)
@@ -1684,9 +1678,7 @@ fi
 %files system-sparc
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-sparc
-%ifnarch %{arm} %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-system-sparc64
-%endif
 %{_datadir}/%{name}/QEMU,cgthree.bin
 %{_datadir}/%{name}/QEMU,tcx.bin
 %{_datadir}/%{name}/openbios-sparc32
@@ -1699,10 +1691,8 @@ fi
 %files system-x86
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-i386
-%ifnarch %{arm} %{ix86} x32
 %attr(755,root,root) %{_bindir}/qemu-system-x86_64
-%endif
-%ifarch %{ix86} %{x8664} x32
+%ifarch %{x8664}
 %config(noreplace) %verify(not md5 mtime size) /etc/modules-load.d/kvm.conf
 /lib/udev/rules.d/80-kvm.rules
 %endif
@@ -1715,9 +1705,7 @@ fi
 %{_datadir}/%{name}/edk2-x86_64-code.fd
 %{_datadir}/%{name}/edk2-x86_64-secure-code.fd
 %{_datadir}/%{name}/kvmvapic.bin
-%{_datadir}/%{name}/linuxboot.bin
 %{_datadir}/%{name}/linuxboot_dma.bin
-%{_datadir}/%{name}/multiboot.bin
 %{_datadir}/%{name}/multiboot_dma.bin
 %{_datadir}/%{name}/pvh.bin
 %{_datadir}/%{name}/qboot.rom
@@ -1753,12 +1741,6 @@ fi
 %files module-block-curl
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/%{name}/block-curl.so
-
-%if %{with glusterfs}
-%files module-block-gluster
-%defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/%{name}/block-gluster.so
-%endif
 
 %if %{with iscsi}
 %files module-block-iscsi
@@ -1799,6 +1781,11 @@ fi
 %attr(755,root,root) %{_libdir}/%{name}/audio-sdl.so
 %attr(755,root,root) %{_libdir}/%{name}/ui-sdl.so
 %endif
+
+%files vnc
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/qemu-vnc
+%{_mandir}/man1/qemu-vnc.1*
 
 %if %{with systemtap}
 %files -n systemtap-qemu

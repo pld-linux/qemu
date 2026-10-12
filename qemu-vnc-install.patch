@@ -1,0 +1,13 @@
+# upstream builds qemu-vnc but never installs it (only the man page)
+--- a/tools/qemu-vnc/meson.build
++++ b/tools/qemu-vnc/meson.build
+@@ -15,7 +15,8 @@
+             'audio.c', 'chardev.c', 'clipboard.c', 'console.c',
+             'dbus.c', 'stubs.c', 'utils.c',
+             vnca.sources(), dbus_display1, qemu_vnc1],
+-  dependencies: [vnca.dependencies(), io, crypto, qemuutil, gio, ui])
++  dependencies: [vnca.dependencies(), io, crypto, qemuutil, gio, ui],
++  install: true)
+ 
+ # The executable lives in a subdirectory of the build tree, but
+ # get_relocated_path() looks for qemu-bundle relative to the binary.
