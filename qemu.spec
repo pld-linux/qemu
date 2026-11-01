@@ -31,7 +31,12 @@
 %bcond_without	xkbcommon	# xkbcommon support
 %bcond_without	qatzip	# QATzip support
 %bcond_without	vde	# vde network backend support
+%bcond_with	tools_only	# only disk image tools and guest agent
 
+# QEMU 11 builds emulators on 64-bit hosts only
+%ifarch %{ix86} %{arm} x32
+%define		with_tools_only	1
+%endif
 %if %{without gtk3}
 %undefine	with_vte
 %endif
@@ -45,12 +50,12 @@
 Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
-Version:	11.1.2
+Version:	11.1.3
 Release:	1
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	https://download.qemu.org/%{name}-%{version}.tar.xz
-# Source0-md5:	f37a3842afa91df8bd602e0f29dca6d9
+# Source0-md5:	fc206ce1fca9cbd4f7493c81a2f2d2fb
 # Loads kvm kernel modules at boot
 Source3:	kvm-modules-load.conf
 # Creates /dev/kvm
@@ -219,8 +224,6 @@ Requires:	%{name}-system-x86 = %{version}-%{release}
 Requires:	%{name}-system-xtensa = %{version}-%{release}
 Requires:	%{name}-user = %{version}-%{release}
 Obsoletes:	qemu-kvm < 2
-# QEMU 11 supports 64-bit hosts only
-ExcludeArch:	%{ix86} %{arm} x32
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define	systempkg_req \
@@ -353,6 +356,8 @@ Requires:	libaio >= 0.3.111
 Requires:	liburing >= 2.2
 Obsoletes:	qemu-kvm-img < 2
 Conflicts:	qemu < 1.0-2
+Conflicts:	qemu-common < 11.1.3
+Conflicts:	qemu-user < 11.1.3
 
 %description img
 This package provides a command line tool for manipulating disk
@@ -1064,6 +1069,19 @@ build() {
 }
 
 # rust: crates are fetched from the network at build time and it only replaces the C pl011 and HPET devices
+%if %{with tools_only}
+build dynamic \
+	--extra-cflags="%{rpmcflags} %{rpmcppflags}" \
+	--extra-ldflags="%{rpmldflags} -Wl,-z,relro -Wl,-z,now" \
+	--without-default-features \
+	--disable-system \
+	--disable-user \
+	--enable-docs \
+	--enable-guest-agent \
+	--enable-linux-aio \
+	--enable-linux-io-uring \
+	--enable-tools
+%else
 build dynamic \
 	--extra-cflags="%{rpmcflags} %{rpmcppflags}" \
 	--extra-ldflags="%{rpmldflags} -Wl,-z,relro -Wl,-z,now" \
@@ -1142,6 +1160,7 @@ build static \
 %endif
 
 %{__cc} %{SOURCE7} %{rpmcflags} -o ksmctl
+%endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -1149,6 +1168,22 @@ install -d $RPM_BUILD_ROOT{%{systemdunitdir},/usr/lib/binfmt.d} \
 	$RPM_BUILD_ROOT/etc/{qemu,sysconfig,modules-load.d,rc.d/init.d,logrotate.d} \
 	$RPM_BUILD_ROOT{%{_sysconfdir}/sasl,/lib/udev/rules.d,%{_sbindir}}
 
+# For the qemu-guest-agent subpackage install the systemd
+# service and udev rules.
+install -p %{SOURCE11} $RPM_BUILD_ROOT%{systemdunitdir}
+install -p %{SOURCE12} $RPM_BUILD_ROOT/lib/udev/rules.d
+
+install -p %{SOURCE13} $RPM_BUILD_ROOT/etc/rc.d/init.d/qemu-guest-agent
+install -p %{SOURCE14} $RPM_BUILD_ROOT/etc/logrotate.d/qemu-ga
+
+%if %{with tools_only}
+install -d $RPM_BUILD_ROOT{%{_bindir},%{_mandir}/man{1,7,8}}
+install -p build-dynamic/{qemu-img,qemu-io,qemu-nbd,storage-daemon/qemu-storage-daemon,qga/qemu-ga} \
+	$RPM_BUILD_ROOT%{_bindir}
+cp -p build-dynamic/docs/{qemu-img,qemu-storage-daemon}.1 $RPM_BUILD_ROOT%{_mandir}/man1
+cp -p build-dynamic/docs/{qemu-block-drivers,qemu-ga-ref,qemu-storage-daemon-qmp-ref}.7 $RPM_BUILD_ROOT%{_mandir}/man7
+cp -p build-dynamic/docs/{qemu-ga,qemu-nbd}.8 $RPM_BUILD_ROOT%{_mandir}/man8
+%else
 %if %{with user_static}
 %{__make} -C build-static install \
 	DESTDIR=$RPM_BUILD_ROOT
@@ -1188,14 +1223,6 @@ install -p ksmctl $RPM_BUILD_ROOT%{_sbindir}
 install -p %{SOURCE8} $RPM_BUILD_ROOT%{systemdunitdir}/ksmtuned.service
 install -p %{SOURCE9} $RPM_BUILD_ROOT%{_sbindir}/ksmtuned
 install -p %{SOURCE10} $RPM_BUILD_ROOT%{_sysconfdir}/ksmtuned.conf
-
-# For the qemu-guest-agent subpackage install the systemd
-# service and udev rules.
-install -p %{SOURCE11} $RPM_BUILD_ROOT%{systemdunitdir}
-install -p %{SOURCE12} $RPM_BUILD_ROOT/lib/udev/rules.d
-
-install -p %{SOURCE13} $RPM_BUILD_ROOT/etc/rc.d/init.d/qemu-guest-agent
-install -p %{SOURCE14} $RPM_BUILD_ROOT/etc/logrotate.d/qemu-ga
 
 cp -p %{SOURCE15} %{SOURCE16} $RPM_BUILD_ROOT%{systemdunitdir}
 
@@ -1290,6 +1317,7 @@ done
 
 # cleanup Sphinx files
 %{__rm} $RPM_BUILD_ROOT%{_docdir}/qemu/{.buildinfo,objects.inv}
+%endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -1358,6 +1386,7 @@ fi
 %post	-n libvfio-user -p /sbin/ldconfig
 %postun	-n libvfio-user -p /sbin/ldconfig
 
+%if %{without tools_only}
 %files
 %defattr(644,root,root,755)
 
@@ -1389,9 +1418,7 @@ fi
 %if %{with xkbcommon}
 %attr(755,root,root) %{_bindir}/qemu-keymap
 %endif
-%attr(755,root,root) %{_bindir}/qemu-nbd
 %attr(755,root,root) %{_bindir}/qemu-pr-helper
-%attr(755,root,root) %{_bindir}/qemu-storage-daemon
 %ifarch %{x8664}
 %attr(755,root,root) %{_bindir}/qemu-vmsr-helper
 %endif
@@ -1481,20 +1508,25 @@ fi
 %{_iconsdir}/hicolor/32x32/apps/qemu.bmp
 %{_iconsdir}/hicolor/scalable/apps/qemu.svg
 %{_mandir}/man1/qemu.1*
-%{_mandir}/man1/qemu-storage-daemon.1*
-%{_mandir}/man7/qemu-block-drivers.7*
 %{_mandir}/man7/qemu-cpu-models.7*
 %{_mandir}/man7/qemu-qmp-ref.7*
-%{_mandir}/man7/qemu-storage-daemon-qmp-ref.7*
-%{_mandir}/man8/qemu-nbd.8*
 %{_mandir}/man8/qemu-pr-helper.8*
 %{_docdir}/qemu
+%endif
 
 %files img
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-img
+%attr(755,root,root) %{_bindir}/qemu-io
+%attr(755,root,root) %{_bindir}/qemu-nbd
+%attr(755,root,root) %{_bindir}/qemu-storage-daemon
 %{_mandir}/man1/qemu-img.1*
+%{_mandir}/man1/qemu-storage-daemon.1*
+%{_mandir}/man7/qemu-block-drivers.7*
+%{_mandir}/man7/qemu-storage-daemon-qmp-ref.7*
+%{_mandir}/man8/qemu-nbd.8*
 
+%if %{without tools_only}
 %files user
 %defattr(644,root,root,755)
 /usr/lib/binfmt.d/qemu-*-dynamic.conf
@@ -1518,7 +1550,6 @@ fi
 %attr(755,root,root) %{_bindir}/qemu-armeb
 %attr(755,root,root) %{_bindir}/qemu-hexagon
 %attr(755,root,root) %{_bindir}/qemu-i386
-%attr(755,root,root) %{_bindir}/qemu-io
 %attr(755,root,root) %{_bindir}/qemu-m68k
 %attr(755,root,root) %{_bindir}/qemu-microblaze
 %attr(755,root,root) %{_bindir}/qemu-microblazeel
@@ -1719,6 +1750,7 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qemu-system-xtensa
 %attr(755,root,root) %{_bindir}/qemu-system-xtensaeb
+%endif
 
 %files guest-agent
 %defattr(644,root,root,755)
@@ -1730,6 +1762,7 @@ fi
 %{_mandir}/man7/qemu-ga-ref.7*
 %{_mandir}/man8/qemu-ga.8*
 
+%if %{without tools_only}
 %files module-audio-jack
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/%{name}/audio-jack.so
@@ -1805,4 +1838,5 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libvfio-user.so
 %{_includedir}/vfio-user
+%endif
 %endif
