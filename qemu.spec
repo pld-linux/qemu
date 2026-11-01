@@ -51,7 +51,7 @@ Summary:	QEMU CPU Emulator
 Summary(pl.UTF-8):	QEMU - emulator procesora
 Name:		qemu
 Version:	11.1.3
-Release:	1
+Release:	2
 License:	GPL v2, BSD (edk2 firmware files)
 Group:		Applications/Emulators
 Source0:	https://download.qemu.org/%{name}-%{version}.tar.xz
@@ -79,6 +79,30 @@ Patch3:		libjpeg-boolean.patch
 Patch6:		%{name}-linux-mount.patch
 Patch7:		%{name}-vnc-install.patch
 URL:		https://www.qemu.org/
+BuildRequires:	gcc >= 6:10.4
+BuildRequires:	glib2-devel >= 1:2.75.3
+BuildRequires:	libaio-devel >= 0.3.111
+BuildRequires:	liburing-devel >= 2.2
+BuildRequires:	meson >= 1.5.0
+BuildRequires:	ninja >= 1.5
+BuildRequires:	pkgconfig
+BuildRequires:	python3 >= 1:3.9
+BuildRequires:	python3-distlib
+BuildRequires:	python3-pip
+BuildRequires:	python3-pycotap >= 1.1.0
+BuildRequires:	python3-setuptools
+BuildRequires:	python3-sphinx_rtd_theme >= 0.5
+BuildRequires:	python3-tomli >= 1.2.0
+BuildRequires:	python3-wheel
+BuildRequires:	rpm-build >= 4.6
+BuildRequires:	rpmbuild(macros) >= 1.644
+BuildRequires:	sed >= 4.0
+BuildRequires:	sphinx-pdg >= 3.4.3
+%{?with_systemtap:BuildRequires:	systemtap-sdt-devel}
+BuildRequires:	tar >= 1:1.22
+BuildRequires:	xz
+BuildRequires:	zlib-devel
+%if %{without tools_only}
 %{?with_opengl:BuildRequires:	Mesa-libgbm-devel}
 %{?with_opengl:BuildRequires:	OpenGL-GLX-devel}
 %{?with_opengl:BuildRequires:	OpenGL-devel}
@@ -96,15 +120,12 @@ BuildRequires:	curl-devel >= 7.29.0
 BuildRequires:	cyrus-sasl-devel >= 2
 BuildRequires:	daxctl-devel >= 57
 BuildRequires:	flex
-BuildRequires:	gcc >= 6:10.4
 BuildRequires:	gettext-tools
-BuildRequires:	glib2-devel >= 1:2.75.3
 BuildRequires:	gnutls-devel >= 3.7.5
 %{?with_gtk3:BuildRequires:	gtk+3-devel >= 3.22.0}
 BuildRequires:	jack-audio-connection-kit-devel
 %{?with_vfio_user:BuildRequires:	json-c-devel >= 0.11}
 BuildRequires:	keyutils-devel
-BuildRequires:	libaio-devel >= 0.3.111
 BuildRequires:	libblkio-devel >= 1.3.0
 BuildRequires:	libbpf-devel >= 1.1.0
 %{?with_smartcard:BuildRequires:	libcacard-devel >= 2.5.1}
@@ -129,7 +150,6 @@ BuildRequires:	libstdc++-devel >= 6:4.7
 # for tests only
 #BuildRequires:	libtasn1-devel
 BuildRequires:	libu2f-emu-devel
-BuildRequires:	liburing-devel >= 2.2
 BuildRequires:	libusb-devel >= 1.0.22
 BuildRequires:	libuuid-devel
 BuildRequires:	libxdp-devel >= 1.4.0
@@ -137,12 +157,10 @@ BuildRequires:	libxml2-devel >= 2.0
 %{?with_lttng:BuildRequires:	lttng-ust-devel >= 2.1}
 BuildRequires:	lzfse-devel
 BuildRequires:	lzo-devel >= 2
-BuildRequires:	meson >= 1.5.0
 %{?with_multipath:BuildRequires:	multipath-tools-devel}
 BuildRequires:	ncurses-devel
 # also libgcrypt-devel >= 1.8 possible, but gnutls already pulls nettle
 BuildRequires:	nettle-devel >= 3.9
-BuildRequires:	ninja >= 1.5
 %{?with_smartcard:BuildRequires:	nss-devel >= 1:3.12.8}
 BuildRequires:	numactl-devel
 BuildRequires:	pam-devel
@@ -150,29 +168,14 @@ BuildRequires:	perl-Encode
 BuildRequires:	perl-tools-pod
 BuildRequires:	pipewire-devel >= 0.3.60
 BuildRequires:	pixman-devel >= 0.21.8
-BuildRequires:	pkgconfig
 %{?with_pmem:BuildRequires:	pmdk-devel}
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
-BuildRequires:	python3 >= 1:3.9
-BuildRequires:	python3-distlib
-BuildRequires:	python3-pip
-BuildRequires:	python3-pycotap >= 1.1.0
-BuildRequires:	python3-setuptools
-BuildRequires:	python3-sphinx_rtd_theme >= 0.5
-BuildRequires:	python3-tomli >= 1.2.0
-BuildRequires:	python3-wheel
-BuildRequires:	rpm-build >= 4.6
-BuildRequires:	rpmbuild(macros) >= 1.644
 %{?with_system_seabios:BuildRequires:	seabios}
-BuildRequires:	sed >= 4.0
 %{?with_snappy:BuildRequires:	snappy-devel}
-BuildRequires:	sphinx-pdg >= 3.4.3
 %if %{with spice}
 BuildRequires:	spice-protocol >= 0.14.3
 BuildRequires:	spice-server-devel >= 0.15.0
 %endif
-%{?with_systemtap:BuildRequires:	systemtap-sdt-devel}
-BuildRequires:	tar >= 1:1.22
 BuildRequires:	texi2html
 BuildRequires:	texinfo
 %{?with_multipath:BuildRequires:	udev-devel}
@@ -191,8 +194,6 @@ BuildRequires:	xkeyboard-config
 BuildRequires:	xorg-lib-libxkbcommon-devel
 %endif
 BuildRequires:	xorg-lib-libX11-devel
-BuildRequires:	xz
-BuildRequires:	zlib-devel
 BuildRequires:	zstd-devel >= 1.4.0
 %if %{with user_static}
 BuildRequires:	glib2-static >= 1:2.75.3
@@ -201,6 +202,7 @@ BuildRequires:	libatomic-static
 BuildRequires:	libstdc++-static >= 6:4.7
 BuildRequires:	pcre2-8-static >= 10.32
 BuildRequires:	zlib-static
+%endif
 %endif
 Requires:	%{name}-img = %{version}-%{release}
 Requires:	%{name}-system-aarch64 = %{version}-%{release}
